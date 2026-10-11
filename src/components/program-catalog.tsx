@@ -1,17 +1,17 @@
 "use client";
 
 import Image from "next/image";
-import Link from "next/link";
 import heroPhoto from "@/assets/hero.jpg";
 import { useState } from "react";
 import { LESSONS_PER_DANCE, lowestPriceEur, programGroups, programs, type ProgramGroup } from "@/content/catalog";
-import { format, formatEuro, plural } from "@/i18n/format";
-import { useI18n } from "./i18n-provider";
+import { useFormatter, useTranslations } from "next-intl";
+import { Link } from "@/i18n/navigation";
 
 const COLLAPSED_COUNT = 3;
 
 export function ProgramCatalog() {
-  const { locale, dict } = useI18n();
+  const t = useTranslations();
+  const format = useFormatter();
   const [filter, setFilter] = useState<ProgramGroup | "all">("all");
   const [expanded, setExpanded] = useState(false);
 
@@ -29,34 +29,33 @@ export function ProgramCatalog() {
             aria-pressed={filter === group}
             onClick={() => setFilter(group)}
           >
-            {dict.catalog.groups[group]}
+            {t(`catalog.groups.${group}`)}
           </button>
         ))}
       </div>
       <div className="programs">
         {visible.map((program) => {
-          const copy = dict.programs[program.id];
           return (
             <article className="program" key={program.id}>
               <div className="art">
                 <Image src={heroPhoto} alt="" fill sizes="(max-width: 640px) 100vw, (max-width: 900px) 50vw, 400px" />
-                <span className="pill">{copy.tag}</span>
+                <span className="pill">{t(`programs.${program.id}.tag`)}</span>
                 <span className="num">{program.number}</span>
               </div>
               <div className="programBody">
                 <h3>{program.name}</h3>
-                <p>{copy.description}</p>
+                <p>{t(`programs.${program.id}.description`)}</p>
                 <div className="meta">
-                  <span>{plural(locale, program.danceIds.length, dict.catalog.dances)}</span>
-                  <span>{plural(locale, program.danceIds.length * LESSONS_PER_DANCE, dict.catalog.lessons)}</span>
-                  <span>{dict.catalog.online}</span>
+                  <span>{t("catalog.dances", { count: program.danceIds.length })}</span>
+                  <span>{t("catalog.lessons", { count: program.danceIds.length * LESSONS_PER_DANCE })}</span>
+                  <span>{t("catalog.online")}</span>
                 </div>
                 <div className="cardBottom">
-                  <span>{format(dict.catalog.fromPrice, { price: formatEuro(locale, lowestPriceEur) })}</span>
+                  <span>{t("catalog.fromPrice", { price: format.number(lowestPriceEur, "eur") })}</span>
                   <Link
                     className="arrow"
-                    href={`/${locale}/programs/${program.id}`}
-                    aria-label={format(dict.catalog.open, { name: program.name })}
+                    href={`/programs/${program.id}`}
+                    aria-label={t("catalog.open", { name: program.name })}
                   >
                     ↗
                   </Link>
@@ -69,7 +68,7 @@ export function ProgramCatalog() {
       {filter === "all" && (
         <div style={{ textAlign: "center", marginTop: 26 }}>
           <button className="btn outline" onClick={() => setExpanded((value) => !value)}>
-            {expanded ? dict.catalog.showLess : dict.catalog.showMore}
+            {expanded ? t("catalog.showLess") : t("catalog.showMore")}
           </button>
         </div>
       )}

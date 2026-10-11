@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 import {
   dances,
@@ -11,16 +11,17 @@ import {
   courseKey,
   type CourseKey,
 } from "@/content/catalog";
-import { format, plural } from "@/i18n/format";
+import { Link } from "@/i18n/navigation";
 import { BEFORE_LOCALE_CHANGE, noteKey, updateDemoState, useDemoState } from "@/lib/demo-store";
 import { DemoPlayer } from "./demo-player";
-import { useI18n } from "./i18n-provider";
 import { useToast } from "./toast";
 
 type Tab = "about" | "notes" | "practice";
 
+const practiceTips = ["repeat", "count", "combine"] as const;
+
 export function Dashboard() {
-  const { locale, dict } = useI18n();
+  const t = useTranslations();
   const toast = useToast();
   const state = useDemoState();
   const [tab, setTab] = useState<Tab>("about");
@@ -38,7 +39,8 @@ export function Dashboard() {
     0,
   );
   const lessonDone = enrollment.done.includes(lesson);
-  const lessonTitle = dict.lessons.titles[lesson];
+  const lessonKey = lessons[lesson].key;
+  const lessonTitle = t(`lessons.${lessonKey}.title`);
 
   function select(next: CourseKey, nextLesson = 0) {
     updateDemoState((s) => ({ ...s, current: { course: next, lesson: nextLesson } }));
@@ -49,8 +51,8 @@ export function Dashboard() {
       ? enrollment!.done.filter((n) => n !== lesson)
       : [...enrollment!.done, lesson];
     updateDemoState((s) => ({ ...s, enrolled: { ...s.enrolled, [course]: { ...enrollment!, done } } }));
-    if (!done.includes(lesson)) toast(dict.dashboard.completionRemoved);
-    else toast(done.length === LESSONS_PER_DANCE ? dict.dashboard.danceCompleted : dict.dashboard.lessonCompleted);
+    if (!done.includes(lesson)) toast(t("dashboard.completionRemoved"));
+    else toast(done.length === LESSONS_PER_DANCE ? t("dashboard.danceCompleted") : t("dashboard.lessonCompleted"));
   }
 
   return (
@@ -59,24 +61,24 @@ export function Dashboard() {
         <div className="studioHeader">
           <div>
             <div className="eyebrow" style={{ marginBottom: 13 }}>
-              {dict.dashboard.eyebrow}
+              {t("dashboard.eyebrow")}
             </div>
             <h1>
-              {state.user ? format(dict.dashboard.greetingNamed, { name: state.user.name }) : dict.dashboard.greetingGuest}
+              {state.user ? t("dashboard.greetingNamed", { name: state.user.name }) : t("dashboard.greetingGuest")}
             </h1>
-            <p>{dict.dashboard.tagline}</p>
+            <p>{t("dashboard.tagline")}</p>
           </div>
-          <Link className="btn outline" href={`/${locale}#courses`}>
-            {dict.dashboard.addCourse}
+          <Link className="btn outline" href="/#courses">
+            {t("dashboard.addCourse")}
           </Link>
         </div>
 
         <div className="studioGrid">
           <aside className="sidebar">
-            <h3>{dict.dashboard.myDances}</h3>
+            <h3>{t("dashboard.myDances")}</h3>
             <div className="sidebarCourses">
               <p className="fine courseSummary" style={{ margin: "0 0 10px" }}>
-                {format(dict.dashboard.programProgress, {
+                {t("dashboard.programProgress", {
                   program: program.name,
                   done: programDone,
                   total: program.danceIds.length * LESSONS_PER_DANCE,
@@ -94,7 +96,7 @@ export function Dashboard() {
                       <i style={{ width: `${(record.done.length / LESSONS_PER_DANCE) * 100}%` }} />
                     </div>
                     <small>
-                      {format(dict.dashboard.courseProgress, {
+                      {t("dashboard.courseProgress", {
                         done: record.done.length,
                         package: getPackage(record.packageId)!.name,
                       })}
@@ -104,11 +106,11 @@ export function Dashboard() {
               })}
             </div>
             <div className="bookingCard">
-              <span className="eyebrow">{dict.dashboard.privatePractice}</span>
+              <span className="eyebrow">{t("dashboard.privatePractice")}</span>
               <p>
                 {pkg.privateLessons
-                  ? plural(locale, pkg.privateLessons, dict.dashboard.privateLessons)
-                  : dict.dashboard.soloPackage}
+                  ? t("dashboard.privateLessons", { count: pkg.privateLessons })
+                  : t("dashboard.soloPackage")}
               </p>
             </div>
           </aside>
@@ -124,7 +126,7 @@ export function Dashboard() {
                   {String(lesson + 1).padStart(2, "0")}. {lessonTitle}
                 </h2>
                 <p>
-                  {format(dict.dashboard.lessonMeta, {
+                  {t("dashboard.lessonMeta", {
                     dance: danceName,
                     number: lesson + 1,
                     minutes: lessons[lesson].durationMinutes,
@@ -132,7 +134,7 @@ export function Dashboard() {
                 </p>
               </div>
               <button className="btn" onClick={toggleComplete}>
-                {lessonDone ? dict.dashboard.completed : dict.dashboard.markCompleted}
+                {lessonDone ? t("dashboard.completed") : t("dashboard.markCompleted")}
               </button>
             </div>
 
@@ -147,25 +149,25 @@ export function Dashboard() {
                   className={tab === id ? "active" : undefined}
                   onClick={() => setTab(id)}
                 >
-                  {dict.dashboard.tabs[id]}
+                  {t(`dashboard.tabs.${id}`)}
                 </button>
               ))}
             </div>
             <div id="lesson-panel" role="tabpanel" aria-labelledby={`tab-${tab}`} className="lessonText">
               {tab === "about" && (
                 <>
-                  <h3>{format(dict.dashboard.aboutTitle, { dance: danceName })}</h3>
-                  <p>{dict.lessons.descriptions[lesson]}</p>
-                  <p style={{ marginTop: 10 }}>{dict.dashboard.aboutFine}</p>
+                  <h3>{t("dashboard.aboutTitle", { dance: danceName })}</h3>
+                  <p>{t(`lessons.${lessonKey}.description`)}</p>
+                  <p style={{ marginTop: 10 }}>{t("dashboard.aboutFine")}</p>
                 </>
               )}
               {tab === "notes" && <LessonNotes key={noteKey(course, lesson)} noteId={noteKey(course, lesson)} />}
               {tab === "practice" && (
                 <>
-                  <h3>{dict.dashboard.practiceTitle}</h3>
+                  <h3>{t("dashboard.practiceTitle")}</h3>
                   <ul>
-                    {dict.dashboard.practice.map((item) => (
-                      <li key={item}>{item}</li>
+                    {practiceTips.map((key) => (
+                      <li key={key}>{t(`dashboard.practice.${key}`)}</li>
                     ))}
                   </ul>
                 </>
@@ -173,13 +175,13 @@ export function Dashboard() {
             </div>
 
             <div className="lessonList">
-              {lessons.map(({ index, durationMinutes }) => {
+              {lessons.map(({ index, key, durationMinutes }) => {
                 const done = enrollment.done.includes(index);
                 const status = done
-                  ? dict.dashboard.statusCompleted
+                  ? t("dashboard.statusCompleted")
                   : index === lesson
-                    ? dict.dashboard.statusWatching
-                    : dict.dashboard.statusVideo;
+                    ? t("dashboard.statusWatching")
+                    : t("dashboard.statusVideo");
                 return (
                   <button
                     key={index}
@@ -188,15 +190,15 @@ export function Dashboard() {
                     onClick={() => select(course, index)}
                   >
                     <b>{done ? "✓" : String(index + 1).padStart(2, "0")}</b>
-                    {dict.lessons.titles[index]}
-                    <small>{format(dict.dashboard.lessonCardMeta, { minutes: durationMinutes, status })}</small>
+                    {t(`lessons.${key}.title`)}
+                    <small>{t("dashboard.lessonCardMeta", { minutes: durationMinutes, status })}</small>
                   </button>
                 );
               })}
             </div>
 
             <div className="bookingCard">
-              <p>{dict.dashboard.mobileNotice}</p>
+              <p>{t("dashboard.mobileNotice")}</p>
             </div>
           </div>
         </div>
@@ -206,7 +208,7 @@ export function Dashboard() {
 }
 
 function LessonNotes({ noteId }: { noteId: string }) {
-  const { dict } = useI18n();
+  const t = useTranslations("dashboard");
   const toast = useToast();
   const saved = useDemoState().notes[noteId] ?? "";
   const [draft, setDraft] = useState(saved);
@@ -220,10 +222,10 @@ function LessonNotes({ noteId }: { noteId: string }) {
 
   return (
     <>
-      <label htmlFor="notes">{dict.dashboard.notesLabel}</label>
+      <label htmlFor="notes">{t("notesLabel")}</label>
       <textarea
         id="notes"
-        placeholder={dict.dashboard.notesPlaceholder}
+        placeholder={t("notesPlaceholder")}
         value={draft}
         onChange={(event) => setDraft(event.target.value)}
       />
@@ -232,10 +234,10 @@ function LessonNotes({ noteId }: { noteId: string }) {
         style={{ marginTop: 10 }}
         onClick={() => {
           updateDemoState((s) => ({ ...s, notes: { ...s.notes, [noteId]: draft } }));
-          toast(dict.dashboard.noteSaved);
+          toast(t("noteSaved"));
         }}
       >
-        {dict.dashboard.saveNote}
+        {t("saveNote")}
       </button>
     </>
   );

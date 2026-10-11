@@ -1,13 +1,14 @@
 "use client";
 
-import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
+import { useRouter } from "@/i18n/navigation";
 import { resetDemoState } from "@/lib/demo-store";
-import { useI18n } from "./i18n-provider";
 import { Modal, useDialogState } from "./modal";
 import { useToast } from "./toast";
 
 export function DemoDataButton() {
-  const { locale, dict } = useI18n();
+  const t = useTranslations("privacy");
+  const tFooter = useTranslations("footer");
   const router = useRouter();
   const toast = useToast();
   const dialog = useDialogState();
@@ -15,22 +16,22 @@ export function DemoDataButton() {
   function clear() {
     resetDemoState();
     dialog.close();
-    router.push(`/${locale}`);
+    router.push("/");
     window.scrollTo(0, 0);
-    toast(dict.privacy.cleared);
+    toast(t("cleared"));
   }
 
   return (
     <>
       <button className="btn quiet" style={{ fontSize: 10, color: "var(--muted)" }} onClick={dialog.show}>
-        {dict.footer.demoData}
+        {tFooter("demoData")}
       </button>
-      <Modal open={dialog.open} onClose={dialog.close} label={dict.privacy.dialogLabel}>
-        <div className="eyebrow">{dict.privacy.eyebrow}</div>
-        <h2>{dict.privacy.title}</h2>
-        <p className="sub">{dict.privacy.body}</p>
+      <Modal open={dialog.open} onClose={dialog.close} label={t("dialogLabel")}>
+        <div className="eyebrow">{t("eyebrow")}</div>
+        <h2>{t("title")}</h2>
+        <p className="sub">{t("body")}</p>
         <button className="btn outline" onClick={clear}>
-          {dict.privacy.clear}
+          {t("clear")}
         </button>
       </Modal>
     </>

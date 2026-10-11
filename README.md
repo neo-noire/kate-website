@@ -29,10 +29,19 @@ Routes:
 Code layout:
 
 - `src/content/catalog.ts`: programs, dances, packages and lessons with stable, untranslated IDs.
-- `src/i18n/dictionaries/{en,uk}.ts`: all copy, typed so the Ukrainian dictionary must match the English shape. Plurals use `Intl.PluralRules`.
+- `messages/{en,uk}.json`: all copy, in ICU message format, loaded with [next-intl](https://next-intl.dev). Plurals use ICU (`{count, plural, one {# урок} few {# уроки} many {# уроків} other {…}}`) and prices use the shared `eur` number format.
+- `src/i18n/`: next-intl routing, request config and locale-aware `Link`/`useRouter`. `npm run typecheck` fails if a locale’s messages are missing or have extra keys compared with English, and message keys used in code are type-checked.
 - `src/app/[lang]/`: routes; the root layout sits under `[lang]` so `<html lang>`, metadata and `hreflang` links are per locale.
 - `src/lib/demo-store.ts`: the prototype-only `localStorage` store (key `ritmo-demo-v2`). Replace with database-backed records when auth and payments arrive.
 - `src/app/globals.css`: the prototype’s stylesheet, ported with its class names intact.
+
+### Adding a language
+
+1. Add its code to `locales` and a picker label to `localeLabels` in `src/i18n/routing.ts`.
+2. Copy `messages/en.json` to `messages/<code>.json` and translate it.
+3. Add the new file to the key check in `src/i18n/messages-shape.ts`, then run `npm run typecheck`.
+
+Pages for the new locale are prerendered automatically, and redirects, `hreflang` links and the language picker pick it up from the routing config.
 
 Names, emails, notes, progress and requests are stored only in this browser’s `localStorage`. Nothing is sent to a coach or email provider. Demo data can be cleared through **About demo data** in the footer.
 

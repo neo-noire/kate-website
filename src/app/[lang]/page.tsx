@@ -4,49 +4,53 @@ import { NewsletterForm } from "@/components/newsletter-form";
 import { PreviewLessonButton } from "@/components/preview-lesson-button";
 import { ProgramCatalog } from "@/components/program-catalog";
 import { dances } from "@/content/catalog";
-import { getDictionary } from "@/i18n/server";
+import { getTranslations } from "next-intl/server";
 import heroPhoto from "@/assets/hero.jpg";
 
 const tickerDances = (["cha-cha-cha", "samba", "rumba", "paso-doble", "jive"] as const).map((id) =>
   dances[id].name.toUpperCase(),
 );
 
+const heroStats = ["lessons", "formats", "pace"] as const;
+const approachSteps = ["understand", "format", "complete"] as const;
+const faqItems = ["partner", "singleDance", "privateLessons"] as const;
+
 export default async function HomePage() {
-  const { dict } = await getDictionary();
+  const t = await getTranslations();
 
   return (
     <main>
       <section className="hero">
-        <Image className="heroPhoto" src={heroPhoto} alt={dict.hero.photoAlt} preload sizes="(max-width: 640px) 100vw, 90vw" />
+        <Image className="heroPhoto" src={heroPhoto} alt={t("hero.photoAlt")} preload sizes="(max-width: 640px) 100vw, 90vw" />
         <div className="wrap">
-          <div className="eyebrow">{dict.hero.eyebrow}</div>
+          <div className="eyebrow">{t("hero.eyebrow")}</div>
           <h1>
-            {dict.hero.titleLine1}
+            {t("hero.titleLine1")}
             <br />
-            {dict.hero.titleLine2}
-            <span>{dict.hero.titleAccent}</span>
+            {t("hero.titleLine2")}
+            <span>{t("hero.titleAccent")}</span>
           </h1>
           <p>
-            {dict.hero.lead1}
+            {t("hero.lead1")}
             <br />
-            {dict.hero.lead2}
+            {t("hero.lead2")}
           </p>
           <div className="heroActions">
             <a href="#courses" className="btn">
-              {dict.hero.choosePrograms} <span>↗</span>
+              {t("hero.choosePrograms")} <span>↗</span>
             </a>
             <PreviewLessonButton />
           </div>
           <div className="heroBottom">
-            {dict.hero.stats.map((stat, i) => (
-              <span key={stat.value} style={i === dict.hero.stats.length - 1 ? { border: 0 } : undefined}>
-                <b>{stat.value}</b>
-                {stat.label}
+            {heroStats.map((key, i) => (
+              <span key={key} style={i === heroStats.length - 1 ? { border: 0 } : undefined}>
+                <b>{t(`hero.stats.${key}.value`)}</b>
+                {t(`hero.stats.${key}.label`)}
               </span>
             ))}
           </div>
         </div>
-        <div className="imageLabel">{dict.hero.imageLabel}</div>
+        <div className="imageLabel">{t("hero.imageLabel")}</div>
       </section>
 
       <div className="ticker">
@@ -58,44 +62,43 @@ export default async function HomePage() {
       <section className="section wrap" id="courses">
         <div className="heading">
           <div>
-            <div className="eyebrow">{dict.catalog.eyebrow}</div>
+            <div className="eyebrow">{t("catalog.eyebrow")}</div>
             <h2>
-              {dict.catalog.titleLine1}
+              {t("catalog.titleLine1")}
               <br />
-              {dict.catalog.titleLine2}
+              {t("catalog.titleLine2")}
             </h2>
           </div>
           <p>
-            {dict.catalog.intro.map((line, i) => (
-              <span key={line}>
-                {i > 0 && <br />}
-                {line}
-              </span>
-            ))}
+            {t("catalog.intro.line1")}
+            <br />
+            {t("catalog.intro.line2")}
+            <br />
+            {t("catalog.intro.line3")}
           </p>
         </div>
         <ProgramCatalog />
-        <p className="programNote">{dict.catalog.note}</p>
+        <p className="programNote">{t("catalog.note")}</p>
       </section>
 
       <section className="section wrap method" id="approach">
         <div>
-          <div className="eyebrow">{dict.approach.eyebrow}</div>
+          <div className="eyebrow">{t("approach.eyebrow")}</div>
           <h2>
-            {dict.approach.titleLine1}
+            {t("approach.titleLine1")}
             <br />
-            {dict.approach.titleLine2}
+            {t("approach.titleLine2")}
           </h2>
-          <p>{dict.approach.body}</p>
+          <p>{t("approach.body")}</p>
           <ContactButton />
         </div>
         <div className="steps">
-          {dict.approach.steps.map((step, i) => (
-            <div className="step" key={step.title}>
+          {approachSteps.map((key, i) => (
+            <div className="step" key={key}>
               <span>{String(i + 1).padStart(2, "0")}</span>
               <div>
-                <h3>{step.title}</h3>
-                <p>{step.body}</p>
+                <h3>{t(`approach.steps.${key}.title`)}</h3>
+                <p>{t(`approach.steps.${key}.body`)}</p>
               </div>
             </div>
           ))}
@@ -106,23 +109,23 @@ export default async function HomePage() {
         <div className="newsletter">
           <div>
             <h2>
-              {dict.newsletter.titleLine1}
+              {t("newsletter.titleLine1")}
               <br />
-              {dict.newsletter.titleLine2}
+              {t("newsletter.titleLine2")}
             </h2>
             <p>
-              {dict.newsletter.body1}
+              {t("newsletter.body1")}
               <br />
-              {dict.newsletter.body2}
+              {t("newsletter.body2")}
             </p>
           </div>
           <NewsletterForm />
         </div>
         <div className="faq">
-          {dict.faq.map((item) => (
-            <details key={item.question}>
-              <summary>{item.question}</summary>
-              <p>{item.answer}</p>
+          {faqItems.map((key) => (
+            <details key={key}>
+              <summary>{t(`faq.${key}.question`)}</summary>
+              <p>{t(`faq.${key}.answer`)}</p>
             </details>
           ))}
         </div>

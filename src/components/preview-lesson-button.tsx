@@ -1,13 +1,13 @@
 "use client";
 
-import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { DEFAULT_COURSE } from "@/content/catalog";
+import { useRouter } from "@/i18n/navigation";
 import { updateDemoState } from "@/lib/demo-store";
-import { useI18n } from "./i18n-provider";
 
 /** Opens the dashboard on the first lesson of the free demo course. */
 export function PreviewLessonButton() {
-  const { locale, dict } = useI18n();
+  const t = useTranslations("hero");
   const router = useRouter();
   return (
     <button
@@ -18,10 +18,10 @@ export function PreviewLessonButton() {
           enrolled: { ...state.enrolled, [DEFAULT_COURSE]: state.enrolled[DEFAULT_COURSE] ?? { packageId: "solo", done: [] } },
           current: { course: DEFAULT_COURSE, lesson: 0 },
         }));
-        router.push(`/${locale}/dashboard`);
+        router.push("/dashboard");
       }}
     >
-      {dict.hero.previewLesson}
+      {t("previewLesson")}
     </button>
   );
 }

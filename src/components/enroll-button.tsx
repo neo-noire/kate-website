@@ -1,12 +1,11 @@
 "use client";
 
-import { useRouter } from "next/navigation";
+import { useFormatter, useTranslations } from "next-intl";
 import type { FormEvent } from "react";
 import { courseKey, dances, getPackage, getProgram, type DanceId, type PackageId, type ProgramId } from "@/content/catalog";
-import { format, formatEuro, plural } from "@/i18n/format";
+import { useRouter } from "@/i18n/navigation";
 import { updateDemoState, useDemoState } from "@/lib/demo-store";
-import { localizedValidation } from "@/lib/validation";
-import { useI18n } from "./i18n-provider";
+import { useLocalizedValidation } from "@/lib/validation";
 import { Modal, useDialogState } from "./modal";
 import { useToast } from "./toast";
 
@@ -14,7 +13,9 @@ type EnrollButtonProps = { programId: ProgramId; danceId: DanceId; packageId: Pa
 
 /** Demo enrollment: no payment, the course is added to this browser's dashboard. */
 export function EnrollButton({ programId, danceId, packageId, featured }: EnrollButtonProps) {
-  const { locale, dict } = useI18n();
+  const t = useTranslations();
+  const format = useFormatter();
+  const validation = useLocalizedValidation();
   const router = useRouter();
   const toast = useToast();
   const dialog = useDialogState();
@@ -26,7 +27,7 @@ export function EnrollButton({ programId, danceId, packageId, featured }: Enroll
   function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const data = new FormData(event.currentTarget);
-    const name = String(data.get("name")).trim() || dict.enroll.defaultName;
+    const name = String(data.get("name")).trim() || t("enroll.defaultName");
     updateDemoState((state) => ({
       ...state,
       user: { name, email: String(data.get("email")) },
@@ -34,52 +35,52 @@ export function EnrollButton({ programId, danceId, packageId, featured }: Enroll
       current: { course: key, lesson: 0 },
     }));
     dialog.close();
-    router.push(`/${locale}/dashboard`);
-    toast(dict.enroll.success);
+    router.push("/dashboard");
+    toast(t("enroll.success"));
   }
 
   return (
     <>
       <button className={`btn${featured ? "" : " outline"}`} onClick={dialog.show}>
-        {format(dict.packages.choose, { name: pkg.name })}
+        {t("packages.choose", { name: pkg.name })}
       </button>
-      <Modal open={dialog.open} onClose={dialog.close} label={dict.enroll.dialogLabel}>
-        <div className="eyebrow">{dict.enroll.eyebrow}</div>
+      <Modal open={dialog.open} onClose={dialog.close} label={t("enroll.dialogLabel")}>
+        <div className="eyebrow">{t("enroll.eyebrow")}</div>
         <h2>
           {dances[danceId].name} · {pkg.name}
         </h2>
         <p className="sub">
-          {format(dict.enroll.summary, { program: program.name, price: formatEuro(locale, pkg.priceEur) })}
+          {t("enroll.summary", { program: program.name, price: format.number(pkg.priceEur, "eur") })}
           <br />
-          {pkg.privateLessons ? plural(locale, pkg.privateLessons, dict.enroll.privateLessons) : dict.enroll.independent}
+          {pkg.privateLessons ? t("enroll.privateLessons", { count: pkg.privateLessons }) : t("enroll.independent")}
         </p>
-        <form className="formStack" onSubmit={submit} {...localizedValidation(dict)}>
+        <form className="formStack" onSubmit={submit} {...validation}>
           <label>
-            {dict.common.name}
+            {t("common.name")}
             <input
               name="name"
               autoComplete="given-name"
-              placeholder={dict.enroll.namePlaceholder}
+              placeholder={t("enroll.namePlaceholder")}
               maxLength={60}
               required
               defaultValue={user?.name ?? ""}
             />
           </label>
           <label>
-            {dict.common.email}
+            {t("common.email")}
             <input
               name="email"
               type="email"
               autoComplete="email"
               required
-              placeholder={dict.common.emailPlaceholder}
+              placeholder={t("common.emailPlaceholder")}
               defaultValue={user?.email ?? ""}
             />
           </label>
           <button className="btn" type="submit">
-            {dict.enroll.submit}
+            {t("enroll.submit")}
           </button>
-          <p className="fine">{dict.enroll.fine}</p>
+          <p className="fine">{t("enroll.fine")}</p>
         </form>
       </Modal>
     </>

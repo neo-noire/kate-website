@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import { PackagePicker } from "@/components/package-picker";
 import { getProgram, programs } from "@/content/catalog";
 import { localeAlternates } from "@/i18n/metadata";
-import { getLocale } from "@/i18n/server";
+import { getLocale } from "next-intl/server";
 
 export function generateStaticParams() {
   return programs.map((program) => ({ programId: program.id }));

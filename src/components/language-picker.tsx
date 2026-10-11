@@ -1,32 +1,33 @@
 "use client";
 
-import { usePathname, useRouter } from "next/navigation";
-import { LOCALE_COOKIE, localeLabels, locales, hasLocale } from "@/i18n/config";
+import { useLocale, useTranslations } from "next-intl";
+import { usePathname, useRouter } from "@/i18n/navigation";
+import { localeLabels, routing } from "@/i18n/routing";
 import { BEFORE_LOCALE_CHANGE } from "@/lib/demo-store";
-import { useI18n } from "./i18n-provider";
+import { hasLocale } from "next-intl";
 
 export function LanguagePicker() {
-  const { locale, dict } = useI18n();
+  const locale = useLocale();
+  const t = useTranslations();
   const pathname = usePathname();
   const router = useRouter();
 
   function change(next: string) {
-    if (!hasLocale(next) || next === locale) return;
+    if (!hasLocale(routing.locales, next) || next === locale) return;
     window.dispatchEvent(new Event(BEFORE_LOCALE_CHANGE));
-    document.cookie = `${LOCALE_COOKIE}=${next}; path=/; max-age=31536000; samesite=lax`;
-    const rest = pathname.split("/").slice(2).join("/");
-    // Each locale has its own root layout, so Next.js does a full page load here.
-    router.push(`/${next}${rest ? `/${rest}` : ""}${window.location.search}${window.location.hash}`);
+    // Each locale has its own root layout, so this is a full page load. next-intl
+    // remembers the choice in the NEXT_LOCALE cookie.
+    router.replace(`${pathname}${window.location.search}`, { locale: next });
   }
 
   return (
     <select
       className="languagePicker"
-      aria-label={dict.languageLabel}
+      aria-label={t("languageLabel")}
       value={locale}
       onChange={(event) => change(event.target.value)}
     >
-      {locales.map((value) => (
+      {routing.locales.map((value) => (
         <option key={value} value={value}>
           {localeLabels[value]}
         </option>

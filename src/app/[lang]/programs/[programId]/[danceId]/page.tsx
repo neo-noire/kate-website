@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import { PackagePicker } from "@/components/package-picker";
 import { dances, getProgram, programHasDance, programs } from "@/content/catalog";
 import { localeAlternates } from "@/i18n/metadata";
-import { getLocale } from "@/i18n/server";
+import { getLocale } from "next-intl/server";
 
 export function generateStaticParams() {
   return programs.flatMap((program) => program.danceIds.map((danceId) => ({ programId: program.id, danceId })));

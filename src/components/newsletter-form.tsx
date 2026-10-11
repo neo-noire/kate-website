@@ -1,12 +1,13 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { useState, type FormEvent } from "react";
 import { updateDemoState } from "@/lib/demo-store";
-import { localizedValidation } from "@/lib/validation";
-import { useI18n } from "./i18n-provider";
+import { useLocalizedValidation } from "@/lib/validation";
 
 export function NewsletterForm() {
-  const { dict } = useI18n();
+  const t = useTranslations();
+  const validation = useLocalizedValidation();
   const [subscribed, setSubscribed] = useState(false);
 
   function submit(event: FormEvent<HTMLFormElement>) {
@@ -18,21 +19,21 @@ export function NewsletterForm() {
   }
 
   return (
-    <form onSubmit={submit} {...localizedValidation(dict)}>
-      <label htmlFor="subEmail">{dict.newsletter.emailLabel}</label>
+    <form onSubmit={submit} {...validation}>
+      <label htmlFor="subEmail">{t("newsletter.emailLabel")}</label>
       <div className="inputRow">
-        <input id="subEmail" name="email" type="email" placeholder={dict.common.emailPlaceholder} required />
+        <input id="subEmail" name="email" type="email" placeholder={t("common.emailPlaceholder")} required />
         <button className="btn" type="submit">
-          {dict.newsletter.subscribe}
+          {t("newsletter.subscribe")}
         </button>
       </div>
       <label className="checkLabel">
         <input type="checkbox" required />
-        {dict.newsletter.consent}
+        {t("newsletter.consent")}
       </label>
-      <small>{dict.newsletter.demoNotice}</small>
+      <small>{t("newsletter.demoNotice")}</small>
       <p className="status" aria-live="polite">
-        {subscribed ? dict.newsletter.success : ""}
+        {subscribed ? t("newsletter.success") : ""}
       </p>
     </form>
   );

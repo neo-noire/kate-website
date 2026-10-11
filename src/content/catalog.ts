@@ -32,9 +32,13 @@ export type Package = {
   privateLessons: number;
 };
 
+export type LessonKey = "rhythm" | "basicStep" | "combination" | "music";
+
 export type Lesson = {
   /** 0-based position within a dance; every dance has four lessons. */
   index: number;
+  /** Message key for the lesson's title and description. */
+  key: LessonKey;
   durationMinutes: number;
 };
 
@@ -70,10 +74,10 @@ export const packages: Package[] = [
 ];
 
 export const lessons: Lesson[] = [
-  { index: 0, durationMinutes: 18 },
-  { index: 1, durationMinutes: 24 },
-  { index: 2, durationMinutes: 22 },
-  { index: 3, durationMinutes: 20 },
+  { index: 0, key: "rhythm", durationMinutes: 18 },
+  { index: 1, key: "basicStep", durationMinutes: 24 },
+  { index: 2, key: "combination", durationMinutes: 22 },
+  { index: 3, key: "music", durationMinutes: 20 },
 ];
 
 export const LESSONS_PER_DANCE = lessons.length;

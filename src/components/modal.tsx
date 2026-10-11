@@ -2,7 +2,7 @@
 
 import { useEffect, useLayoutEffect, useRef, useState, type ReactNode } from "react";
 import { createPortal } from "react-dom";
-import { useI18n } from "./i18n-provider";
+import { useTranslations } from "next-intl";
 
 const FOCUSABLE = "button,a[href],input,select,textarea";
 
@@ -25,7 +25,7 @@ type ModalProps = {
 };
 
 export function Modal({ open, onClose, label, children }: ModalProps) {
-  const { dict } = useI18n();
+  const t = useTranslations("common");
   const dialog = useRef<HTMLElement>(null);
   const onCloseRef = useRef(onClose);
 
@@ -73,7 +73,7 @@ export function Modal({ open, onClose, label, children }: ModalProps) {
       }}
     >
       <section className="modal" role="dialog" aria-modal="true" aria-label={label} ref={dialog}>
-        <button className="close" aria-label={dict.common.close} onClick={onClose}>
+        <button className="close" aria-label={t("close")} onClick={onClose}>
           ×
         </button>
         {children}

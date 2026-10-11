@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { useI18n } from "./i18n-provider";
+import { useTranslations } from "next-intl";
 import { useToast } from "./toast";
 
 const DURATION = 30;
@@ -58,7 +58,7 @@ function drawFrame(canvas: HTMLCanvasElement, time: number) {
  * access-controlled video (Mux) after checking enrollment on the server.
  */
 export function DemoPlayer({ danceName, lessonTitle }: { danceName: string; lessonTitle: string }) {
-  const { dict } = useI18n();
+  const t = useTranslations("player");
   const toast = useToast();
   const player = useRef<HTMLDivElement>(null);
   const canvas = useRef<HTMLCanvasElement>(null);
@@ -97,21 +97,21 @@ export function DemoPlayer({ danceName, lessonTitle }: { danceName: string; less
 
   function fullscreen() {
     if (document.fullscreenElement) void document.exitFullscreen();
-    else if (player.current?.requestFullscreen) player.current.requestFullscreen().catch(() => toast(dict.player.fullscreenUnavailable));
-    else toast(dict.player.fullscreenUnavailable);
+    else if (player.current?.requestFullscreen) player.current.requestFullscreen().catch(() => toast(t("fullscreenUnavailable")));
+    else toast(t("fullscreenUnavailable"));
   }
 
   return (
     <div className="player" ref={player}>
-      <canvas ref={canvas} width={1280} height={720} aria-label={dict.player.canvasLabel} />
-      <span className="playerBadge">{dict.player.badge}</span>
+      <canvas ref={canvas} width={1280} height={720} aria-label={t("canvasLabel")} />
+      <span className="playerBadge">{t("badge")}</span>
       <div className="playerCaption">
         <small>{danceName.toUpperCase()}</small>
         <h3>{lessonTitle}</h3>
-        <p>{dict.player.placeholder}</p>
+        <p>{t("placeholder")}</p>
       </div>
       <div className="controls">
-        <button aria-label={playing ? dict.player.pause : dict.player.play} onClick={togglePlay}>
+        <button aria-label={playing ? t("pause") : t("play")} onClick={togglePlay}>
           {playing ? "Ⅱ" : "▶"}
         </button>
         <span className="timer">
@@ -123,17 +123,17 @@ export function DemoPlayer({ danceName, lessonTitle }: { danceName: string; less
           max={DURATION}
           step={0.1}
           value={time}
-          aria-label={dict.player.seek}
+          aria-label={t("seek")}
           onChange={(event) => seek(Number(event.target.value))}
         />
-        <select aria-label={dict.player.speed} value={speed} onChange={(event) => setSpeed(Number(event.target.value))}>
+        <select aria-label={t("speed")} value={speed} onChange={(event) => setSpeed(Number(event.target.value))}>
           {SPEEDS.map((value) => (
             <option key={value} value={value}>
               {value}×
             </option>
           ))}
         </select>
-        <button aria-label={dict.player.fullscreen} onClick={fullscreen}>
+        <button aria-label={t("fullscreen")} onClick={fullscreen}>
           ⛶
         </button>
       </div>

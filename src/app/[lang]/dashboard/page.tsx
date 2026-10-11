@@ -1,13 +1,13 @@
 import type { Metadata } from "next";
 import { Dashboard } from "@/components/dashboard";
 import { localeAlternates } from "@/i18n/metadata";
-import { getDictionary } from "@/i18n/server";
+import { getLocale, getTranslations } from "next-intl/server";
 
 export async function generateMetadata(): Promise<Metadata> {
-  const { locale, dict } = await getDictionary();
+  const t = await getTranslations("dashboard");
   return {
-    title: dict.dashboard.myDances,
-    alternates: localeAlternates(locale, "/dashboard"),
+    title: t("myDances"),
+    alternates: localeAlternates(await getLocale(), "/dashboard"),
     // A personal page; keep it out of search results.
     robots: { index: false },
   };
