@@ -1,9 +1,12 @@
 .DS_Store
 node_modules/
 .next/
-.astro/
-dist/
+out/
+coverage/
 .vercel/
+*.tsbuildinfo
+next-env.d.ts
+npm-debug.log*
 .env
 .env.*
 !.env.example
