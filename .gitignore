@@ -1,0 +1,9 @@
+.DS_Store
+node_modules/
+.next/
+.astro/
+dist/
+.vercel/
+.env
+.env.*
+!.env.example
