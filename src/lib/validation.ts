@@ -15,7 +15,6 @@ export function localizedValidation(dict: Dictionary) {
       const { validity } = field;
       if (validity.valueMissing) field.setCustomValidity(dict.validation.required);
       else if (validity.typeMismatch) field.setCustomValidity(dict.validation.email);
-      else if (validity.rangeUnderflow) field.setCustomValidity(dict.validation.futureDate);
     },
     onInputCapture(event: FormEvent<HTMLFormElement>) {
       (event.target as Field).setCustomValidity?.("");

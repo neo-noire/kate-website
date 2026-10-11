@@ -102,7 +102,7 @@ const en = {
     },
     {
       question: "How do private lessons work?",
-      answer: "Choose your preferred date and time in the dashboard and leave a request. Your coach needs to confirm it. In this prototype you can try the booking flow; no real appointment is created.",
+      answer: "Personal and Mentorship packages include private lessons. They are scheduled with your coach on a separate booking platform, not on this site.",
     },
   ],
   footer: {
@@ -161,14 +161,11 @@ const en = {
     programProgress: "{program} · {done}/{total} lessons",
     courseProgress: "{done}/4 lessons · {package}",
     privatePractice: "Private practice",
-    credits: {
-      one: "Your package includes {count} private lesson. Requests: {used}",
-      other: "Your package includes {count} private lessons. Requests: {used}",
+    privateLessons: {
+      one: "Your package includes {count} private lesson. Your coach will arrange it with you on a separate booking platform.",
+      other: "Your package includes {count} private lessons. Your coach will arrange them with you on a separate booking platform.",
     } as PluralForms,
-    soloPackage: "Solo package. Choose Personal or Mentorship for private coaching.",
-    bookLesson: "Book a lesson ↗",
-    bookPrivateLesson: "Book a private lesson ↗",
-    requestPending: "Request awaiting confirmation (demo)",
+    soloPackage: "Solo package: video lessons only. Personal and Mentorship add private lessons.",
     lessonMeta: "{dance} · Lesson {number} of 4 · {minutes} min (planned duration)",
     completed: "Completed ✓",
     markCompleted: "Mark as completed ✓",
@@ -214,23 +211,16 @@ const en = {
     fullscreen: "Fullscreen",
     fullscreenUnavailable: "Fullscreen is unavailable in this browser.",
   },
-  booking: {
+  contact: {
     eyebrow: "Personal support",
-    titleLesson: "Book a lesson",
-    titleContact: "Let's talk dance",
-    subLesson: "{dance} · 50 min · choose your preferred time",
-    subContact: "Leave a request or a question for your coach.",
-    date: "Preferred date",
-    time: "Time (your local time)",
+    title: "Let's talk dance",
+    sub: "Leave a question for your coach.",
     message: "Message",
     messagePlaceholder: "What is your goal, or what do you need help with?",
-    submitLesson: "Save demo booking request ↗",
-    submitContact: "Save demo message ↗",
-    fine: "Your request is saved locally only. No message is sent to the coach and no real appointment is created.",
-    dialogLabel: "Booking or message to your coach",
-    savedLesson: "Demo lesson request saved.",
-    savedContact: "Demo message saved in your browser.",
-    allBooked: "All private lessons in this package already have demo booking requests.",
+    submit: "Save demo message ↗",
+    fine: "Your message is saved locally only. Nothing is sent to the coach.",
+    dialogLabel: "Message to your coach",
+    saved: "Demo message saved in your browser.",
   },
   privacy: {
     eyebrow: "About this prototype",
@@ -243,7 +233,6 @@ const en = {
   validation: {
     required: "Please complete this field.",
     email: "Please enter a valid email address.",
-    futureDate: "Please choose an available future date.",
   },
   notFound: {
     title: "This page took a wrong step.",

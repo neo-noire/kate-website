@@ -10,21 +10,12 @@ const STORAGE_KEY = "ritmo-demo-v2";
 
 export type DemoUser = { name: string; email: string };
 export type Enrollment = { packageId: PackageId; done: number[] };
-export type BookingRequest = {
-  course: CourseKey;
-  date: string;
-  time: string;
-  name: string;
-  email: string;
-  message: string;
-};
 
 export type DemoState = {
   user: DemoUser | null;
   enrolled: Partial<Record<CourseKey, Enrollment>>;
   /** Keyed by `${course}#${lessonIndex}`. */
   notes: Record<string, string>;
-  bookings: BookingRequest[];
   subscribed: string;
   feedback: { name: string; email: string; message: string } | null;
   /** The course and lesson the dashboard opens on. */
@@ -36,7 +27,6 @@ function initialState(): DemoState {
     user: null,
     enrolled: { [DEFAULT_COURSE]: { packageId: "solo", done: [] } },
     notes: {},
-    bookings: [],
     subscribed: "",
     feedback: null,
     current: { course: DEFAULT_COURSE, lesson: 0 },
@@ -61,7 +51,6 @@ function sanitize(raw: unknown): DemoState {
     ...base,
     ...saved,
     enrolled: Object.keys(enrolled).length ? enrolled : base.enrolled,
-    bookings: (saved.bookings ?? []).filter((b) => parseCourseKey(b.course)),
   };
   if (!state.enrolled[state.current.course]) state.current = { course: Object.keys(state.enrolled)[0] as CourseKey, lesson: 0 };
   return state;

@@ -22,7 +22,7 @@ Routes:
 | --- | --- |
 | `/en`, `/uk` | Landing page: hero, program catalog with filters, approach, newsletter, FAQ |
 | `/{lang}/programs/{program}` and `/{lang}/programs/{program}/{dance}` | Dance tabs and the three packages for one dance, with demo enrollment |
-| `/{lang}/dashboard` | Demo student dashboard: lessons, placeholder player, progress, notes, private-lesson requests |
+| `/{lang}/dashboard` | Demo student dashboard: lessons, placeholder player, progress and notes |
 
 `/` and any path without a language prefix redirect to the visitor’s language (a saved choice in the `NEXT_LOCALE` cookie first, then the browser’s `Accept-Language`, else English).
 
@@ -43,6 +43,7 @@ Names, emails, notes, progress and requests are stored only in this browser’s 
 - Package selection is a page per program and dance instead of a dialog, so each is linkable and indexable.
 - Switching language loads the other locale’s URL. Lesson notes in progress are kept; other half-filled dialog forms are not.
 - The language picker lives in the header only, not inside dialogs.
+- The private-lesson request flow is removed. The site sells courses only; private sessions included in a package are booked on a separate platform. The "Let's plan your first step" button still opens a contact form.
 
 ## Product goal and audience
 
@@ -117,7 +118,7 @@ This commit does not create a Vercel project or deploy a website. The current HT
 4. Build localized public pages, then connect the newsletter and contact forms to real delivery with consent handling and validation.
 5. Add authentication, database-backed student records, verified purchase entitlements and account recovery.
 6. Integrate real course videos, lesson notes and progress; authorize access to both pages and video playback.
-7. Add private-session requests or booking, enforce session allowances and give the coach a confirmation workflow.
+7. ~~Add private-session booking.~~ Dropped: the site sells courses only, and private sessions are booked on a separate platform.
 8. Verify mobile/desktop layouts, keyboard access, translations, enrollment/payment behavior and access permissions before production launch.
 
 Potential domain entities: `Program`, `DanceCourse`, `Lesson`, `Package`, `User`, `Enrollment`, `Order`, `LessonProgress`, `LessonNote` and `PrivateSession`. Keep program membership, lesson ordering and package session allowances explicit. Service providers, schema details and the coach’s administration workflow remain to be decided.

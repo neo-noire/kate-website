@@ -1,7 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import {
   dances,
@@ -14,20 +13,16 @@ import {
 } from "@/content/catalog";
 import { format, plural } from "@/i18n/format";
 import { BEFORE_LOCALE_CHANGE, noteKey, updateDemoState, useDemoState } from "@/lib/demo-store";
-import { BookingDialog } from "./booking-dialog";
 import { DemoPlayer } from "./demo-player";
 import { useI18n } from "./i18n-provider";
-import { useDialogState } from "./modal";
 import { useToast } from "./toast";
 
 type Tab = "about" | "notes" | "practice";
 
 export function Dashboard() {
   const { locale, dict } = useI18n();
-  const router = useRouter();
   const toast = useToast();
   const state = useDemoState();
-  const booking = useDialogState();
   const [tab, setTab] = useState<Tab>("about");
 
   const { course, lesson } = state.current;
@@ -38,7 +33,6 @@ export function Dashboard() {
   const { program, danceId } = parsed;
   const danceName = dances[danceId].name;
   const pkg = getPackage(enrollment.packageId)!;
-  const courseBookings = state.bookings.filter((b) => b.course === course);
   const programDone = program.danceIds.reduce(
     (sum, id) => sum + (state.enrolled[courseKey(program.id, id)]?.done.length ?? 0),
     0,
@@ -57,13 +51,6 @@ export function Dashboard() {
     updateDemoState((s) => ({ ...s, enrolled: { ...s.enrolled, [course]: { ...enrollment!, done } } }));
     if (!done.includes(lesson)) toast(dict.dashboard.completionRemoved);
     else toast(done.length === LESSONS_PER_DANCE ? dict.dashboard.danceCompleted : dict.dashboard.lessonCompleted);
-  }
-
-  function requestBooking() {
-    // Solo has no private lessons: offer the packages for this dance instead.
-    if (pkg.privateLessons === 0) router.push(`/${locale}/programs/${program.id}/${danceId}`);
-    else if (courseBookings.length >= pkg.privateLessons) toast(dict.booking.allBooked);
-    else booking.show();
   }
 
   return (
@@ -120,21 +107,9 @@ export function Dashboard() {
               <span className="eyebrow">{dict.dashboard.privatePractice}</span>
               <p>
                 {pkg.privateLessons
-                  ? plural(locale, pkg.privateLessons, dict.dashboard.credits, { used: courseBookings.length })
+                  ? plural(locale, pkg.privateLessons, dict.dashboard.privateLessons)
                   : dict.dashboard.soloPackage}
               </p>
-              <button className="btn outline" style={{ width: "100%" }} onClick={requestBooking}>
-                {dict.dashboard.bookLesson}
-              </button>
-              <div className="fine">
-                {courseBookings.map((b, i) => (
-                  <p key={i}>
-                    {b.date} · {b.time}
-                    <br />
-                    {dict.dashboard.requestPending}
-                  </p>
-                ))}
-              </div>
             </div>
           </aside>
 
@@ -220,16 +195,12 @@ export function Dashboard() {
               })}
             </div>
 
-            <div className="bookingCard mobileBooking">
-              <button className="btn outline" onClick={requestBooking}>
-                {dict.dashboard.bookPrivateLesson}
-              </button>
+            <div className="bookingCard">
               <p>{dict.dashboard.mobileNotice}</p>
             </div>
           </div>
         </div>
       </div>
-      <BookingDialog open={booking.open} onClose={booking.close} course={course} />
     </main>
   );
 }
