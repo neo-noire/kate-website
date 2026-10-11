@@ -74,7 +74,7 @@ English and Ukrainian should cover the entire experience. Keep stable program, d
 
 ## Framework direction
 
-**Working recommendation: Next.js App Router with TypeScript**, because the intended product includes a public site and an interactive, authenticated student application with purchases, private videos, persistent progress and booking flows. This is a recommendation, not a finalized decision.
+**Working recommendation: Next.js App Router with TypeScript**, because the intended product includes a public site and an interactive, authenticated student application with purchases, private videos, persistent progress and booking flows. The proposed stack and providers, with costs, are recorded in [docs/decisions/0001-stack-and-providers.md](./docs/decisions/0001-stack-and-providers.md) (accepted 2026-10-11).
 
 | Option | Fit for this project | Considerations |
 | --- | --- | --- |
