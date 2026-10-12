@@ -4,60 +4,81 @@ import Image from "next/image";
 import { ArrowUpRight, ChevronDown, ChevronUp } from "lucide-react";
 import heroPhoto from "@/assets/hero.jpg";
 import { useState } from "react";
-import { LESSONS_PER_DANCE, lowestPriceEur, programGroups, programs, type ProgramGroup } from "@/content/catalog";
-import { useFormatter, useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
+import type { CatalogProgram } from "@/lib/catalog/queries";
+import { localize } from "@/lib/localized";
+import { formatPrice } from "@/lib/money";
 
 const COLLAPSED_COUNT = 3;
 
-export function ProgramCatalog() {
+/** Category filter key: the English category, so translations can't split a filter. */
+const categoryKey = (program: CatalogProgram) => program.category?.en.trim() || null;
+
+export function ProgramCatalog({ programs }: { programs: CatalogProgram[] }) {
   const t = useTranslations();
-  const format = useFormatter();
-  const [filter, setFilter] = useState<ProgramGroup | "all">("all");
+  const locale = useLocale();
+  const [filter, setFilter] = useState<string | null>(null);
   const [expanded, setExpanded] = useState(false);
 
-  const visible = programs
-    .filter((p) => filter === "all" || p.group === filter)
-    .filter((_, i) => filter !== "all" || expanded || i < COLLAPSED_COUNT);
+  if (!programs.length) return <p className="fine">{t("catalog.empty")}</p>;
+
+  // One filter per category, labelled in the current language, in catalog order.
+  const categories = new Map<string, string>();
+  for (const program of programs) {
+    const key = categoryKey(program);
+    if (key && !categories.has(key)) categories.set(key, localize(program.category!, locale));
+  }
+
+  const inFilter = programs.filter((p) => filter === null || categoryKey(p) === filter);
+  const visible = filter === null && !expanded ? inFilter.slice(0, COLLAPSED_COUNT) : inFilter;
 
   return (
     <>
-      <div className="filters">
-        {(["all", ...programGroups] as const).map((group) => (
-          <button
-            key={group}
-            className={`chip${filter === group ? " active" : ""}`}
-            aria-pressed={filter === group}
-            onClick={() => setFilter(group)}
-          >
-            {t(`catalog.groups.${group}`)}
-          </button>
-        ))}
-      </div>
+      {categories.size > 1 && (
+        <div className="filters">
+          {[[null, t("catalog.all")] as const, ...categories].map(([key, label]) => (
+            <button
+              key={key ?? "all"}
+              className={`chip${filter === key ? " active" : ""}`}
+              aria-pressed={filter === key}
+              onClick={() => setFilter(key)}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
+      )}
       <div className="programs">
         {visible.map((program) => {
+          const title = localize(program.title, locale);
+          const tag = localize(program.tag, locale);
+          const sameCategory = programs.filter((p) => categoryKey(p) === categoryKey(program));
+          const number = String(sameCategory.indexOf(program) + 1).padStart(2, "0");
           return (
             <article className="program" key={program.id}>
               <div className="art">
                 <Image src={heroPhoto} alt="" fill sizes="(max-width: 640px) 100vw, (max-width: 900px) 50vw, 400px" />
-                <span className="pill">{t(`programs.${program.id}.tag`)}</span>
-                <span className="num">{program.number}</span>
+                {tag && <span className="pill">{tag}</span>}
+                <span className="num">{number}</span>
               </div>
               <div className="programBody">
-                <h3>{program.name}</h3>
-                <p>{t(`programs.${program.id}.description`)}</p>
+                <h3>{title}</h3>
+                <p>{localize(program.description, locale)}</p>
                 <div className="meta">
-                  <span>{t("catalog.dances", { count: program.danceIds.length })}</span>
-                  <span>{t("catalog.lessons", { count: program.danceIds.length * LESSONS_PER_DANCE })}</span>
+                  <span>{t("catalog.dances", { count: program.courseCount })}</span>
+                  <span>{t("catalog.lessons", { count: program.lessonCount })}</span>
                   <span>{t("catalog.online")}</span>
                 </div>
                 <div className="cardBottom">
-                  <span>{t("catalog.fromPrice", { price: format.number(lowestPriceEur, "eur") })}</span>
-                  <Link
-                    className="arrow"
-                    href={`/programs/${program.id}`}
-                    aria-label={t("catalog.open", { name: program.name })}
-                  >
+                  <span>
+                    {program.fromPrice
+                      ? t("catalog.fromPrice", {
+                          price: formatPrice(program.fromPrice.priceCents, program.fromPrice.currency, locale),
+                        })
+                      : null}
+                  </span>
+                  <Link className="arrow" href={`/programs/${program.slug}`} aria-label={t("catalog.open", { name: title })}>
                     <ArrowUpRight size={18} aria-hidden />
                   </Link>
                 </div>
@@ -66,7 +87,7 @@ export function ProgramCatalog() {
           );
         })}
       </div>
-      {filter === "all" && (
+      {filter === null && programs.length > COLLAPSED_COUNT && (
         <div style={{ textAlign: "center", marginTop: 26 }}>
           <button className="btn outline" onClick={() => setExpanded((value) => !value)}>
             {expanded ? t("catalog.showLess") : t("catalog.showMore")}

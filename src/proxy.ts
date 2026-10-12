@@ -7,15 +7,15 @@ import { routing } from "./i18n/routing";
 // then the browser's Accept-Language, then English.
 const intl = createMiddleware(routing);
 
-const signedInOnly = new RegExp(`^/(${routing.locales.join("|")})/dashboard(?:/|$)`);
+const signedInOnly = new RegExp(`^/(${routing.locales.join("|")})(/dashboard|/admin)(?:/|$)`);
 
 export default function proxy(request: NextRequest) {
-  // Fast path for signed-out visitors: no session cookie means no session. The dashboard
-  // page still validates the session itself.
+  // Fast path for signed-out visitors: no session cookie means no session. The dashboard and
+  // admin pages still validate the session (and admin rights) themselves.
   const match = request.nextUrl.pathname.match(signedInOnly);
   if (match && !getSessionCookie(request)) {
     const signIn = new URL(`/${match[1]}/sign-in`, request.url);
-    signIn.searchParams.set("next", "/dashboard");
+    signIn.searchParams.set("next", match[2]);
     return NextResponse.redirect(signIn);
   }
   return intl(request);

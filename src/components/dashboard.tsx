@@ -1,79 +1,33 @@
 "use client";
 
-import { Check, LogOut, Plus } from "lucide-react";
+import { Check, LogOut, Plus, Settings } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
-import { useEffect, useRef, useState, useSyncExternalStore } from "react";
-import {
-  dances,
-  getPackage,
-  lessons,
-  LESSONS_PER_DANCE,
-  parseCourseKey,
-  courseKey,
-  type CourseKey,
-} from "@/content/catalog";
+import { useState, useTransition } from "react";
 import { getPathname, Link } from "@/i18n/navigation";
 import { authClient } from "@/lib/auth/client";
-import { BEFORE_LOCALE_CHANGE, noteKey, updateDemoState, useDemoState } from "@/lib/demo-store";
-import { DemoPlayer } from "./demo-player";
+import type { Library } from "@/lib/catalog/queries";
+import { saveLessonNote, setLessonCompleted } from "@/lib/catalog/student-actions";
+import { localize } from "@/lib/localized";
 import { useToast } from "./toast";
+import { YouTubePlayer } from "./youtube-player";
 
 type Tab = "about" | "notes" | "practice";
+type Course = Library["courses"][number];
 
 const practiceTips = ["repeat", "count", "combine"] as const;
 
-const noopSubscribe = () => () => {};
+type DashboardProps = {
+  userName: string;
+  admin: boolean;
+  library: Library;
+  /** Course to open first, e.g. from a course page's "Open in my dashboard". */
+  initialCourseId?: string;
+};
 
-/** False during server rendering and hydration, true once the browser's saved state can be read. */
-function useHydrated() {
-  return useSyncExternalStore(noopSubscribe, () => true, () => false);
-}
-
-/** The student dashboard. Course data is read from this browser, so it renders after hydration. */
-export function Dashboard({ userName }: { userName: string }) {
-  const hydrated = useHydrated();
-  return hydrated ? <StudentDashboard userName={userName} /> : null;
-}
-
-function StudentDashboard({ userName }: { userName: string }) {
+/** The student dashboard: the courses this student owns (every course for admins). */
+export function Dashboard({ userName, admin, library, initialCourseId }: DashboardProps) {
   const t = useTranslations();
-  const toast = useToast();
   const locale = useLocale();
-  const state = useDemoState();
-  const [tab, setTab] = useState<Tab>("about");
-
-  const { course, lesson } = state.current;
-  const parsed = parseCourseKey(course);
-  const enrollment = state.enrolled[course];
-  if (!parsed || !enrollment) return null;
-
-  const { program, danceId } = parsed;
-  const danceName = dances[danceId].name;
-  const pkg = getPackage(enrollment.packageId)!;
-  const programDone = program.danceIds.reduce(
-    (sum, id) => sum + (state.enrolled[courseKey(program.id, id)]?.done.length ?? 0),
-    0,
-  );
-  const lessonDone = enrollment.done.includes(lesson);
-  const lessonKey = lessons[lesson].key;
-  const lessonTitle = t(`lessons.${lessonKey}.title`);
-
-  function select(next: CourseKey, nextLesson = 0) {
-    updateDemoState((s) => ({ ...s, current: { course: next, lesson: nextLesson } }));
-  }
-
-  function toggleComplete() {
-    // Read the latest saved record, which another tab may have changed since this render.
-    let done: number[] = [];
-    updateDemoState((s) => {
-      const record = s.enrolled[course];
-      if (!record) return s;
-      done = record.done.includes(lesson) ? record.done.filter((n) => n !== lesson) : [...record.done, lesson];
-      return { ...s, enrolled: { ...s.enrolled, [course]: { ...record, done } } };
-    });
-    if (!done.includes(lesson)) toast(t("dashboard.completionRemoved"));
-    else toast(done.length === LESSONS_PER_DANCE ? t("dashboard.danceCompleted") : t("dashboard.lessonCompleted"));
-  }
 
   return (
     <main>
@@ -83,12 +37,15 @@ function StudentDashboard({ userName }: { userName: string }) {
             <div className="eyebrow" style={{ marginBottom: 13 }}>
               {t("dashboard.eyebrow")}
             </div>
-            <h1>
-              {t("dashboard.greetingNamed", { name: userName })}
-            </h1>
+            <h1>{t("dashboard.greetingNamed", { name: userName })}</h1>
             <p>{t("dashboard.tagline")}</p>
           </div>
           <div className="studioActions">
+            {admin && (
+              <Link className="btn outline" href="/admin">
+                <Settings size={16} aria-hidden /> {t("dashboard.manage")}
+              </Link>
+            )}
             <Link className="btn outline" href="/#courses">
               <Plus size={16} aria-hidden /> {t("dashboard.addCourse")}
             </Link>
@@ -105,68 +62,126 @@ function StudentDashboard({ userName }: { userName: string }) {
           </div>
         </div>
 
-        <div className="studioGrid">
-          <aside className="sidebar">
-            <h3>{t("dashboard.myDances")}</h3>
-            <div className="sidebarCourses">
-              <p className="fine courseSummary" style={{ margin: "0 0 10px" }}>
-                {t("dashboard.programProgress", {
-                  program: program.name,
-                  done: programDone,
-                  total: program.danceIds.length * LESSONS_PER_DANCE,
-                })}
-              </p>
-              {(Object.keys(state.enrolled) as CourseKey[]).map((key) => {
-                const entry = parseCourseKey(key);
-                const record = state.enrolled[key];
-                if (!entry || !record) return null;
-                return (
-                  <button key={key} className={`sideCourse${key === course ? " active" : ""}`} onClick={() => select(key)}>
-                    {dances[entry.danceId].name}
-                    <small>{entry.program.name}</small>
-                    <div className="progressTrack">
-                      <i style={{ width: `${(record.done.length / LESSONS_PER_DANCE) * 100}%` }} />
-                    </div>
-                    <small>
-                      {t("dashboard.courseProgress", {
-                        done: record.done.length,
-                        package: getPackage(record.packageId)!.name,
-                      })}
-                    </small>
-                  </button>
-                );
-              })}
-            </div>
-            <div className="bookingCard">
-              <span className="eyebrow">{t("dashboard.privatePractice")}</span>
-              <p>
-                {pkg.privateLessons
-                  ? t("dashboard.privateLessons", { count: pkg.privateLessons })
-                  : t("dashboard.soloPackage")}
-              </p>
-            </div>
-          </aside>
+        {library.courses.length ? (
+          <Studio admin={admin} library={library} initialCourseId={initialCourseId} />
+        ) : (
+          <div className="emptyLibrary">
+            <h2>{t("dashboard.emptyTitle")}</h2>
+            <p>{t("dashboard.emptyBody")}</p>
+            <Link className="btn" href="/#courses">
+              {t("dashboard.browse")}
+            </Link>
+          </div>
+        )}
+      </div>
+    </main>
+  );
+}
 
-          <div>
-            <div className="eyebrow" style={{ marginBottom: 14 }}>
-              {program.name} / {danceName}
-            </div>
-            <DemoPlayer key={`${course}#${lesson}`} danceName={danceName} lessonTitle={lessonTitle} />
+function Studio({ admin, library, initialCourseId }: Omit<DashboardProps, "userName">) {
+  const t = useTranslations();
+  const locale = useLocale();
+  const toast = useToast();
+  const [, startTransition] = useTransition();
+  const [completed, setCompleted] = useState(() => new Set(library.completed));
+  const [notes, setNotes] = useState(library.notes);
+  const [courseId, setCourseId] = useState(
+    () => library.courses.find((c) => c.id === initialCourseId)?.id ?? library.courses[0].id,
+  );
+  const [tab, setTab] = useState<Tab>("about");
+
+  const course = library.courses.find((c) => c.id === courseId)!;
+  const [lessonIndex, setLessonIndex] = useState(() => firstOpenLesson(course, completed));
+  const lesson = course.lessons[Math.min(lessonIndex, course.lessons.length - 1)];
+  const courseTitle = localize(course.title, locale);
+  const doneCount = (c: Course) => c.lessons.filter((l) => completed.has(l.id)).length;
+
+  function selectCourse(next: Course) {
+    setCourseId(next.id);
+    setLessonIndex(firstOpenLesson(next, completed));
+  }
+
+  function toggleComplete() {
+    if (!lesson) return;
+    const done = !completed.has(lesson.id);
+    const next = new Set(completed);
+    if (done) next.add(lesson.id);
+    else next.delete(lesson.id);
+    setCompleted(next);
+    if (!done) toast(t("dashboard.completionRemoved"));
+    else toast(doneCountIn(course, next) === course.lessons.length ? t("dashboard.danceCompleted") : t("dashboard.lessonCompleted"));
+
+    startTransition(async () => {
+      if (await setLessonCompleted(lesson.id, done)) return;
+      setCompleted((current) => {
+        const reverted = new Set(current);
+        if (done) reverted.delete(lesson.id);
+        else reverted.add(lesson.id);
+        return reverted;
+      });
+      toast(t("dashboard.saveError"));
+    });
+  }
+
+  return (
+    <div className="studioGrid">
+      <aside className="sidebar">
+        <h3>{admin ? t("dashboard.allCourses") : t("dashboard.myDances")}</h3>
+        <div className="sidebarCourses">
+          {library.courses.map((c) => (
+            <button key={c.id} className={`sideCourse${c.id === course.id ? " active" : ""}`} onClick={() => selectCourse(c)}>
+              {localize(c.title, locale)}
+              <small>{localize(c.programTitle, locale)}</small>
+              <div className="progressTrack">
+                <i style={{ width: `${c.lessons.length ? (doneCount(c) / c.lessons.length) * 100 : 0}%` }} />
+              </div>
+              <small>
+                {c.tier
+                  ? t("dashboard.courseProgressTier", { done: doneCount(c), total: c.lessons.length, tier: localize(c.tier.name, locale) })
+                  : t("dashboard.courseProgress", { done: doneCount(c), total: c.lessons.length })}
+              </small>
+            </button>
+          ))}
+        </div>
+        {course.tier && (
+          <div className="bookingCard">
+            <span className="eyebrow">{t("dashboard.privatePractice")}</span>
+            <p>
+              {course.tier.privateLessons
+                ? t("dashboard.privateLessons", { count: course.tier.privateLessons })
+                : t("dashboard.soloPackage")}
+            </p>
+          </div>
+        )}
+      </aside>
+
+      <div>
+        <div className="eyebrow" style={{ marginBottom: 14 }}>
+          {localize(course.programTitle, locale)} / {courseTitle}
+        </div>
+        {!lesson ? (
+          <p className="lessonText">{t("dashboard.noLessons")}</p>
+        ) : (
+          <>
+            {lesson.videoId ? (
+              <YouTubePlayer key={lesson.id} videoId={lesson.videoId} title={localize(lesson.title, locale)} />
+            ) : (
+              <div className="videoFrame videoPending">
+                <p>{t("dashboard.videoComingSoon")}</p>
+              </div>
+            )}
             <div className="lessonHead">
               <div>
                 <h2>
-                  {String(lesson + 1).padStart(2, "0")}. {lessonTitle}
+                  {String(lessonIndex + 1).padStart(2, "0")}. {localize(lesson.title, locale)}
                 </h2>
                 <p>
-                  {t("dashboard.lessonMeta", {
-                    dance: danceName,
-                    number: lesson + 1,
-                    minutes: lessons[lesson].durationMinutes,
-                  })}
+                  {t("dashboard.lessonMeta", { course: courseTitle, number: lessonIndex + 1, total: course.lessons.length })}
+                  {lesson.durationMinutes ? ` · ${t("dashboard.lessonMinutes", { minutes: lesson.durationMinutes })}` : ""}
                 </p>
               </div>
               <button className="btn" onClick={toggleComplete}>
-                {lessonDone ? t("dashboard.completed") : t("dashboard.markCompleted")} <Check size={16} aria-hidden />
+                {completed.has(lesson.id) ? t("dashboard.completed") : t("dashboard.markCompleted")} <Check size={16} aria-hidden />
               </button>
             </div>
 
@@ -188,12 +203,19 @@ function StudentDashboard({ userName }: { userName: string }) {
             <div id="lesson-panel" role="tabpanel" aria-labelledby={`tab-${tab}`} className="lessonText">
               {tab === "about" && (
                 <>
-                  <h3>{t("dashboard.aboutTitle", { dance: danceName })}</h3>
-                  <p>{t(`lessons.${lessonKey}.description`)}</p>
+                  <h3>{t("dashboard.aboutTitle", { lesson: localize(lesson.title, locale) })}</h3>
+                  {localize(lesson.description, locale) && <p>{localize(lesson.description, locale)}</p>}
                   <p style={{ marginTop: 10 }}>{t("dashboard.aboutFine")}</p>
                 </>
               )}
-              {tab === "notes" && <LessonNotes key={noteKey(course, lesson)} noteId={noteKey(course, lesson)} />}
+              {tab === "notes" && (
+                <LessonNotes
+                  key={lesson.id}
+                  lessonId={lesson.id}
+                  saved={notes[lesson.id] ?? ""}
+                  onSaved={(body) => setNotes((current) => ({ ...current, [lesson.id]: body }))}
+                />
+              )}
               {tab === "practice" && (
                 <>
                   <h3>{t("dashboard.practiceTitle")}</h3>
@@ -205,73 +227,71 @@ function StudentDashboard({ userName }: { userName: string }) {
                 </>
               )}
             </div>
+          </>
+        )}
 
-            <div className="lessonList">
-              {lessons.map(({ index, key, durationMinutes }) => {
-                const done = enrollment.done.includes(index);
-                const status = done
-                  ? t("dashboard.statusCompleted")
-                  : index === lesson
-                    ? t("dashboard.statusWatching")
-                    : t("dashboard.statusVideo");
-                return (
-                  <button
-                    key={index}
-                    className={`lessonItem${index === lesson ? " active" : ""}`}
-                    aria-current={index === lesson ? "true" : undefined}
-                    onClick={() => select(course, index)}
-                  >
-                    <b>{done ? <Check size={16} aria-label={t("dashboard.statusCompleted")} /> : String(index + 1).padStart(2, "0")}</b>
-                    {t(`lessons.${key}.title`)}
-                    <small>{t("dashboard.lessonCardMeta", { minutes: durationMinutes, status })}</small>
-                  </button>
-                );
-              })}
-            </div>
-
-            <div className="bookingCard">
-              <p>{t("dashboard.mobileNotice")}</p>
-            </div>
-          </div>
+        <div className="lessonList">
+          {course.lessons.map((item, index) => {
+            const done = completed.has(item.id);
+            const status = done
+              ? t("dashboard.statusCompleted")
+              : item.id === lesson?.id
+                ? t("dashboard.statusWatching")
+                : t("dashboard.statusVideo");
+            return (
+              <button
+                key={item.id}
+                className={`lessonItem${item.id === lesson?.id ? " active" : ""}`}
+                aria-current={item.id === lesson?.id ? "true" : undefined}
+                onClick={() => setLessonIndex(index)}
+              >
+                <b>{done ? <Check size={16} aria-label={t("dashboard.statusCompleted")} /> : String(index + 1).padStart(2, "0")}</b>
+                {localize(item.title, locale)}
+                <small>
+                  {item.durationMinutes ? t("dashboard.lessonCardMeta", { minutes: item.durationMinutes, status }) : status}
+                </small>
+              </button>
+            );
+          })}
         </div>
       </div>
-    </main>
+    </div>
   );
 }
 
-function LessonNotes({ noteId }: { noteId: string }) {
+function doneCountIn(course: Course, completed: Set<string>) {
+  return course.lessons.filter((l) => completed.has(l.id)).length;
+}
+
+/** The first lesson not yet completed, or the first lesson. */
+function firstOpenLesson(course: Course, completed: Set<string>) {
+  return Math.max(0, course.lessons.findIndex((l) => !completed.has(l.id)));
+}
+
+function LessonNotes({ lessonId, saved, onSaved }: { lessonId: string; saved: string; onSaved: (body: string) => void }) {
   const t = useTranslations("dashboard");
   const toast = useToast();
-  const saved = useDemoState().notes[noteId] ?? "";
   const [draft, setDraft] = useState(saved);
-
-  // A language switch reloads the page; keep the unsaved draft, as the prototype did.
-  const draftRef = useRef(draft);
-  useEffect(() => {
-    draftRef.current = draft;
-  }, [draft]);
-  useEffect(() => {
-    const save = () => updateDemoState((s) => ({ ...s, notes: { ...s.notes, [noteId]: draftRef.current } }));
-    window.addEventListener(BEFORE_LOCALE_CHANGE, save);
-    return () => window.removeEventListener(BEFORE_LOCALE_CHANGE, save);
-  }, [noteId]);
+  const [pending, startTransition] = useTransition();
 
   return (
     <>
       <label htmlFor="notes">{t("notesLabel")}</label>
-      <textarea
-        id="notes"
-        placeholder={t("notesPlaceholder")}
-        value={draft}
-        onChange={(event) => setDraft(event.target.value)}
-      />
+      <textarea id="notes" placeholder={t("notesPlaceholder")} value={draft} onChange={(event) => setDraft(event.target.value)} />
       <button
         className="btn outline"
         style={{ marginTop: 10 }}
-        onClick={() => {
-          updateDemoState((s) => ({ ...s, notes: { ...s.notes, [noteId]: draft } }));
-          toast(t("noteSaved"));
-        }}
+        disabled={pending}
+        onClick={() =>
+          startTransition(async () => {
+            if (await saveLessonNote(lessonId, draft)) {
+              onSaved(draft);
+              toast(t("noteSaved"));
+            } else {
+              toast(t("saveError"));
+            }
+          })
+        }
       >
         {t("saveNote")}
       </button>

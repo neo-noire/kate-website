@@ -1359,3 +1359,268 @@ textarea,
   flex: 1;
   border-top: 1px solid var(--line);
 }
+
+/* Course pages: lesson outline, ownership banner and video frames. */
+.courseOutline {
+  margin: 44px 0 10px;
+}
+.courseOutline h2 {
+  font-size: 20px;
+  margin-bottom: 14px;
+}
+.courseOutline ol {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  border-top: 1px solid var(--line);
+}
+.courseOutline li {
+  display: grid;
+  grid-template-columns: 40px 1fr auto;
+  gap: 14px;
+  align-items: start;
+  padding: 16px 0;
+  border-bottom: 1px solid var(--line);
+}
+.courseOutline li > b {
+  color: var(--red);
+  font-size: 13px;
+  padding-top: 2px;
+}
+.courseOutline h3 {
+  font-size: 16px;
+  margin: 0 0 4px;
+}
+.courseOutline p {
+  color: var(--muted);
+  font-size: 13px;
+  margin: 0 0 4px;
+}
+.courseOutline small {
+  color: var(--muted);
+  font-size: 12px;
+}
+.ownedBanner {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px 18px;
+  margin-bottom: 22px;
+  border: 1px solid var(--red);
+  background: var(--panel);
+}
+.videoFrame {
+  position: relative;
+  aspect-ratio: 16 / 9;
+  background: #000;
+  border: 1px solid var(--line);
+}
+.videoFrame iframe {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border: 0;
+}
+.videoPending {
+  display: grid;
+  place-items: center;
+  text-align: center;
+  color: var(--muted);
+  padding: 20px;
+}
+.previewTitle {
+  font-size: 22px;
+  margin: 0 40px 16px 0;
+}
+.modal:has(.videoFrame) {
+  width: min(960px, calc(100vw - 32px));
+}
+.emptyLibrary {
+  padding: 48px 0 80px;
+  max-width: 520px;
+}
+.emptyLibrary h2 {
+  font-size: 28px;
+  margin-bottom: 10px;
+}
+.emptyLibrary p {
+  color: var(--muted);
+  margin-bottom: 20px;
+}
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+/* Admin pages: plain, dense forms. */
+.adminPage {
+  max-width: 900px;
+  min-height: 60vh;
+}
+.adminPage h1 {
+  font-size: 42px;
+  letter-spacing: -1.7px;
+  margin: 12px 0 10px;
+}
+.adminPage .sub {
+  color: var(--muted);
+  margin-bottom: 28px;
+}
+.adminCard {
+  border: 1px solid var(--line);
+  background: var(--panel);
+  padding: 22px;
+  margin: 0 0 22px;
+}
+.adminCard h2 {
+  font-size: 20px;
+  margin: 0 0 8px;
+}
+.adminCard h3 {
+  font-size: 14px;
+  margin: 22px 0 10px;
+}
+.adminCard > .fine {
+  margin: 0 0 16px;
+}
+.adminForm {
+  display: grid;
+  gap: 14px;
+  margin-top: 12px;
+}
+.adminInlineForm {
+  display: inline-flex;
+  margin-top: 10px;
+}
+.adminField {
+  display: grid;
+  gap: 6px;
+  font-size: 12px;
+  min-width: 0;
+}
+.adminField > span {
+  color: var(--muted);
+}
+.adminLocalized {
+  border: 0;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  gap: 8px;
+}
+.adminLocalized legend {
+  font-size: 12px;
+  margin-bottom: 6px;
+}
+.adminLocalized .adminField {
+  grid-template-columns: 36px 1fr;
+  align-items: start;
+}
+.adminLocalized .adminField > span {
+  padding-top: 12px;
+}
+.adminLocalized .fieldError {
+  grid-column: 2;
+}
+.adminRow {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 14px;
+  align-items: end;
+}
+.adminCheckbox {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 13px;
+}
+.adminActions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+}
+.adminStatus {
+  font-size: 13px;
+  color: var(--muted);
+}
+.adminStatus.error,
+.fieldError {
+  color: #ff7b71;
+  font-size: 12px;
+}
+.btn.danger {
+  color: #ff7b71;
+}
+.adminItem {
+  border-top: 1px solid var(--line);
+  padding: 12px 0;
+}
+.adminItem .adminItem {
+  margin-left: 14px;
+}
+.adminItem > summary {
+  cursor: pointer;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  font-size: 14px;
+}
+.adminItem.new > summary {
+  color: var(--red);
+}
+.adminList {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+.adminList li {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 14px;
+  padding: 12px 0;
+  border-top: 1px solid var(--line);
+}
+.adminList li a {
+  text-decoration: underline;
+}
+.adminList small {
+  color: var(--muted);
+  font-size: 12px;
+}
+.adminList .adminInlineForm {
+  margin: 0 0 0 auto;
+}
+.badge {
+  display: inline-block;
+  padding: 2px 8px;
+  border: 1px solid var(--line);
+  color: var(--muted);
+  font-size: 11px;
+  letter-spacing: 0;
+  text-transform: none;
+}
+.badge.live {
+  border-color: var(--red);
+  color: var(--white);
+}
+@media (max-width: 640px) {
+  .adminPage h1 {
+    font-size: 33px;
+  }
+  .adminCard {
+    padding: 16px;
+  }
+  .courseOutline li {
+    grid-template-columns: 30px 1fr auto;
+  }
+}

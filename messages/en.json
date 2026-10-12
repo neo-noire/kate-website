@@ -41,7 +41,8 @@
         "label": "anytime, anywhere"
       }
     },
-    "imageLabel": "FEEL THE MUSIC. OWN THE FLOOR."
+    "imageLabel": "FEEL THE MUSIC. OWN THE FLOOR.",
+    "previewTitle": "Preview: {title}"
   },
   "catalog": {
     "eyebrow": "01 / Your next step",
@@ -52,50 +53,15 @@
       "line2": "Each dance is a standalone course.",
       "line3": "All the dances together make a complete program."
     },
-    "groups": {
-      "all": "All programs",
-      "intro": "Intro",
-      "beginner": "Beginner",
-      "salsa": "Salsa"
-    },
     "showMore": "All programs",
     "showLess": "Show less",
-    "note": "Intro to Latin: 3 dances × 4 lessons = 12 lessons. Beginner: 5 dances × 4 lessons = 20 lessons. Choose a package separately for each dance.",
     "dances": "{count, plural, one {# dance} other {# dances}}",
     "lessons": "{count, plural, one {# lesson} other {# lessons}}",
     "online": "Online",
     "fromPrice": "From {price} / dance",
-    "open": "Open {name}"
-  },
-  "programs": {
-    "intro-latin-1": {
-      "tag": "START HERE",
-      "description": "Three dances. Your first introduction to Latin."
-    },
-    "intro-latin-2": {
-      "tag": "THE NEXT STEP",
-      "description": "More technique, musicality and freedom."
-    },
-    "beginner-1": {
-      "tag": "FOUNDATION",
-      "description": "Five dances. The full spectrum of Latin."
-    },
-    "beginner-2": {
-      "tag": "GROWTH",
-      "description": "Build a solid foundation and connect your moves."
-    },
-    "beginner-3": {
-      "tag": "PRACTICE",
-      "description": "From individual steps to expressive combinations."
-    },
-    "beginner-4": {
-      "tag": "CONFIDENCE",
-      "description": "Dance with flow. Add character and confidence."
-    },
-    "salsa-essentials": {
-      "tag": "SOCIAL DANCE",
-      "description": "Feel the pulse of salsa and master the basics."
-    }
+    "open": "Open {name}",
+    "all": "All programs",
+    "empty": "New programs are coming soon."
   },
   "approach": {
     "eyebrow": "02 / A personal approach",
@@ -151,38 +117,33 @@
   "packages": {
     "back": "All programs",
     "eyebrow": "Choose your format",
-    "summary": "{count, plural, one {# course × 4 lessons. Your package covers the selected dance only.} other {# dances/courses × 4 lessons. Your package covers the selected dance only.}}",
-    "perDance": "/ 4 lessons",
+    "summary": "{count, plural, one {One dance in this program.} other {# dances in this program.}} Each dance is its own course, and your package covers the selected dance.",
+    "perDance": "/ {count, plural, one {# lesson} other {# lessons}}",
     "featured": "More support",
     "format": "Format {number}",
     "perCourse": "/ course",
     "choose": "Choose {name}",
-    "fine": "Illustrative prices. Complete every dance to finish the full program. No payments are processed in this prototype.",
-    "provisional": " The dance selection for Intro 2.0 is provisional and needs confirmation.",
-    "videoLessons": "4 video lessons",
+    "fine": "Complete every dance to finish the full program.",
+    "videoLessons": "{count, plural, one {# video lesson} other {# video lessons}}",
     "privateLessons": "{count, plural, one {# private lesson · {minutes} min} other {# private lessons · {minutes} min each}}",
-    "items": {
-      "solo": {
-        "access": "Course access",
-        "pace": "Practice at your own pace"
-      },
-      "personal": {
-        "feedback": "Personal technique feedback"
-      },
-      "mentorship": {
-        "guidance": "Guidance at every stage"
-      }
-    }
+    "noTiers": "Pricing for this program is coming soon.",
+    "inside": "What's inside",
+    "minutes": "{minutes} min",
+    "preview": "Free preview",
+    "watchPreview": "Watch the preview of {title}",
+    "noLessons": "Lessons for this dance are coming soon.",
+    "owned": "You have this course · {tier}",
+    "ownedNoTier": "You have this course",
+    "adminAccess": "As an admin, you can watch every lesson.",
+    "openDashboard": "Open in my dashboard"
   },
   "enroll": {
     "eyebrow": "Your selection",
-    "summary": "{program} · 4 video lessons · {price}",
+    "summary": "{program} · {lessons} · {price}",
     "privateLessons": "{count, plural, one {# private lesson} other {# private lessons}}",
     "independent": "Independent practice",
-    "submit": "Add course to my dashboard",
-    "fine": "No payment yet: this is a demo enrollment, and course progress is saved in this browser.",
-    "dialogLabel": "Demo course enrollment",
-    "success": "Course added. You're ready to begin!"
+    "dialogLabel": "Course checkout",
+    "comingSoon": "Online payment is coming soon. Until then, your coach can give you access to this course."
   },
   "dashboard": {
     "eyebrow": "Your space to move",
@@ -190,12 +151,11 @@
     "tagline": "Step by step — you're already on your way.",
     "addCourse": "Add a course",
     "myDances": "My dances",
-    "programProgress": "{program} · {done}/{total} lessons",
-    "courseProgress": "{done}/4 lessons · {package}",
+    "courseProgress": "{done}/{total} lessons",
     "privatePractice": "Private practice",
     "privateLessons": "{count, plural, one {Your package includes # private lesson. Your coach will arrange it with you on a separate booking platform.} other {Your package includes # private lessons. Your coach will arrange them with you on a separate booking platform.}}",
-    "soloPackage": "Solo package: video lessons only. Personal and Mentorship add private lessons.",
-    "lessonMeta": "{dance} · Lesson {number} of 4 · {minutes} min (planned duration)",
+    "soloPackage": "Your package includes the video lessons only.",
+    "lessonMeta": "{course} · Lesson {number} of {total}",
     "completed": "Completed",
     "markCompleted": "Mark as completed",
     "lessonCardMeta": "{minutes} min · {status}",
@@ -210,8 +170,8 @@
       "notes": "My notes",
       "practice": "Practice"
     },
-    "aboutTitle": "Discover {dance} step by step",
-    "aboutFine": "Prepare comfortable shoes and enough space to move. All lesson titles and descriptions in this prototype are examples.",
+    "aboutTitle": "{lesson}: step by step",
+    "aboutFine": "Prepare comfortable shoes and enough space to move.",
     "notesLabel": "Save your observations for this lesson",
     "notesPlaceholder": "What would you like to focus on next time?",
     "saveNote": "Save note",
@@ -222,36 +182,16 @@
       "count": "Count out loud and feel the weight transfer.",
       "combine": "Try a short combination and note what you want to discuss with your coach."
     },
-    "mobileNotice": "The demo video is a silent, 30-second animated placeholder. Your coach's video lesson will appear here in the final version."
-  },
-  "lessons": {
-    "rhythm": {
-      "title": "Finding the rhythm",
-      "description": "Explore the character of the dance, musical counts and weight transfer. Start slowly: confidence grows from mindful movement."
-    },
-    "basicStep": {
-      "title": "Basic step technique",
-      "description": "Work on posture, balance and precise footwork. Repeat each element a few times at a comfortable pace."
-    },
-    "combination": {
-      "title": "Your first combination",
-      "description": "Connect the basic elements into a short sequence. Focus on transitions and staying in rhythm."
-    },
-    "music": {
-      "title": "Practice with music",
-      "description": "Bring it all together: movement, rhythm and your own character. Practice without music first, then add tempo."
-    }
-  },
-  "player": {
-    "canvasLabel": "Demo video with an animated footwork diagram",
-    "badge": "DEMO PREVIEW · FOOTWORK DIAGRAM",
-    "placeholder": "Your coach's video lesson will appear here",
-    "play": "Play demo video",
-    "pause": "Pause demo video",
-    "seek": "Video position",
-    "speed": "Playback speed",
-    "fullscreen": "Fullscreen",
-    "fullscreenUnavailable": "Fullscreen is unavailable in this browser."
+    "courseProgressTier": "{done}/{total} lessons · {tier}",
+    "lessonMinutes": "{minutes} min",
+    "saveError": "Couldn't save. Please try again.",
+    "emptyTitle": "No courses yet.",
+    "emptyBody": "Choose a program and its lessons will appear here.",
+    "browse": "Browse programs",
+    "videoComingSoon": "The video for this lesson is coming soon.",
+    "noLessons": "Lessons for this course are coming soon.",
+    "manage": "Manage courses",
+    "allCourses": "All courses (admin view)"
   },
   "contact": {
     "eyebrow": "Personal support",
@@ -267,7 +207,7 @@
   "privacy": {
     "eyebrow": "About this prototype",
     "title": "Everything stays here.",
-    "body": "Your account (name, email and password) is stored securely on our server. Course enrollments, progress, notes and requests are still demo data saved in this browser's localStorage. There is no payment or email sending yet. The brand, programs, prices and lessons are illustrative. Photo: Unsplash.",
+    "body": "Your account, courses, progress and notes are stored securely on our server. The newsletter and contact forms are still demos saved in this browser. There is no payment or email sending yet. Photo: Unsplash.",
     "clear": "Clear my demo data",
     "dialogLabel": "Prototype data",
     "cleared": "Demo data cleared."
@@ -309,5 +249,88 @@
     },
     "google": "Continue with Google",
     "or": "or"
+  },
+  "admin": {
+    "title": "Manage courses",
+    "eyebrow": "Admin",
+    "intro": "A program holds one course per dance. Students buy a course at one of the program's pricing tiers.",
+    "programs": "Programs",
+    "newProgram": "New program",
+    "create": "Create",
+    "save": "Save",
+    "saved": "Saved.",
+    "delete": "Delete",
+    "confirmDelete": "Delete this? This can't be undone.",
+    "add": "Add",
+    "published": "Published",
+    "draft": "Draft",
+    "view": "View on site",
+    "back": "All programs",
+    "noPrograms": "No programs yet.",
+    "courseCount": "{count, plural, one {# course} other {# courses}}",
+    "tierCount": "{count, plural, one {# tier} other {# tiers}}",
+    "lessonCount": "{count, plural, one {# lesson} other {# lessons}}",
+    "hasVideo": "Video added",
+    "noVideo": "No video yet",
+    "sections": {
+      "details": "Program details",
+      "tiers": "Pricing tiers",
+      "tiersHint": "Every course in this program can be bought at any of these tiers.",
+      "courses": "Courses",
+      "coursesHint": "One course per dance, each with its own lessons.",
+      "lessons": "Lessons",
+      "access": "Access",
+      "accessHint": "Payments aren't connected yet. Give a registered student access to a course here."
+    },
+    "newTier": "New tier",
+    "newCourse": "New course",
+    "newLesson": "New lesson",
+    "grant": "Give access",
+    "revoke": "Remove access",
+    "noAccess": "Nobody has access yet.",
+    "source": {
+      "admin": "Given by an admin",
+      "stripe": "Paid"
+    },
+    "fields": {
+      "title": "Title",
+      "slug": "Address",
+      "slugHint": "Lowercase letters, numbers and dashes, e.g. beginner-1.",
+      "description": "Description",
+      "tag": "Card label",
+      "tagHint": "A short label on the catalog card, e.g. START HERE.",
+      "category": "Category",
+      "categoryHint": "Programs with the same category share a filter on the home page.",
+      "sortOrder": "Order",
+      "published": "Published (visible on the site)",
+      "name": "Name",
+      "price": "Price",
+      "currency": "Currency",
+      "privateLessons": "Private lessons",
+      "privateLessonMinutes": "Minutes per private lesson",
+      "features": "Extra benefits (one per line)",
+      "featured": "Highlight as recommended",
+      "video": "YouTube link",
+      "videoHint": "Use an unlisted video. Anyone who has its link can watch it.",
+      "duration": "Length (minutes)",
+      "isPreview": "Free preview (anyone can watch it)",
+      "email": "Student email",
+      "course": "Course",
+      "tier": "Tier",
+      "noTier": "No tier"
+    },
+    "errors": {
+      "required": "Please fill in the English version of this field.",
+      "slug": "Use lowercase letters, numbers and dashes only.",
+      "slugTaken": "That address is already used. Choose another.",
+      "price": "Enter a price like 39 or 39.50.",
+      "number": "Enter a whole number in the allowed range.",
+      "youtube": "That isn't a YouTube video link.",
+      "email": "Enter a valid email address.",
+      "userNotFound": "No account uses this email. Ask the student to sign up first.",
+      "notFound": "This item no longer exists. Reload the page.",
+      "forbidden": "Only admins can do this.",
+      "generic": "Something went wrong. Please try again."
+    }
   }
 }
