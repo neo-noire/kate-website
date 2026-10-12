@@ -3,7 +3,8 @@
 import { ArrowUpRight } from "lucide-react";
 import { useTranslations } from "next-intl";
 import type { FormEvent } from "react";
-import { updateDemoState, useDemoState } from "@/lib/demo-store";
+import { authClient } from "@/lib/auth/client";
+import { updateDemoState } from "@/lib/demo-store";
 import { useLocalizedValidation } from "@/lib/validation";
 import { Modal } from "./modal";
 import { useToast } from "./toast";
@@ -12,7 +13,7 @@ import { useToast } from "./toast";
 export function ContactDialog({ open, onClose }: { open: boolean; onClose: () => void }) {
   const t = useTranslations();
   const validation = useLocalizedValidation();
-  const { user } = useDemoState();
+  const user = authClient.useSession().data?.user;
   const toast = useToast();
 
   function submit(event: FormEvent<HTMLFormElement>) {

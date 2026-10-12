@@ -2,14 +2,16 @@
 
 A personal website for a ballroom dance coach, combining a compact marketing landing page with an online course library and a student learning dashboard.
 
-**Current status:** a Next.js App Router + TypeScript app that reproduces the bilingual design prototype with static data. There is still no real authentication, payment, email or video delivery; demo data lives in the browser. `RITMO` is a placeholder brand; the coach’s final branding, biography, photography, course content and prices still need to be supplied.
+**Current status:** a Next.js App Router + TypeScript app that reproduces the bilingual design prototype with static data, plus real accounts (email and password, Google once its keys are added) stored in Neon Postgres. There is still no payment, email or video delivery; course enrollments, progress and notes are demo data in the browser. `RITMO` is a placeholder brand; the coach’s final branding, biography, photography, course content and prices still need to be supplied.
 
 ## Run the app
 
-Requires Node.js 20.9 or later.
+Requires Node.js 20.9 or later and a Postgres database for accounts.
 
 ```sh
 npm install
+cp .env.example .env.local   # then fill in DATABASE_URL and BETTER_AUTH_SECRET
+npm run db:migrate           # creates the auth tables
 npm run dev        # http://localhost:3000 (redirects to /en or /uk)
 npm run lint
 npm run typecheck
@@ -22,7 +24,9 @@ Routes:
 | --- | --- |
 | `/en`, `/uk` | Landing page: hero, program catalog with filters, approach, newsletter, FAQ |
 | `/{lang}/programs/{program}` and `/{lang}/programs/{program}/{dance}` | Dance tabs and the three packages for one dance, with demo enrollment |
-| `/{lang}/dashboard` | Student dashboard: lessons, placeholder player, progress and notes. Signed-out visitors see a sign-in prompt instead |
+| `/{lang}/sign-in`, `/{lang}/sign-up` | Account pages (email and password; a Google button appears once Google keys are configured) |
+| `/{lang}/dashboard` | Student dashboard: lessons, placeholder player, progress and notes. Signed-out visitors are redirected to sign in |
+| `/api/auth/*` | Better Auth endpoints |
 
 `/` and any path without a language prefix redirect to the visitor’s language (a saved choice in the `NEXT_LOCALE` cookie first, then the browser’s `Accept-Language`, else English).
 
@@ -32,7 +36,9 @@ Code layout:
 - `messages/{en,uk}.json`: all copy, in ICU message format, loaded with [next-intl](https://next-intl.dev). Plurals use ICU (`{count, plural, one {# урок} few {# уроки} many {# уроків} other {…}}`) and prices use the shared `eur` number format.
 - `src/i18n/`: next-intl routing, request config and locale-aware `Link`/`useRouter`. `npm run typecheck` fails if a locale’s messages are missing or have extra keys compared with English, and message keys used in code are type-checked.
 - `src/app/[lang]/`: routes; the root layout sits under `[lang]` so `<html lang>`, metadata and `hreflang` links are per locale.
-- `src/lib/demo-store.ts`: the prototype-only `localStorage` store (key `ritmo-demo-v2`). Replace with database-backed records when auth and payments arrive.
+- `src/lib/auth/`: [Better Auth](https://better-auth.com) server config, React client and the safe post-sign-in redirect. `src/proxy.ts` redirects signed-out visitors away from the dashboard; the dashboard page checks the session again on the server.
+- `src/db/`: Drizzle schema and client (`pg` driver). Migrations live in `drizzle/`; `npm run db:generate` creates one from schema changes and `npm run build` applies pending ones before building (on Vercel the build fails if the database is not connected).
+- `src/lib/demo-store.ts`: the prototype-only `localStorage` store (key `ritmo-demo-v2`) for enrollments, progress and notes. Replace with database-backed records when payments arrive.
 - `src/app/globals.css`: the prototype’s stylesheet, ported with its class names intact. Form fields are at least 16px so iOS Safari does not zoom in on focus.
 - Icons come from [Lucide](https://lucide.dev) (`lucide-react`), not Unicode symbols, which iOS renders as emoji.
 
@@ -44,7 +50,19 @@ Code layout:
 
 Pages for the new locale are prerendered automatically, and redirects, `hreflang` links and the language picker pick it up from the routing config.
 
-Sign-in is still a demo: it asks for a name and email, has no password, and only gates the dashboard in this browser. It is not access control. Names, emails, notes, progress and requests are stored only in this browser’s `localStorage`. Nothing is sent to a coach or email provider. Demo data can be cleared through **About demo data** in the footer.
+Accounts are real: passwords are hashed by Better Auth and sessions are stored in Postgres. Enrollments, progress, notes and requests are still stored only in this browser’s `localStorage`. Nothing is sent to a coach or email provider. Demo data can be cleared through **About demo data** in the footer.
+
+### Accounts and environment variables
+
+| Variable | Where it comes from |
+| --- | --- |
+| `DATABASE_URL`, `DATABASE_URL_UNPOOLED` | Added by the Vercel Neon integration (pooled for the app, direct for migrations) |
+| `BETTER_AUTH_SECRET` | A random secret, set in Vercel for production and preview |
+| `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` | Optional. From a Google Cloud OAuth client; the Google button appears after the next deploy |
+
+For Google, create an OAuth client of type *Web application* and add the redirect URI `https://<site host>/api/auth/callback/google` for each host people sign in on (for now `https://kate-website-indol.vercel.app`). Signing in with Google links to an existing email-and-password account with the same address.
+
+Password reset and email verification need an email provider (Resend) and are not set up yet.
 
 ## The original prototype
 
