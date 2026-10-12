@@ -1,5 +1,6 @@
 "use client";
 
+import { ArrowUpRight } from "lucide-react";
 import { useTranslations } from "next-intl";
 import type { FormEvent } from "react";
 import { updateDemoState, useDemoState } from "@/lib/demo-store";
@@ -40,7 +41,7 @@ export function ContactDialog({ open, onClose }: { open: boolean; onClose: () =>
           {t("contact.message")}
           <textarea name="message" placeholder={t("contact.messagePlaceholder")} required />
         </label>
-        <button className="btn">{t("contact.submit")}</button>
+        <button className="btn">{t("contact.submit")} <ArrowUpRight size={16} aria-hidden /></button>
         <p className="fine">{t("contact.fine")}</p>
       </form>
     </Modal>

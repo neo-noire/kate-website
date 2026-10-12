@@ -23,13 +23,11 @@ export const viewport: Viewport = { themeColor: "#111111" };
 
 export default async function RootLayout({ children }: LayoutProps<"/[lang]">) {
   const locale = await getLocale();
-  const t = await getTranslations();
   return (
     <html lang={locale}>
       <body>
         <NextIntlClientProvider>
           <ToastProvider>
-            <div className="demoBar">{t("demoBar")}</div>
             <SiteHeader />
             {children}
             <SiteFooter />

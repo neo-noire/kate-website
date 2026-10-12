@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { Maximize, Pause, Play } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useToast } from "./toast";
 
@@ -112,7 +113,7 @@ export function DemoPlayer({ danceName, lessonTitle }: { danceName: string; less
       </div>
       <div className="controls">
         <button aria-label={playing ? t("pause") : t("play")} onClick={togglePlay}>
-          {playing ? "Ⅱ" : "▶"}
+          {playing ? <Pause size={16} aria-hidden /> : <Play size={16} aria-hidden />}
         </button>
         <span className="timer">
           00:{String(Math.floor(time)).padStart(2, "0")} / 00:{DURATION}
@@ -134,7 +135,7 @@ export function DemoPlayer({ danceName, lessonTitle }: { danceName: string; less
           ))}
         </select>
         <button aria-label={t("fullscreen")} onClick={fullscreen}>
-          ⛶
+          <Maximize size={16} aria-hidden />
         </button>
       </div>
     </div>

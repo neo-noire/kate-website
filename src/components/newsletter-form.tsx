@@ -1,5 +1,6 @@
 "use client";
 
+import { ArrowUpRight } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useState, type FormEvent } from "react";
 import { updateDemoState } from "@/lib/demo-store";
@@ -24,7 +25,7 @@ export function NewsletterForm() {
       <div className="inputRow">
         <input id="subEmail" name="email" type="email" placeholder={t("common.emailPlaceholder")} required />
         <button className="btn" type="submit">
-          {t("newsletter.subscribe")}
+          {t("newsletter.subscribe")} <ArrowUpRight size={16} aria-hidden />
         </button>
       </div>
       <label className="checkLabel">

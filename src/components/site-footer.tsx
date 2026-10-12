@@ -1,3 +1,4 @@
+import { ExternalLink } from "lucide-react";
 import { getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 import { DemoDataButton } from "./demo-data-button";
@@ -15,7 +16,7 @@ export async function SiteFooter() {
         <div style={{ display: "flex", gap: 20 }}>
           <DemoDataButton />
           <a href="https://unsplash.com/photos/POoF2Wv6ACU" target="_blank" rel="noopener">
-            {t("photoCredit")}
+            {t("photoCredit")} <ExternalLink size={12} aria-hidden />
           </a>
         </div>
       </div>

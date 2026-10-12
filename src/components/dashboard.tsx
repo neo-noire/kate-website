@@ -1,7 +1,8 @@
 "use client";
 
+import { Check, LogIn, LogOut, Plus } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import {
   dances,
   getPackage,
@@ -11,18 +12,52 @@ import {
   courseKey,
   type CourseKey,
 } from "@/content/catalog";
-import { Link } from "@/i18n/navigation";
+import { Link, useRouter } from "@/i18n/navigation";
 import { BEFORE_LOCALE_CHANGE, noteKey, updateDemoState, useDemoState } from "@/lib/demo-store";
 import { DemoPlayer } from "./demo-player";
+import { LoginDialog } from "./login-dialog";
+import { useDialogState } from "./modal";
 import { useToast } from "./toast";
 
 type Tab = "about" | "notes" | "practice";
 
 const practiceTips = ["repeat", "count", "combine"] as const;
 
+const noopSubscribe = () => () => {};
+
+/** False during server rendering and hydration, true once the browser's saved state can be read. */
+function useHydrated() {
+  return useSyncExternalStore(noopSubscribe, () => true, () => false);
+}
+
 export function Dashboard() {
+  const hydrated = useHydrated();
+  const { user } = useDemoState();
+  // Wait for the saved session before deciding, so signed-in visitors never see the sign-in prompt flash.
+  if (!hydrated) return null;
+  return user ? <StudentDashboard /> : <SignInRequired />;
+}
+
+function SignInRequired() {
+  const t = useTranslations("dashboard");
+  const login = useDialogState();
+  return (
+    <main className="section wrap signInRequired">
+      <div className="eyebrow">{t("eyebrow")}</div>
+      <h1>{t("signInTitle")}</h1>
+      <p>{t("signInBody")}</p>
+      <button className="btn" onClick={login.show}>
+        <LogIn size={16} aria-hidden /> {t("signIn")}
+      </button>
+      <LoginDialog open={login.open} onClose={login.close} onSignedIn={() => {}} />
+    </main>
+  );
+}
+
+function StudentDashboard() {
   const t = useTranslations();
   const toast = useToast();
+  const router = useRouter();
   const state = useDemoState();
   const [tab, setTab] = useState<Tab>("about");
 
@@ -72,9 +107,20 @@ export function Dashboard() {
             </h1>
             <p>{t("dashboard.tagline")}</p>
           </div>
-          <Link className="btn outline" href="/#courses">
-            {t("dashboard.addCourse")}
-          </Link>
+          <div className="studioActions">
+            <Link className="btn outline" href="/#courses">
+              <Plus size={16} aria-hidden /> {t("dashboard.addCourse")}
+            </Link>
+            <button
+              className="btn quiet"
+              onClick={() => {
+                updateDemoState((s) => ({ ...s, user: null }));
+                router.push("/");
+              }}
+            >
+              <LogOut size={16} aria-hidden /> {t("dashboard.signOut")}
+            </button>
+          </div>
         </div>
 
         <div className="studioGrid">
@@ -138,7 +184,7 @@ export function Dashboard() {
                 </p>
               </div>
               <button className="btn" onClick={toggleComplete}>
-                {lessonDone ? t("dashboard.completed") : t("dashboard.markCompleted")}
+                {lessonDone ? t("dashboard.completed") : t("dashboard.markCompleted")} <Check size={16} aria-hidden />
               </button>
             </div>
 
@@ -193,7 +239,7 @@ export function Dashboard() {
                     aria-current={index === lesson ? "true" : undefined}
                     onClick={() => select(course, index)}
                   >
-                    <b>{done ? "✓" : String(index + 1).padStart(2, "0")}</b>
+                    <b>{done ? <Check size={16} aria-label={t("dashboard.statusCompleted")} /> : String(index + 1).padStart(2, "0")}</b>
                     {t(`lessons.${key}.title`)}
                     <small>{t("dashboard.lessonCardMeta", { minutes: durationMinutes, status })}</small>
                   </button>

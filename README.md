@@ -22,7 +22,7 @@ Routes:
 | --- | --- |
 | `/en`, `/uk` | Landing page: hero, program catalog with filters, approach, newsletter, FAQ |
 | `/{lang}/programs/{program}` and `/{lang}/programs/{program}/{dance}` | Dance tabs and the three packages for one dance, with demo enrollment |
-| `/{lang}/dashboard` | Demo student dashboard: lessons, placeholder player, progress and notes |
+| `/{lang}/dashboard` | Student dashboard: lessons, placeholder player, progress and notes. Signed-out visitors see a sign-in prompt instead |
 
 `/` and any path without a language prefix redirect to the visitor’s language (a saved choice in the `NEXT_LOCALE` cookie first, then the browser’s `Accept-Language`, else English).
 
@@ -33,7 +33,8 @@ Code layout:
 - `src/i18n/`: next-intl routing, request config and locale-aware `Link`/`useRouter`. `npm run typecheck` fails if a locale’s messages are missing or have extra keys compared with English, and message keys used in code are type-checked.
 - `src/app/[lang]/`: routes; the root layout sits under `[lang]` so `<html lang>`, metadata and `hreflang` links are per locale.
 - `src/lib/demo-store.ts`: the prototype-only `localStorage` store (key `ritmo-demo-v2`). Replace with database-backed records when auth and payments arrive.
-- `src/app/globals.css`: the prototype’s stylesheet, ported with its class names intact.
+- `src/app/globals.css`: the prototype’s stylesheet, ported with its class names intact. Form fields are at least 16px so iOS Safari does not zoom in on focus.
+- Icons come from [Lucide](https://lucide.dev) (`lucide-react`), not Unicode symbols, which iOS renders as emoji.
 
 ### Adding a language
 
@@ -43,7 +44,7 @@ Code layout:
 
 Pages for the new locale are prerendered automatically, and redirects, `hreflang` links and the language picker pick it up from the routing config.
 
-Names, emails, notes, progress and requests are stored only in this browser’s `localStorage`. Nothing is sent to a coach or email provider. Demo data can be cleared through **About demo data** in the footer.
+Sign-in is still a demo: it asks for a name and email, has no password, and only gates the dashboard in this browser. It is not access control. Names, emails, notes, progress and requests are stored only in this browser’s `localStorage`. Nothing is sent to a coach or email provider. Demo data can be cleared through **About demo data** in the footer.
 
 ## The original prototype
 
@@ -117,7 +118,7 @@ See [Vercel Hobby](https://vercel.com/docs/plans/hobby) and [Vercel fair-use gui
 
 Domain registration, database/auth services, email, payment processing and video storage/delivery may introduce separate costs. Choose these services after requirements and the expected budget are confirmed. Do not put paid lesson videos into public pages or rely on client-side hiding for access control; production playback should check enrollment on the server and use access-controlled video delivery.
 
-This commit does not create a Vercel project or deploy a website. The current HTML can be served by a static host; no framework migration is needed merely to review the design.
+The repository is connected to a Vercel project: every push to `main` deploys production and other branches get preview deployments.
 
 ## Suggested implementation plan
 

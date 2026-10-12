@@ -1,3 +1,4 @@
+import { ArrowLeft, Check } from "lucide-react";
 import { getFormatter, getTranslations } from "next-intl/server";
 import { dances, packages, PRIVATE_LESSON_MINUTES, type DanceId, type PackageId, type Program } from "@/content/catalog";
 import { Link } from "@/i18n/navigation";
@@ -18,7 +19,7 @@ export async function PackagePicker({ program, danceId }: { program: Program; da
   return (
     <main className="section wrap packagesPage">
       <Link className="backLink" href="/#courses">
-        {t("back")}
+        <ArrowLeft size={14} aria-hidden /> {t("back")}
       </Link>
       <div className="eyebrow">{t("eyebrow")}</div>
       <h1>{program.name}</h1>
@@ -57,7 +58,10 @@ export async function PackagePicker({ program, danceId }: { program: Program; da
               </div>
               <ul>
                 {items.map((item) => (
-                  <li key={item}>{item}</li>
+                  <li key={item}>
+                    <Check size={14} aria-hidden />
+                    {item}
+                  </li>
                 ))}
               </ul>
               <EnrollButton programId={program.id} danceId={danceId} packageId={pkg.id} featured={featured} />
