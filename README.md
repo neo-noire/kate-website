@@ -59,17 +59,30 @@ Accounts are real: passwords are hashed by Better Auth and sessions are stored i
 | `DATABASE_URL`, `DATABASE_URL_UNPOOLED` | Added by the Vercel Neon integration (pooled for the app, direct for migrations) |
 | `BETTER_AUTH_SECRET` | A random secret, set in Vercel for production and preview |
 | `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` | Optional. From a Google Cloud OAuth client; the Google button appears after the next deploy |
+| `ADMIN_EMAILS` | Comma-separated emails of the accounts that can manage courses, e.g. `kate@example.com,me@example.com` |
 
 For Google, create an OAuth client of type *Web application* and add the redirect URI `https://<site host>/api/auth/callback/google` for each host people sign in on (for now `https://katematus-website.vercel.app`). Signing in with Google links to an existing email-and-password account with the same address.
 
-Password reset and email verification need an email provider (Resend) and are not set up yet.
+Password reset and email verification need an email provider (Resend) and are not set up yet ([#6](https://github.com/neo-noire/kate-website/issues/6)).
+
+### Courses and admin
+
+The catalog lives in the database. A **program** (e.g. Beginner 1.0) holds one **course** per dance, each with its **lessons**, and has **pricing tiers** (e.g. Solo, Personal, Mentorship). A student buys one course at one tier.
+
+Admins (the `ADMIN_EMAILS` accounts) manage it at `/en/admin`, linked from their dashboard as "Manage courses": edit text in each language, set prices, paste YouTube links for lessons, mark free previews, publish programs and give students access by email. Until Stripe checkout exists, giving access there is how a student gets a course.
+
+- Lesson videos are YouTube embeds (use unlisted videos). Video ids reach the browser only for students who own the course, admins, and free previews, but anyone holding an unlisted link can still watch it.
+- Text a student reads is stored per language; English is required and other languages fall back to it.
+- Public pages are cached and refreshed as soon as an admin saves a change.
+- The first migrations seed the prototype's programs, tiers and lesson outlines (no videos) so the site isn't empty.
 
 ## The original prototype
 
 [`prototype/ritmo.html`](./prototype/ritmo.html) is the original single-file prototype, kept for reference. Open it directly in a browser; it needs no build or network. The app above reproduces it, with these deliberate differences:
 
 - Package selection is a page per program and dance instead of a dialog, so each is linkable and indexable.
-- Switching language loads the other locale’s URL. Lesson notes in progress are kept; other half-filled dialog forms are not.
+- Switching language loads the other locale’s URL; half-filled forms and unsaved lesson notes are not kept.
+- The demo player is replaced by real YouTube lessons, and the catalog comes from the database instead of fixed program data.
 - The language picker lives in the header only, not inside dialogs.
 - The private-lesson request flow is removed. The site sells courses only; private sessions included in a package are booked on a separate platform. The "Let's plan your first step" button still opens a contact form.
 

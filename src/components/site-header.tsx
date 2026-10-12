@@ -3,16 +3,15 @@
 import { ArrowUpRight, Menu, X } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useState } from "react";
-import { Link, usePathname } from "@/i18n/navigation";
+import { Link } from "@/i18n/navigation";
 import { LanguagePicker } from "./language-picker";
 
 export function SiteHeader() {
   const t = useTranslations("nav");
-  const pathname = usePathname();
-  // The menu belongs to the page it was opened on, so it closes on any navigation.
-  const [menuPath, setMenuPath] = useState<string | null>(null);
-  const menuOpen = menuPath === pathname;
-  const setMenuOpen = (open: boolean) => setMenuPath(open ? pathname : null);
+  // Every link in the header navigates, so following one closes the menu. The header doesn't
+  // read the pathname, which keeps it in the static shell of every page.
+  const [menuOpen, setMenuOpen] = useState(false);
+  const close = () => setMenuOpen(false);
 
   const anchors = [
     { id: "courses", label: t("programs") },
@@ -23,7 +22,7 @@ export function SiteHeader() {
   return (
     <header>
       <div className="wrap">
-        <Link className="brand" href="/">
+        <Link className="brand" href="/" onClick={close}>
           <i />
           RITMO
           <span aria-hidden="true" style={{ fontSize: 12, color: "var(--red)", letterSpacing: 0 }}>
@@ -32,7 +31,7 @@ export function SiteHeader() {
         </Link>
         <nav className={menuOpen ? "open" : undefined}>
           {anchors.map((anchor) => (
-            <Link key={anchor.id} href={`/#${anchor.id}`} onClick={() => setMenuOpen(false)}>
+            <Link key={anchor.id} href={`/#${anchor.id}`} onClick={close}>
               {anchor.label}
             </Link>
           ))}
@@ -40,7 +39,7 @@ export function SiteHeader() {
         <div className="navRight">
           <LanguagePicker />
           {/* Signed-out visitors are sent to sign in, then come back to the dashboard. */}
-          <Link className="btn outline" href="/dashboard">
+          <Link className="btn outline" href="/dashboard" onClick={close}>
             {t("myDashboard")} <ArrowUpRight size={16} aria-hidden />
           </Link>
           <button

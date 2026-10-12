@@ -27,6 +27,10 @@ export const auth = betterAuth({
     ],
     fallback: process.env.BETTER_AUTH_URL ?? `https://${productionHost}`,
   },
+  user: {
+    // Read-only for users: sign-up and profile updates can't set it.
+    additionalFields: { role: { type: "string", defaultValue: "student", input: false } },
+  },
   emailAndPassword: {
     enabled: true,
     minPasswordLength: 8,

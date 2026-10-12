@@ -1,18 +1,17 @@
 import Image from "next/image";
-import { ArrowUpRight, Asterisk } from "lucide-react";
+import { ArrowUpRight, Asterisk, Play } from "lucide-react";
 import { ContactButton } from "@/components/contact-button";
 import { NewsletterForm } from "@/components/newsletter-form";
 import { PreviewLessonButton } from "@/components/preview-lesson-button";
 import { ProgramCatalog } from "@/components/program-catalog";
-import { dances } from "@/content/catalog";
 import type { Metadata } from "next";
 import { getLocale, getTranslations } from "next-intl/server";
 import { localeAlternates } from "@/i18n/metadata";
 import heroPhoto from "@/assets/hero.jpg";
+import { getCatalog, getFeaturedPreview } from "@/lib/catalog/queries";
+import { localize } from "@/lib/localized";
 
-const tickerDances = (["cha-cha-cha", "samba", "rumba", "paso-doble", "jive"] as const).map((id) =>
-  dances[id].name.toUpperCase(),
-);
+const tickerDances = ["CHA-CHA-CHA", "SAMBA", "RUMBA", "PASO DOBLE", "JIVE"];
 
 const heroStats = ["lessons", "formats", "pace"] as const;
 const approachSteps = ["understand", "format", "complete"] as const;
@@ -23,7 +22,12 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function HomePage() {
-  const t = await getTranslations();
+  const [t, locale, catalog, preview] = await Promise.all([
+    getTranslations(),
+    getLocale(),
+    getCatalog(),
+    getFeaturedPreview(),
+  ]);
 
   return (
     <main>
@@ -46,7 +50,14 @@ export default async function HomePage() {
             <a href="#courses" className="btn">
               {t("hero.choosePrograms")} <ArrowUpRight size={18} aria-hidden />
             </a>
-            <PreviewLessonButton />
+            {preview && (
+              <PreviewLessonButton
+                videoId={preview.videoId}
+                title={t("hero.previewTitle", { title: localize(preview.title, locale) })}
+              >
+                <Play size={16} aria-hidden /> {t("hero.previewLesson")}
+              </PreviewLessonButton>
+            )}
           </div>
           <div className="heroBottom">
             {heroStats.map((key, i) => (
@@ -87,8 +98,7 @@ export default async function HomePage() {
             {t("catalog.intro.line3")}
           </p>
         </div>
-        <ProgramCatalog />
-        <p className="programNote">{t("catalog.note")}</p>
+        <ProgramCatalog programs={catalog} />
       </section>
 
       <section className="section wrap method" id="approach">

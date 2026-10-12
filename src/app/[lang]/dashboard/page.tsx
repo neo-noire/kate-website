@@ -1,11 +1,11 @@
 import type { Metadata } from "next";
-import { headers } from "next/headers";
 import { getLocale, getTranslations } from "next-intl/server";
 import { Suspense } from "react";
 import { Dashboard } from "@/components/dashboard";
 import { localeAlternates } from "@/i18n/metadata";
 import { redirect } from "@/i18n/navigation";
-import { auth } from "@/lib/auth/server";
+import { getSession, isAdmin } from "@/lib/auth/session";
+import { getLibrary } from "@/lib/catalog/queries";
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations("dashboard");
@@ -18,19 +18,28 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 /** Student dashboard, for signed-in students only. */
-export default function DashboardPage() {
+export default function DashboardPage({ searchParams }: PageProps<"/[lang]/dashboard">) {
   return (
     <Suspense fallback={<main className="section wrap" style={{ minHeight: "60vh" }} />}>
-      <SignedInDashboard />
+      <SignedInDashboard searchParams={searchParams} />
     </Suspense>
   );
 }
 
-async function SignedInDashboard() {
+async function SignedInDashboard({ searchParams }: Pick<PageProps<"/[lang]/dashboard">, "searchParams">) {
   const locale = await getLocale();
-  const session = await auth.api.getSession({ headers: await headers() });
+  const session = await getSession();
   // The proxy already redirects visitors without a session cookie; this also covers expired
   // or revoked sessions.
   if (!session) return redirect({ href: { pathname: "/sign-in", query: { next: "/dashboard" } }, locale });
-  return <Dashboard userName={session.user.name} />;
+  const admin = isAdmin(session.user);
+  const [library, { course }] = await Promise.all([getLibrary(session.user.id, admin), searchParams]);
+  return (
+    <Dashboard
+      userName={session.user.name}
+      admin={admin}
+      library={library}
+      initialCourseId={typeof course === "string" ? course : undefined}
+    />
+  );
 }
