@@ -2,33 +2,57 @@
 
 A personal website for a ballroom dance coach, combining a compact marketing landing page with an online course library and a student learning dashboard.
 
-**Current status:** a clickable, bilingual design prototype. The production framework and service providers have not been selected or installed. `RITMO` is a placeholder brand; the coach’s final branding, biography, photography, course content and prices still need to be supplied.
+**Current status:** a Next.js App Router + TypeScript app that reproduces the bilingual design prototype with static data. There is still no real authentication, payment, email or video delivery; demo data lives in the browser. `RITMO` is a placeholder brand; the coach’s final branding, biography, photography, course content and prices still need to be supplied.
 
-## Try the prototype
+## Run the app
 
-Open [`index.html`](./index.html) in a browser. It is a single, self-contained file with inline CSS, JavaScript and an embedded photograph. No installation, build or internet connection is required for the interface.
-
-Alternatively, serve the repository locally:
+Requires Node.js 20.9 or later.
 
 ```sh
-python3 -m http.server 8000
+npm install
+npm run dev        # http://localhost:3000 (redirects to /en or /uk)
+npm run lint
+npm run typecheck
+npm run build      # production build; public pages are prerendered for both locales
 ```
 
-Then open `http://localhost:8000`.
+Routes:
 
-Use **Preview a lesson** to explore the dashboard immediately, or choose a program, dance and package to test enrollment. The **EN / UA** selector is available in the header and dialogs. English is the default; the selected language is remembered in the browser.
+| Route | What it is |
+| --- | --- |
+| `/en`, `/uk` | Landing page: hero, program catalog with filters, approach, newsletter, FAQ |
+| `/{lang}/programs/{program}` and `/{lang}/programs/{program}/{dance}` | Dance tabs and the three packages for one dance, with demo enrollment |
+| `/{lang}/dashboard` | Demo student dashboard: lessons, placeholder player, progress and notes |
 
-The prototype includes:
+`/` and any path without a language prefix redirect to the visitor’s language (a saved choice in the `NEXT_LOCALE` cookie first, then the browser’s `Accept-Language`, else English).
 
-- Responsive black and red landing page, course catalog and expandable program list.
-- Dance selection and three package options for each dance.
-- Demo sign-in and enrollment forms, newsletter subscription and contact form.
-- Student dashboard with lesson titles, descriptions, practice suggestions and notes.
-- A silent, animated 30-second footwork placeholder with playback, seeking and speed controls; it is not a real instructional video.
-- Lesson completion tracking and demo requests for private coaching sessions.
-- English and Ukrainian copy, including forms, dialogs, accessibility labels and feedback messages.
+Code layout:
 
-Names, emails, notes, progress and requests are stored only in this browser’s `localStorage`. Nothing is sent to a coach or email provider. There is no real authentication, payment, protected video delivery or confirmed appointment. Do not use the prototype as a production account or order system. Demo data can be cleared through **About demo data** in the footer; the language preference is retained.
+- `src/content/catalog.ts`: programs, dances, packages and lessons with stable, untranslated IDs.
+- `messages/{en,uk}.json`: all copy, in ICU message format, loaded with [next-intl](https://next-intl.dev). Plurals use ICU (`{count, plural, one {# урок} few {# уроки} many {# уроків} other {…}}`) and prices use the shared `eur` number format.
+- `src/i18n/`: next-intl routing, request config and locale-aware `Link`/`useRouter`. `npm run typecheck` fails if a locale’s messages are missing or have extra keys compared with English, and message keys used in code are type-checked.
+- `src/app/[lang]/`: routes; the root layout sits under `[lang]` so `<html lang>`, metadata and `hreflang` links are per locale.
+- `src/lib/demo-store.ts`: the prototype-only `localStorage` store (key `ritmo-demo-v2`). Replace with database-backed records when auth and payments arrive.
+- `src/app/globals.css`: the prototype’s stylesheet, ported with its class names intact.
+
+### Adding a language
+
+1. Add its code to `locales` and a picker label to `localeLabels` in `src/i18n/routing.ts`.
+2. Copy `messages/en.json` to `messages/<code>.json` and translate it.
+3. Add the new file to the key check in `src/i18n/messages-shape.ts`, then run `npm run typecheck`.
+
+Pages for the new locale are prerendered automatically, and redirects, `hreflang` links and the language picker pick it up from the routing config.
+
+Names, emails, notes, progress and requests are stored only in this browser’s `localStorage`. Nothing is sent to a coach or email provider. Demo data can be cleared through **About demo data** in the footer.
+
+## The original prototype
+
+[`prototype/ritmo.html`](./prototype/ritmo.html) is the original single-file prototype, kept for reference. Open it directly in a browser; it needs no build or network. The app above reproduces it, with these deliberate differences:
+
+- Package selection is a page per program and dance instead of a dialog, so each is linkable and indexable.
+- Switching language loads the other locale’s URL. Lesson notes in progress are kept; other half-filled dialog forms are not.
+- The language picker lives in the header only, not inside dialogs.
+- The private-lesson request flow is removed. The site sells courses only; private sessions included in a package are booked on a separate platform. The "Let's plan your first step" button still opens a contact form.
 
 ## Product goal and audience
 
@@ -91,7 +115,7 @@ Vercel’s free Hobby plan is restricted to **non-commercial personal use**. Its
 
 See [Vercel Hobby](https://vercel.com/docs/plans/hobby) and [Vercel fair-use guidelines](https://vercel.com/docs/limits/fair-use-guidelines). Hosting terms were checked on October 10, 2026 and should be checked again when deploying.
 
-Domain registration, database/auth services, email, payment processing and video storage/delivery may introduce separate costs. Choose these services after requirements and the expected budget are confirmed. Do not put paid lesson videos into this public HTML file or rely on client-side hiding for access control; production playback should check enrollment on the server and use access-controlled video delivery.
+Domain registration, database/auth services, email, payment processing and video storage/delivery may introduce separate costs. Choose these services after requirements and the expected budget are confirmed. Do not put paid lesson videos into public pages or rely on client-side hiding for access control; production playback should check enrollment on the server and use access-controlled video delivery.
 
 This commit does not create a Vercel project or deploy a website. The current HTML can be served by a static host; no framework migration is needed merely to review the design.
 
@@ -99,11 +123,11 @@ This commit does not create a Vercel project or deploy a website. The current HT
 
 1. Confirm the coach’s brand and content, all curricula, commercial terms, locale requirements and hosting budget.
 2. Decide Astro versus Next.js and select the required service providers. Record the decision in this README or an architecture decision document.
-3. Preserve the current `index.html` as `prototype/ritmo.html` before scaffolding the chosen framework. Extract reusable layout, typography, colors, course cards, dialogs and translation dictionaries into maintainable components and data files.
+3. ~~Preserve the prototype as `prototype/ritmo.html` and scaffold the framework with components, static data and translation dictionaries.~~ Done.
 4. Build localized public pages, then connect the newsletter and contact forms to real delivery with consent handling and validation.
 5. Add authentication, database-backed student records, verified purchase entitlements and account recovery.
 6. Integrate real course videos, lesson notes and progress; authorize access to both pages and video playback.
-7. Add private-session requests or booking, enforce session allowances and give the coach a confirmation workflow.
+7. ~~Add private-session booking.~~ Dropped: the site sells courses only, and private sessions are booked on a separate platform.
 8. Verify mobile/desktop layouts, keyboard access, translations, enrollment/payment behavior and access permissions before production launch.
 
 Potential domain entities: `Program`, `DanceCourse`, `Lesson`, `Package`, `User`, `Enrollment`, `Order`, `LessonProgress`, `LessonNote` and `PrivateSession`. Keep program membership, lesson ordering and package session allowances explicit. Service providers, schema details and the coach’s administration workflow remain to be decided.
