@@ -1,7 +1,7 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   dances,
   getPackage,
@@ -47,10 +47,14 @@ export function Dashboard() {
   }
 
   function toggleComplete() {
-    const done = enrollment!.done.includes(lesson)
-      ? enrollment!.done.filter((n) => n !== lesson)
-      : [...enrollment!.done, lesson];
-    updateDemoState((s) => ({ ...s, enrolled: { ...s.enrolled, [course]: { ...enrollment!, done } } }));
+    // Read the latest saved record, which another tab may have changed since this render.
+    let done: number[] = [];
+    updateDemoState((s) => {
+      const record = s.enrolled[course];
+      if (!record) return s;
+      done = record.done.includes(lesson) ? record.done.filter((n) => n !== lesson) : [...record.done, lesson];
+      return { ...s, enrolled: { ...s.enrolled, [course]: { ...record, done } } };
+    });
     if (!done.includes(lesson)) toast(t("dashboard.completionRemoved"));
     else toast(done.length === LESSONS_PER_DANCE ? t("dashboard.danceCompleted") : t("dashboard.lessonCompleted"));
   }
@@ -214,11 +218,15 @@ function LessonNotes({ noteId }: { noteId: string }) {
   const [draft, setDraft] = useState(saved);
 
   // A language switch reloads the page; keep the unsaved draft, as the prototype did.
+  const draftRef = useRef(draft);
   useEffect(() => {
-    const save = () => updateDemoState((s) => ({ ...s, notes: { ...s.notes, [noteId]: draft } }));
+    draftRef.current = draft;
+  }, [draft]);
+  useEffect(() => {
+    const save = () => updateDemoState((s) => ({ ...s, notes: { ...s.notes, [noteId]: draftRef.current } }));
     window.addEventListener(BEFORE_LOCALE_CHANGE, save);
     return () => window.removeEventListener(BEFORE_LOCALE_CHANGE, save);
-  }, [noteId, draft]);
+  }, [noteId]);
 
   return (
     <>

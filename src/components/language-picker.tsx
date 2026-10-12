@@ -17,7 +17,7 @@ export function LanguagePicker() {
     window.dispatchEvent(new Event(BEFORE_LOCALE_CHANGE));
     // Each locale has its own root layout, so this is a full page load. next-intl
     // remembers the choice in the NEXT_LOCALE cookie.
-    router.replace(`${pathname}${window.location.search}`, { locale: next });
+    router.replace(`${pathname}${window.location.search}${window.location.hash}`, { locale: next });
   }
 
   return (

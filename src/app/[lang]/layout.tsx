@@ -4,7 +4,6 @@ import { getLocale, getTranslations } from "next-intl/server";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
 import { ToastProvider } from "@/components/toast";
-import { localeAlternates } from "@/i18n/metadata";
 import { routing } from "@/i18n/routing";
 import "../globals.css";
 
@@ -17,7 +16,6 @@ export async function generateMetadata(): Promise<Metadata> {
   return {
     title: { default: t("title"), template: `%s · RITMO` },
     description: t("description"),
-    alternates: localeAlternates(await getLocale()),
   };
 }
 

@@ -1,7 +1,7 @@
 "use client";
 
 import { useSyncExternalStore } from "react";
-import { DEFAULT_COURSE, type CourseKey, type PackageId, parseCourseKey, getPackage } from "@/content/catalog";
+import { DEFAULT_COURSE, LESSONS_PER_DANCE, type CourseKey, type PackageId, parseCourseKey, getPackage } from "@/content/catalog";
 
 // Prototype-only persistence. Everything lives in this browser's localStorage; nothing is
 // sent anywhere. Production replaces this with authenticated, database-backed records.
@@ -37,23 +37,47 @@ const serverState = initialState();
 let cache: DemoState | null = null;
 const listeners = new Set<() => void>();
 
+const isObject = (value: unknown): value is Record<string, unknown> =>
+  typeof value === "object" && value !== null && !Array.isArray(value);
+const isString = (value: unknown): value is string => typeof value === "string";
+const isLesson = (value: unknown): value is number =>
+  Number.isInteger(value) && (value as number) >= 0 && (value as number) < LESSONS_PER_DANCE;
+
+/** Rebuild state from whatever is in storage, keeping only well-formed fields. */
 function sanitize(raw: unknown): DemoState {
   const base = initialState();
-  if (!raw || typeof raw !== "object") return base;
-  const saved = raw as Partial<DemoState>;
+  if (!isObject(raw)) return base;
+
   const enrolled: DemoState["enrolled"] = {};
-  for (const [key, value] of Object.entries(saved.enrolled ?? {})) {
-    if (parseCourseKey(key) && value && getPackage(value.packageId)) {
-      enrolled[key as CourseKey] = { packageId: value.packageId, done: value.done.filter((n) => n >= 0 && n < 4) };
-    }
+  for (const [key, value] of Object.entries(isObject(raw.enrolled) ? raw.enrolled : {})) {
+    if (!parseCourseKey(key) || !isObject(value) || !isString(value.packageId) || !getPackage(value.packageId)) continue;
+    const done = Array.isArray(value.done) ? [...new Set(value.done.filter(isLesson))] : [];
+    enrolled[key as CourseKey] = { packageId: value.packageId as PackageId, done };
   }
-  const state: DemoState = {
-    ...base,
-    ...saved,
-    enrolled: Object.keys(enrolled).length ? enrolled : base.enrolled,
+  const courses = Object.keys(enrolled) as CourseKey[];
+  if (!courses.length) return { ...base, user: sanitizeUser(raw.user) };
+
+  const notes = isObject(raw.notes)
+    ? Object.fromEntries(Object.entries(raw.notes).filter((entry): entry is [string, string] => isString(entry[1])))
+    : {};
+  const current = isObject(raw.current) ? raw.current : {};
+  const course = isString(current.course) && courses.includes(current.course as CourseKey) ? (current.course as CourseKey) : courses[0];
+  const feedback = isObject(raw.feedback) && isString(raw.feedback.name) && isString(raw.feedback.email) && isString(raw.feedback.message)
+    ? { name: raw.feedback.name, email: raw.feedback.email, message: raw.feedback.message }
+    : null;
+
+  return {
+    user: sanitizeUser(raw.user),
+    enrolled,
+    notes,
+    subscribed: isString(raw.subscribed) ? raw.subscribed : "",
+    feedback,
+    current: { course, lesson: course === current.course && isLesson(current.lesson) ? current.lesson : 0 },
   };
-  if (!state.enrolled[state.current.course]) state.current = { course: Object.keys(state.enrolled)[0] as CourseKey, lesson: 0 };
-  return state;
+}
+
+function sanitizeUser(value: unknown): DemoUser | null {
+  return isObject(value) && isString(value.name) && isString(value.email) ? { name: value.name, email: value.email } : null;
 }
 
 function read(): DemoState {
@@ -76,17 +100,19 @@ function write(next: DemoState) {
   listeners.forEach((listener) => listener());
 }
 
+// Another tab changed or cleared storage (key is null when storage is cleared).
+function onStorage(event: StorageEvent) {
+  if (event.key !== null && event.key !== STORAGE_KEY) return;
+  cache = null;
+  listeners.forEach((listener) => listener());
+}
+
 function subscribe(listener: () => void) {
+  if (listeners.size === 0) window.addEventListener("storage", onStorage);
   listeners.add(listener);
-  const onStorage = (event: StorageEvent) => {
-    if (event.key !== STORAGE_KEY) return;
-    cache = null;
-    listener();
-  };
-  window.addEventListener("storage", onStorage);
   return () => {
     listeners.delete(listener);
-    window.removeEventListener("storage", onStorage);
+    if (listeners.size === 0) window.removeEventListener("storage", onStorage);
   };
 }
 

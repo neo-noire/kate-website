@@ -4,7 +4,9 @@ import { NewsletterForm } from "@/components/newsletter-form";
 import { PreviewLessonButton } from "@/components/preview-lesson-button";
 import { ProgramCatalog } from "@/components/program-catalog";
 import { dances } from "@/content/catalog";
-import { getTranslations } from "next-intl/server";
+import type { Metadata } from "next";
+import { getLocale, getTranslations } from "next-intl/server";
+import { localeAlternates } from "@/i18n/metadata";
 import heroPhoto from "@/assets/hero.jpg";
 
 const tickerDances = (["cha-cha-cha", "samba", "rumba", "paso-doble", "jive"] as const).map((id) =>
@@ -14,6 +16,10 @@ const tickerDances = (["cha-cha-cha", "samba", "rumba", "paso-doble", "jive"] as
 const heroStats = ["lessons", "formats", "pace"] as const;
 const approachSteps = ["understand", "format", "complete"] as const;
 const faqItems = ["partner", "singleDance", "privateLessons"] as const;
+
+export async function generateMetadata(): Promise<Metadata> {
+  return { alternates: localeAlternates(await getLocale()) };
+}
 
 export default async function HomePage() {
   const t = await getTranslations();
