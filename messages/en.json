@@ -4,7 +4,6 @@
     "description": "Online ballroom dance lessons. Latin at your pace, with personal support from your coach."
   },
   "languageLabel": "Interface language",
-  "demoBar": "DESIGN PROTOTYPE · RITMO is a placeholder brand · illustrative prices and content",
   "common": {
     "close": "Close",
     "name": "Name",
@@ -16,8 +15,7 @@
     "approach": "Approach",
     "contact": "Contact",
     "openMenu": "Open menu",
-    "myDashboard": "My dashboard ↗",
-    "demoDashboard": "Demo dashboard ↗"
+    "myDashboard": "My dashboard"
   },
   "hero": {
     "photoAlt": "A couple performing a ballroom dance",
@@ -28,7 +26,7 @@
     "lead1": "From your first step to confident dancing.",
     "lead2": "Latin at your pace — with personal support from your coach.",
     "choosePrograms": "Choose a program",
-    "previewLesson": "▷ Preview a lesson",
+    "previewLesson": "Preview a lesson",
     "stats": {
       "lessons": {
         "value": "4 lessons",
@@ -60,8 +58,8 @@
       "beginner": "Beginner",
       "salsa": "Salsa"
     },
-    "showMore": "All programs ↓",
-    "showLess": "Show less ↑",
+    "showMore": "All programs",
+    "showLess": "Show less",
     "note": "Intro to Latin: 3 dances × 4 lessons = 12 lessons. Beginner: 5 dances × 4 lessons = 20 lessons. Choose a package separately for each dance.",
     "dances": "{count, plural, one {# dance} other {# dances}}",
     "lessons": "{count, plural, one {# lesson} other {# lessons}}",
@@ -104,7 +102,7 @@
     "titleLine1": "Dancing starts",
     "titleLine2": "with you.",
     "body": "No partner or experience needed. Just a little space and a desire to move. Watch the lessons, practice and work with your coach on what matters to you.",
-    "cta": "Let's plan your first step ↗",
+    "cta": "Let's plan your first step",
     "steps": {
       "understand": {
         "title": "Understand the movement",
@@ -126,7 +124,7 @@
     "body1": "New courses, practice tips and updates.",
     "body2": "Only what helps you dance.",
     "emailLabel": "Your email",
-    "subscribe": "Subscribe ↗",
+    "subscribe": "Subscribe",
     "consent": "I agree to receive course updates.",
     "demoNotice": "Demo form: data is saved in this browser only.",
     "success": "Done! Demo subscription saved. No emails are sent."
@@ -148,17 +146,17 @@
   "footer": {
     "copyright": "© RITMO · Personal coach website concept",
     "demoData": "About demo data",
-    "photoCredit": "Photo: Unsplash ↗"
+    "photoCredit": "Photo: Unsplash"
   },
   "packages": {
-    "back": "← All programs",
+    "back": "All programs",
     "eyebrow": "Choose your format",
     "summary": "{count, plural, one {# course × 4 lessons. Your package covers the selected dance only.} other {# dances/courses × 4 lessons. Your package covers the selected dance only.}}",
     "perDance": "/ 4 lessons",
     "featured": "More support",
     "format": "Format {number}",
     "perCourse": "/ course",
-    "choose": "Choose {name} ↗",
+    "choose": "Choose {name}",
     "fine": "Illustrative prices. Complete every dance to finish the full program. No payments are processed in this prototype.",
     "provisional": " The dance selection for Intro 2.0 is provisional and needs confirmation.",
     "videoLessons": "4 video lessons",
@@ -182,7 +180,7 @@
     "privateLessons": "{count, plural, one {# private lesson} other {# private lessons}}",
     "independent": "Independent practice",
     "namePlaceholder": "What should we call you?",
-    "submit": "Add course to demo dashboard ↗",
+    "submit": "Add course to demo dashboard",
     "fine": "No payment required. This is a demo enrollment; access is saved locally in your browser.",
     "dialogLabel": "Demo course enrollment",
     "defaultName": "Friend",
@@ -193,7 +191,7 @@
     "title": "Your rhythm is waiting.",
     "body": "Enter the demo dashboard and try the learning experience.",
     "namePlaceholder": "Your name",
-    "submit": "Enter demo dashboard ↗",
+    "submit": "Enter demo dashboard",
     "fine": "A demo without a password or real authentication. Do not enter sensitive information. One account per browser.",
     "dialogLabel": "Demo sign-in"
   },
@@ -202,7 +200,7 @@
     "greetingNamed": "Hi, {name}. Time to dance.",
     "greetingGuest": "Try your first lesson.",
     "tagline": "Step by step — you're already on your way.",
-    "addCourse": "+ Add a course",
+    "addCourse": "Add a course",
     "myDances": "My dances",
     "programProgress": "{program} · {done}/{total} lessons",
     "courseProgress": "{done}/4 lessons · {package}",
@@ -210,8 +208,8 @@
     "privateLessons": "{count, plural, one {Your package includes # private lesson. Your coach will arrange it with you on a separate booking platform.} other {Your package includes # private lessons. Your coach will arrange them with you on a separate booking platform.}}",
     "soloPackage": "Solo package: video lessons only. Personal and Mentorship add private lessons.",
     "lessonMeta": "{dance} · Lesson {number} of 4 · {minutes} min (planned duration)",
-    "completed": "Completed ✓",
-    "markCompleted": "Mark as completed ✓",
+    "completed": "Completed",
+    "markCompleted": "Mark as completed",
     "lessonCardMeta": "{minutes} min · {status}",
     "statusCompleted": "Completed",
     "statusWatching": "Now watching",
@@ -236,7 +234,11 @@
       "count": "Count out loud and feel the weight transfer.",
       "combine": "Try a short combination and note what you want to discuss with your coach."
     },
-    "mobileNotice": "The demo video is a silent, 30-second animated placeholder. Your coach's video lesson will appear here in the final version."
+    "mobileNotice": "The demo video is a silent, 30-second animated placeholder. Your coach's video lesson will appear here in the final version.",
+    "signInTitle": "Sign in to see your courses.",
+    "signInBody": "Your dashboard, lessons and notes open after you sign in.",
+    "signIn": "Sign in",
+    "signOut": "Sign out"
   },
   "lessons": {
     "rhythm": {
@@ -273,7 +275,7 @@
     "sub": "Leave a question for your coach.",
     "message": "Message",
     "messagePlaceholder": "What is your goal, or what do you need help with?",
-    "submit": "Save demo message ↗",
+    "submit": "Save demo message",
     "fine": "Your message is saved locally only. Nothing is sent to the coach.",
     "dialogLabel": "Message to your coach",
     "saved": "Demo message saved in your browser."

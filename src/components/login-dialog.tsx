@@ -1,5 +1,6 @@
 "use client";
 
+import { ArrowUpRight } from "lucide-react";
 import { useTranslations } from "next-intl";
 import type { FormEvent } from "react";
 import { updateDemoState } from "@/lib/demo-store";
@@ -33,7 +34,7 @@ export function LoginDialog({ open, onClose, onSignedIn }: { open: boolean; onCl
           {t("common.email")}
           <input name="email" type="email" autoComplete="email" placeholder={t("common.emailPlaceholder")} required />
         </label>
-        <button className="btn">{t("login.submit")}</button>
+        <button className="btn">{t("login.submit")} <ArrowUpRight size={16} aria-hidden /></button>
         <p className="fine">{t("login.fine")}</p>
       </form>
     </Modal>

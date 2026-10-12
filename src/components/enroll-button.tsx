@@ -1,5 +1,6 @@
 "use client";
 
+import { ArrowUpRight } from "lucide-react";
 import { useFormatter, useTranslations } from "next-intl";
 import type { FormEvent } from "react";
 import { courseKey, dances, getPackage, getProgram, type DanceId, type PackageId, type ProgramId } from "@/content/catalog";
@@ -42,7 +43,7 @@ export function EnrollButton({ programId, danceId, packageId, featured }: Enroll
   return (
     <>
       <button className={`btn${featured ? "" : " outline"}`} onClick={dialog.show}>
-        {t("packages.choose", { name: pkg.name })}
+        {t("packages.choose", { name: pkg.name })} <ArrowUpRight size={16} aria-hidden />
       </button>
       <Modal open={dialog.open} onClose={dialog.close} label={t("enroll.dialogLabel")}>
         <div className="eyebrow">{t("enroll.eyebrow")}</div>
@@ -78,7 +79,7 @@ export function EnrollButton({ programId, danceId, packageId, featured }: Enroll
             />
           </label>
           <button className="btn" type="submit">
-            {t("enroll.submit")}
+            {t("enroll.submit")} <ArrowUpRight size={16} aria-hidden />
           </button>
           <p className="fine">{t("enroll.fine")}</p>
         </form>

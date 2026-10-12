@@ -1,5 +1,6 @@
 "use client";
 
+import { ArrowUpRight, Menu, X } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { Link, usePathname, useRouter } from "@/i18n/navigation";
@@ -11,11 +12,13 @@ import { useDialogState } from "./modal";
 export function SiteHeader() {
   const t = useTranslations("nav");
   const router = useRouter();
-  const pathname = usePathname();
   const { user } = useDemoState();
-  const [menuOpen, setMenuOpen] = useState(false);
+  const pathname = usePathname();
+  // The menu belongs to the page it was opened on, so it closes on any navigation.
+  const [menuPath, setMenuPath] = useState<string | null>(null);
+  const menuOpen = menuPath === pathname;
+  const setMenuOpen = (open: boolean) => setMenuPath(open ? pathname : null);
   const login = useDialogState();
-  const onDashboard = pathname === "/dashboard";
 
   const anchors = [
     { id: "courses", label: t("programs") },
@@ -43,15 +46,15 @@ export function SiteHeader() {
         <div className="navRight">
           <LanguagePicker />
           <button className="btn outline" onClick={() => (user ? router.push("/dashboard") : login.show())}>
-            {user || !onDashboard ? t("myDashboard") : t("demoDashboard")}
+            {t("myDashboard")} <ArrowUpRight size={16} aria-hidden />
           </button>
           <button
             className="menuBtn"
             aria-label={t("openMenu")}
             aria-expanded={menuOpen}
-            onClick={() => setMenuOpen((open) => !open)}
+            onClick={() => setMenuOpen(!menuOpen)}
           >
-            ☰
+            {menuOpen ? <X size={24} aria-hidden /> : <Menu size={24} aria-hidden />}
           </button>
         </div>
       </div>

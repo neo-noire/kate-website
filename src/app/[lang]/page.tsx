@@ -1,4 +1,5 @@
 import Image from "next/image";
+import { ArrowUpRight, Asterisk } from "lucide-react";
 import { ContactButton } from "@/components/contact-button";
 import { NewsletterForm } from "@/components/newsletter-form";
 import { PreviewLessonButton } from "@/components/preview-lesson-button";
@@ -43,7 +44,7 @@ export default async function HomePage() {
           </p>
           <div className="heroActions">
             <a href="#courses" className="btn">
-              {t("hero.choosePrograms")} <span>↗</span>
+              {t("hero.choosePrograms")} <ArrowUpRight size={18} aria-hidden />
             </a>
             <PreviewLessonButton />
           </div>
@@ -61,7 +62,10 @@ export default async function HomePage() {
 
       <div className="ticker">
         {tickerDances.map((name) => (
-          <span key={name}>{name}</span>
+          <span key={name}>
+            <Asterisk size={14} aria-hidden />
+            {name}
+          </span>
         ))}
       </div>
 

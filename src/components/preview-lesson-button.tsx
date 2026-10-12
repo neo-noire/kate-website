@@ -1,5 +1,6 @@
 "use client";
 
+import { Play } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { DEFAULT_COURSE } from "@/content/catalog";
 import { useRouter } from "@/i18n/navigation";
@@ -21,7 +22,7 @@ export function PreviewLessonButton() {
         router.push("/dashboard");
       }}
     >
-      {t("previewLesson")}
+      <Play size={16} aria-hidden /> {t("previewLesson")}
     </button>
   );
 }

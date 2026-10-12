@@ -1,5 +1,6 @@
 "use client";
 
+import { X } from "lucide-react";
 import { useEffect, useLayoutEffect, useRef, useState, type ReactNode } from "react";
 import { createPortal } from "react-dom";
 import { useTranslations } from "next-intl";
@@ -74,7 +75,7 @@ export function Modal({ open, onClose, label, children }: ModalProps) {
     >
       <section className="modal" role="dialog" aria-modal="true" aria-label={label} ref={dialog}>
         <button className="close" aria-label={t("close")} onClick={onClose}>
-          ×
+          <X size={20} aria-hidden />
         </button>
         {children}
       </section>

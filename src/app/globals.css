@@ -134,7 +134,7 @@ nav a:hover {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 18px;
+  gap: 10px;
   padding: 14px 22px;
   min-height: 48px;
   border-radius: 4px;
@@ -258,10 +258,14 @@ nav a:hover {
   overflow: hidden;
   white-space: nowrap;
 }
-.ticker span:before {
-  content: "✳";
+.ticker span {
+  display: inline-flex;
+  align-items: center;
+  gap: 20px;
+}
+.ticker svg {
   color: var(--red);
-  margin-right: 20px;
+  flex: none;
 }
 .section {
   padding: 76px 0;
@@ -399,6 +403,8 @@ nav a:hover {
   font-size: 12px;
 }
 .arrow {
+  display: grid;
+  place-items: center;
   background: var(--red);
   width: 35px;
   height: 35px;
@@ -543,17 +549,15 @@ footer .wrap {
   align-items: center;
   gap: 20px;
 }
+footer a {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
 footer p,
 footer a {
   font-size: 10px;
   color: var(--muted);
-}
-.demoBar {
-  background: #242020;
-  color: #d4bbb8;
-  text-align: center;
-  font-size: 10px;
-  padding: 7px 20px;
 }
 .hidden {
   display: none !important;
@@ -582,6 +586,8 @@ footer a {
   box-shadow: 0 30px 100px #0008;
 }
 .close {
+  display: grid;
+  place-items: center;
   position: absolute;
   right: 18px;
   top: 14px;
@@ -647,10 +653,14 @@ footer a {
   gap: 9px;
   flex: 1;
 }
-.plan li:before {
-  content: "✓";
+.plan li {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+.plan li svg {
   color: var(--red);
-  margin-right: 7px;
+  flex: none;
 }
 .fine {
   font-size: 10px;
@@ -813,6 +823,8 @@ footer a {
   background: linear-gradient(transparent, #000c);
 }
 .controls button {
+  display: grid;
+  place-items: center;
   background: transparent;
   font-size: 17px;
   min-width: 32px;
@@ -825,7 +837,7 @@ footer a {
   min-width: 30px;
 }
 .controls select {
-  width: 65px;
+  width: 72px;
   padding: 5px;
   background: #111;
   font-size: 11px;
@@ -905,7 +917,9 @@ footer a {
 }
 .lessonItem b {
   color: var(--red);
-  display: block;
+  display: flex;
+  height: 18px;
+  align-items: center;
   margin-bottom: 10px;
 }
 .bookingCard {
@@ -920,6 +934,7 @@ footer a {
 }
 .menuBtn {
   display: none;
+  place-items: center;
   background: transparent;
   font-size: 24px;
 }
@@ -981,7 +996,7 @@ footer a {
     min-height: 40px;
   }
   .menuBtn {
-    display: block;
+    display: grid;
   }
   nav {
     display: none;
@@ -1120,7 +1135,7 @@ footer a {
   .studioHeader {
     display: block;
   }
-  .studioHeader .btn {
+  .studioActions {
     margin-top: 15px;
   }
   .studioHeader h1 {
@@ -1180,7 +1195,7 @@ footer a {
     font-size: 7px;
   }
   .controls select {
-    width: 52px;
+    width: 64px;
   }
   .fieldPair {
     grid-template-columns: 1fr;
@@ -1199,7 +1214,7 @@ footer a {
 }
 
 .languagePicker {
-  width: 62px;
+  width: 72px;
   height: 42px;
   align-self: center;
   padding: 7px;
@@ -1232,8 +1247,7 @@ footer a {
     gap: 0;
   }
   .languagePicker {
-    width: 49px;
-    font-size: 11px;
+    width: 60px;
     padding: 5px;
   }
   .menuBtn {
@@ -1259,7 +1273,9 @@ footer a {
   margin-bottom: 22px;
 }
 .backLink {
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
   font-size: 12px;
   color: var(--muted);
   margin-bottom: 24px;
@@ -1271,4 +1287,31 @@ footer a {
   .packagesPage h1 {
     font-size: 33px;
   }
+}
+
+/* iOS Safari zooms into any field whose text is under 16px, so every field stays at 16px. */
+input,
+select,
+textarea,
+.languagePicker,
+.controls select {
+  font-size: 16px;
+}
+.studioActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.signInRequired {
+  max-width: 560px;
+  min-height: 50vh;
+}
+.signInRequired h1 {
+  font-size: 42px;
+  letter-spacing: -1.7px;
+  margin: 12px 0 16px;
+}
+.signInRequired p {
+  color: var(--muted);
+  margin-bottom: 24px;
 }

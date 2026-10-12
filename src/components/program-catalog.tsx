@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import { ArrowUpRight, ChevronDown, ChevronUp } from "lucide-react";
 import heroPhoto from "@/assets/hero.jpg";
 import { useState } from "react";
 import { LESSONS_PER_DANCE, lowestPriceEur, programGroups, programs, type ProgramGroup } from "@/content/catalog";
@@ -57,7 +58,7 @@ export function ProgramCatalog() {
                     href={`/programs/${program.id}`}
                     aria-label={t("catalog.open", { name: program.name })}
                   >
-                    ↗
+                    <ArrowUpRight size={18} aria-hidden />
                   </Link>
                 </div>
               </div>
@@ -69,6 +70,7 @@ export function ProgramCatalog() {
         <div style={{ textAlign: "center", marginTop: 26 }}>
           <button className="btn outline" onClick={() => setExpanded((value) => !value)}>
             {expanded ? t("catalog.showLess") : t("catalog.showMore")}
+            {expanded ? <ChevronUp size={16} aria-hidden /> : <ChevronDown size={16} aria-hidden />}
           </button>
         </div>
       )}
