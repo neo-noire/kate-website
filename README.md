@@ -60,7 +60,7 @@ Accounts are real: passwords are hashed by Better Auth and sessions are stored i
 | `BETTER_AUTH_SECRET` | A random secret, set in Vercel for production and preview |
 | `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` | Optional. From a Google Cloud OAuth client; the Google button appears after the next deploy |
 
-For Google, create an OAuth client of type *Web application* and add the redirect URI `https://<site host>/api/auth/callback/google` for each host people sign in on (for now `https://kate-website-indol.vercel.app`). Signing in with Google links to an existing email-and-password account with the same address.
+For Google, create an OAuth client of type *Web application* and add the redirect URI `https://<site host>/api/auth/callback/google` for each host people sign in on (for now `https://katematus-website.vercel.app`). Signing in with Google links to an existing email-and-password account with the same address.
 
 Password reset and email verification need an email provider (Resend) and are not set up yet.
 

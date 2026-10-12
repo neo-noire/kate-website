@@ -6,14 +6,26 @@ import { db } from "@/db";
 import * as schema from "@/db/schema";
 import { googleEnabled } from "./providers";
 
+const productionHost = process.env.VERCEL_PROJECT_PRODUCTION_URL ?? "katematus-website.vercel.app";
+const vercelHosts = [
+  productionHost,
+  process.env.VERCEL_BRANCH_URL,
+  process.env.VERCEL_URL,
+].filter((host): host is string => Boolean(host));
+
 export const auth = betterAuth({
   appName: "RITMO",
   database: drizzleAdapter(db, { provider: "pg", schema }),
-  // The site answers on several Vercel hostnames (production aliases and previews), so the
-  // base URL follows the request host, limited to this project's hosts.
+  // The site answers on several Vercel hostnames (production domain, aliases and previews), so
+  // the base URL follows the request host, limited to this project's hosts. Vercel sets the
+  // VERCEL_* host variables, so renaming the domain or adding a custom one needs no code change.
   baseURL: {
-    allowedHosts: ["kate-website-*.vercel.app", "localhost:*"],
-    fallback: process.env.BETTER_AUTH_URL ?? "https://kate-website-indol.vercel.app",
+    allowedHosts: [
+      ...vercelHosts,
+      "kate-website-*.vercel.app",
+      "localhost:*",
+    ],
+    fallback: process.env.BETTER_AUTH_URL ?? `https://${productionHost}`,
   },
   emailAndPassword: {
     enabled: true,
