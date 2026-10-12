@@ -1,7 +1,7 @@
 "use client";
 
-import { Check, LogIn, LogOut, Plus } from "lucide-react";
-import { useTranslations } from "next-intl";
+import { Check, LogOut, Plus } from "lucide-react";
+import { useLocale, useTranslations } from "next-intl";
 import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import {
   dances,
@@ -12,11 +12,10 @@ import {
   courseKey,
   type CourseKey,
 } from "@/content/catalog";
-import { Link, useRouter } from "@/i18n/navigation";
+import { getPathname, Link } from "@/i18n/navigation";
+import { authClient } from "@/lib/auth/client";
 import { BEFORE_LOCALE_CHANGE, noteKey, updateDemoState, useDemoState } from "@/lib/demo-store";
 import { DemoPlayer } from "./demo-player";
-import { LoginDialog } from "./login-dialog";
-import { useDialogState } from "./modal";
 import { useToast } from "./toast";
 
 type Tab = "about" | "notes" | "practice";
@@ -30,34 +29,16 @@ function useHydrated() {
   return useSyncExternalStore(noopSubscribe, () => true, () => false);
 }
 
-export function Dashboard() {
+/** The student dashboard. Course data is read from this browser, so it renders after hydration. */
+export function Dashboard({ userName }: { userName: string }) {
   const hydrated = useHydrated();
-  const { user } = useDemoState();
-  // Wait for the saved session before deciding, so signed-in visitors never see the sign-in prompt flash.
-  if (!hydrated) return null;
-  return user ? <StudentDashboard /> : <SignInRequired />;
+  return hydrated ? <StudentDashboard userName={userName} /> : null;
 }
 
-function SignInRequired() {
-  const t = useTranslations("dashboard");
-  const login = useDialogState();
-  return (
-    <main className="section wrap signInRequired">
-      <div className="eyebrow">{t("eyebrow")}</div>
-      <h1>{t("signInTitle")}</h1>
-      <p>{t("signInBody")}</p>
-      <button className="btn" onClick={login.show}>
-        <LogIn size={16} aria-hidden /> {t("signIn")}
-      </button>
-      <LoginDialog open={login.open} onClose={login.close} onSignedIn={() => {}} />
-    </main>
-  );
-}
-
-function StudentDashboard() {
+function StudentDashboard({ userName }: { userName: string }) {
   const t = useTranslations();
   const toast = useToast();
-  const router = useRouter();
+  const locale = useLocale();
   const state = useDemoState();
   const [tab, setTab] = useState<Tab>("about");
 
@@ -103,7 +84,7 @@ function StudentDashboard() {
               {t("dashboard.eyebrow")}
             </div>
             <h1>
-              {state.user ? t("dashboard.greetingNamed", { name: state.user.name }) : t("dashboard.greetingGuest")}
+              {t("dashboard.greetingNamed", { name: userName })}
             </h1>
             <p>{t("dashboard.tagline")}</p>
           </div>
@@ -113,12 +94,13 @@ function StudentDashboard() {
             </Link>
             <button
               className="btn quiet"
-              onClick={() => {
-                updateDemoState((s) => ({ ...s, user: null }));
-                router.push("/");
+              onClick={async () => {
+                await authClient.signOut();
+                // A full page load clears anything the router cached while signed in.
+                window.location.assign(getPathname({ href: "/", locale }));
               }}
             >
-              <LogOut size={16} aria-hidden /> {t("dashboard.signOut")}
+              <LogOut size={16} aria-hidden /> {t("auth.signOut")}
             </button>
           </div>
         </div>

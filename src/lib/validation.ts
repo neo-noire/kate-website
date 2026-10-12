@@ -18,6 +18,7 @@ export function useLocalizedValidation() {
       const { validity } = field;
       if (validity.valueMissing) field.setCustomValidity(t("required"));
       else if (validity.typeMismatch) field.setCustomValidity(t("email"));
+      else if (validity.tooShort && "minLength" in field) field.setCustomValidity(t("tooShort", { min: field.minLength }));
     },
     onInputCapture(event: FormEvent<HTMLFormElement>) {
       (event.target as Field).setCustomValidity?.("");

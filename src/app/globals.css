@@ -1302,16 +1302,60 @@ textarea,
   flex-wrap: wrap;
   gap: 10px;
 }
-.signInRequired {
-  max-width: 560px;
-  min-height: 50vh;
+.authPage {
+  max-width: 520px;
+  min-height: 60vh;
 }
-.signInRequired h1 {
+.authPage h1 {
   font-size: 42px;
   letter-spacing: -1.7px;
-  margin: 12px 0 16px;
+  margin: 12px 0 12px;
 }
-.signInRequired p {
+.authPage .sub {
   color: var(--muted);
-  margin-bottom: 24px;
+  margin-bottom: 28px;
+}
+.fieldHint {
+  display: block;
+  margin-top: 6px;
+  color: var(--muted);
+  font-size: 12px;
+}
+.formError {
+  min-height: 1em;
+  color: #ff7b71;
+  font-size: 13px;
+}
+.formError:empty {
+  display: none;
+}
+.authSwitch {
+  margin-top: 22px;
+  font-size: 13px;
+  color: var(--muted);
+}
+.authSwitch a {
+  color: white;
+  text-decoration: underline;
+}
+.googleButton {
+  width: 100%;
+  max-width: 480px;
+}
+.authDivider {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  max-width: 480px;
+  margin: 20px 0;
+  color: var(--muted);
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+}
+.authDivider::before,
+.authDivider::after {
+  content: "";
+  flex: 1;
+  border-top: 1px solid var(--line);
 }

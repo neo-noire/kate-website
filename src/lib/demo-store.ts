@@ -3,16 +3,15 @@
 import { useSyncExternalStore } from "react";
 import { DEFAULT_COURSE, LESSONS_PER_DANCE, type CourseKey, type PackageId, parseCourseKey, getPackage } from "@/content/catalog";
 
-// Prototype-only persistence. Everything lives in this browser's localStorage; nothing is
-// sent anywhere. Production replaces this with authenticated, database-backed records.
+// Prototype-only persistence for courses, progress, notes and requests. Everything lives in this
+// browser's localStorage; nothing is sent anywhere. Accounts are real (see src/lib/auth); these
+// records move to the database once purchases exist.
 
 const STORAGE_KEY = "ritmo-demo-v2";
 
-export type DemoUser = { name: string; email: string };
 export type Enrollment = { packageId: PackageId; done: number[] };
 
 export type DemoState = {
-  user: DemoUser | null;
   enrolled: Partial<Record<CourseKey, Enrollment>>;
   /** Keyed by `${course}#${lessonIndex}`. */
   notes: Record<string, string>;
@@ -24,7 +23,6 @@ export type DemoState = {
 
 function initialState(): DemoState {
   return {
-    user: null,
     enrolled: { [DEFAULT_COURSE]: { packageId: "solo", done: [] } },
     notes: {},
     subscribed: "",
@@ -55,7 +53,7 @@ function sanitize(raw: unknown): DemoState {
     enrolled[key as CourseKey] = { packageId: value.packageId as PackageId, done };
   }
   const courses = Object.keys(enrolled) as CourseKey[];
-  if (!courses.length) return { ...base, user: sanitizeUser(raw.user) };
+  if (!courses.length) return base;
 
   const notes = isObject(raw.notes)
     ? Object.fromEntries(Object.entries(raw.notes).filter((entry): entry is [string, string] => isString(entry[1])))
@@ -67,7 +65,6 @@ function sanitize(raw: unknown): DemoState {
     : null;
 
   return {
-    user: sanitizeUser(raw.user),
     enrolled,
     notes,
     subscribed: isString(raw.subscribed) ? raw.subscribed : "",
@@ -76,9 +73,6 @@ function sanitize(raw: unknown): DemoState {
   };
 }
 
-function sanitizeUser(value: unknown): DemoUser | null {
-  return isObject(value) && isString(value.name) && isString(value.email) ? { name: value.name, email: value.email } : null;
-}
 
 function read(): DemoState {
   if (cache) return cache;

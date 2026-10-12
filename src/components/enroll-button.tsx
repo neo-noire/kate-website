@@ -2,36 +2,31 @@
 
 import { ArrowUpRight } from "lucide-react";
 import { useFormatter, useTranslations } from "next-intl";
-import type { FormEvent } from "react";
 import { courseKey, dances, getPackage, getProgram, type DanceId, type PackageId, type ProgramId } from "@/content/catalog";
 import { useRouter } from "@/i18n/navigation";
-import { updateDemoState, useDemoState } from "@/lib/demo-store";
-import { useLocalizedValidation } from "@/lib/validation";
+import { updateDemoState } from "@/lib/demo-store";
 import { Modal, useDialogState } from "./modal";
 import { useToast } from "./toast";
 
 type EnrollButtonProps = { programId: ProgramId; danceId: DanceId; packageId: PackageId; featured: boolean };
 
-/** Demo enrollment: no payment, the course is added to this browser's dashboard. */
+/**
+ * Demo enrollment: no payment, the course is added to this browser's dashboard. Signed-out
+ * visitors are sent to sign in first and land on the dashboard afterwards.
+ */
 export function EnrollButton({ programId, danceId, packageId, featured }: EnrollButtonProps) {
   const t = useTranslations();
   const format = useFormatter();
-  const validation = useLocalizedValidation();
   const router = useRouter();
   const toast = useToast();
   const dialog = useDialogState();
-  const { user } = useDemoState();
   const program = getProgram(programId)!;
   const pkg = getPackage(packageId)!;
   const key = courseKey(programId, danceId);
 
-  function submit(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    const data = new FormData(event.currentTarget);
-    const name = String(data.get("name")).trim() || t("enroll.defaultName");
+  function enroll() {
     updateDemoState((state) => ({
       ...state,
-      user: { name, email: String(data.get("email")) },
       enrolled: { ...state.enrolled, [key]: { packageId, done: state.enrolled[key]?.done ?? [] } },
       current: { course: key, lesson: 0 },
     }));
@@ -55,34 +50,10 @@ export function EnrollButton({ programId, danceId, packageId, featured }: Enroll
           <br />
           {pkg.privateLessons ? t("enroll.privateLessons", { count: pkg.privateLessons }) : t("enroll.independent")}
         </p>
-        <form className="formStack" onSubmit={submit} {...validation}>
-          <label>
-            {t("common.name")}
-            <input
-              name="name"
-              autoComplete="given-name"
-              placeholder={t("enroll.namePlaceholder")}
-              maxLength={60}
-              required
-              defaultValue={user?.name ?? ""}
-            />
-          </label>
-          <label>
-            {t("common.email")}
-            <input
-              name="email"
-              type="email"
-              autoComplete="email"
-              required
-              placeholder={t("common.emailPlaceholder")}
-              defaultValue={user?.email ?? ""}
-            />
-          </label>
-          <button className="btn" type="submit">
-            {t("enroll.submit")} <ArrowUpRight size={16} aria-hidden />
-          </button>
-          <p className="fine">{t("enroll.fine")}</p>
-        </form>
+        <button className="btn" onClick={enroll}>
+          {t("enroll.submit")} <ArrowUpRight size={16} aria-hidden />
+        </button>
+        <p className="fine">{t("enroll.fine")}</p>
       </Modal>
     </>
   );
