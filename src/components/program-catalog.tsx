@@ -8,7 +8,7 @@ import { useLocale, useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import type { CatalogProgram } from "@/lib/catalog/queries";
 import { localize } from "@/lib/localized";
-import { formatPrice } from "@/lib/money";
+import { formatPrice, withHst } from "@/lib/money";
 
 const COLLAPSED_COUNT = 3;
 
@@ -74,7 +74,7 @@ export function ProgramCatalog({ programs }: { programs: CatalogProgram[] }) {
                   <span>
                     {program.fromPrice
                       ? t("catalog.fromPrice", {
-                          price: formatPrice(program.fromPrice.priceCents, program.fromPrice.currency, locale),
+                          price: formatPrice(withHst(program.fromPrice.priceCents).total, program.fromPrice.currency, locale),
                         })
                       : null}
                   </span>

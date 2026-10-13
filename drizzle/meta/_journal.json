@@ -43,6 +43,13 @@
       "when": 1791856113257,
       "tag": "0005_prices_include_hst",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1791857849269,
+      "tag": "0006_prices_before_hst",
+      "breakpoints": true
     }
   ]
 }

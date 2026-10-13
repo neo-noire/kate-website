@@ -5,7 +5,7 @@ import { Link } from "@/i18n/navigation";
 import { getSession, isAdmin } from "@/lib/auth/session";
 import { getPurchase, type ProgramPage } from "@/lib/catalog/queries";
 import { localize, localizeLines } from "@/lib/localized";
-import { formatPrice, HST_RATE, hstBreakdown } from "@/lib/money";
+import { formatPrice, HST_RATE, withHst } from "@/lib/money";
 import { EnrollButton } from "./enroll-button";
 import { PreviewLessonButton } from "./preview-lesson-button";
 
@@ -72,8 +72,8 @@ async function Tiers({ page, course, programTitle }: { page: ProgramPage; course
     <div className="planGrid">
       {page.tiers.map((tier, i) => {
         const name = localize(tier.name, locale);
-        const price = formatPrice(tier.priceCents, tier.currency, locale);
-        const { beforeTax, hst } = hstBreakdown(tier.priceCents);
+        const { beforeTax, hst, total } = withHst(tier.priceCents);
+        const price = formatPrice(total, tier.currency, locale);
         const breakdown = {
           rate: HST_RATE * 100,
           hst: formatPrice(hst, tier.currency, locale),

@@ -328,7 +328,8 @@
       "course": "Course",
       "tier": "Tier",
       "noTier": "No tier",
-      "priceHint": "The final price students pay, including 13% HST."
+      "priceHint": "What Kate receives, before tax. Students pay this plus 13% HST.",
+      "priceSummary": "{price} + HST = {total}"
     },
     "errors": {
       "required": "Please fill in the English version of this field.",

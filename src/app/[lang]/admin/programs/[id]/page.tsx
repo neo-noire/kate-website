@@ -23,7 +23,7 @@ import {
 } from "@/lib/catalog/admin-actions";
 import { getAdminProgram, type AdminProgram } from "@/lib/catalog/admin-queries";
 import { localize } from "@/lib/localized";
-import { CURRENCIES, formatPrice } from "@/lib/money";
+import { CURRENCIES, formatPrice, withHst } from "@/lib/money";
 import { youTubeWatchUrl } from "@/lib/youtube";
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -136,7 +136,11 @@ async function TiersSection({ program }: { program: AdminProgram }) {
       {program.tiers.map((item) => (
         <details key={item.id} className="adminItem">
           <summary>
-            {localize(item.name, locale)} · {formatPrice(item.priceCents, item.currency, locale)}
+            {localize(item.name, locale)} ·{" "}
+            {t("fields.priceSummary", {
+              price: formatPrice(item.priceCents, item.currency, locale),
+              total: formatPrice(withHst(item.priceCents).total, item.currency, locale),
+            })}
           </summary>
           <ActionForm action={updateTier} submitLabel={t("save")} hidden={{ id: item.id }}>
             {fields(item)}
