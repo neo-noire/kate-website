@@ -71,14 +71,16 @@ The catalog lives in the database. A **program** (e.g. Beginner 1.0) holds one *
 
 Admins (the `ADMIN_EMAILS` accounts) manage it at `/en/admin`, linked from their dashboard as "Manage courses": edit text in each language, set prices, paste YouTube links for lessons, mark free previews, publish programs and give students access by email. Until Stripe checkout exists, giving access there is how a student gets a course.
 
-- Lesson videos are YouTube embeds (use unlisted videos). Video ids reach the browser only for students who own the course, admins, and free previews, but anyone holding an unlisted link can still watch it.
+- Lesson videos are YouTube embeds (use unlisted videos). A paid lesson's video id is sent only when its owner presses play, but anyone holding an unlisted link can still watch it.
+- The first time a student plays a paid lesson of a course is saved on their purchase and shown on the admin page; refunds are only possible before then (free previews don't count).
+- Access lasts 3 months from purchase (`ACCESS_MONTHS` in `src/lib/catalog/access.ts`). Expired courses leave the student's dashboard, and giving access again renews it.
 - Text a student reads is stored per language; English is required and other languages fall back to it.
 - Public pages are cached and refreshed as soon as an admin saves a change.
 - The first migrations seed the prototype's programs, tiers and lesson outlines (no videos) so the site isn't empty.
 
 ### Legal pages
 
-`/terms`, `/privacy` and `/refunds` (in every language) are linked from the footer, and sign-up links to the first two. The texts live in `src/content/legal/` (`en.ts`, `uk.ts`; a language without a translation shows English). The business name, province and contact email in `src/content/legal/business.ts` are placeholders until Kate confirms them. Each page shows a draft notice until `reviewed` is set to `true` there, after the texts have been checked by someone qualified. Bump `lastUpdated` whenever a text changes.
+`/terms`, `/privacy` and `/refunds` (in every language) are linked from the footer, and sign-up links to the first two. The texts live in `src/content/legal/` (`en.ts`, `uk.ts`; a language without a translation shows English). The terms follow Ontario law; the legal business name and contact email in `src/content/legal/business.ts` are placeholders until Kate confirms them. Each page shows a draft notice until `reviewed` is set to `true` there, after the texts have been checked by someone qualified. Bump `lastUpdated` whenever a text changes.
 
 ## The original prototype
 

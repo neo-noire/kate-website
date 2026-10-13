@@ -1,5 +1,5 @@
 import "server-only";
-import { and, asc, eq, inArray, isNotNull } from "drizzle-orm";
+import { and, asc, eq, gt, inArray, isNotNull, isNull, or } from "drizzle-orm";
 import { cacheLife, cacheTag } from "next/cache";
 import { db } from "@/db";
 import { course, lesson, lessonNote, lessonProgress, program, purchase, tier } from "@/db/schema";
@@ -108,20 +108,35 @@ export async function getFeaturedPreview() {
 }
 
 /** The user's purchase of a course, with its tier, or undefined. Not cached: per user. */
+/** Purchases whose access hasn't ended. */
+function activePurchase() {
+  return or(isNull(purchase.expiresAt), gt(purchase.expiresAt, new Date()));
+}
+
+/** The user's current (not expired) purchase of a course. */
 export async function getPurchase(userId: string, courseId: string) {
   return db.query.purchase.findFirst({
-    where: and(eq(purchase.userId, userId), eq(purchase.courseId, courseId)),
-    columns: { id: true },
+    where: and(eq(purchase.userId, userId), eq(purchase.courseId, courseId), activePurchase()),
+    columns: { id: true, expiresAt: true },
     with: { tier: { columns: { name: true } } },
   });
 }
 
-/** True when the user may watch the lesson: an admin, a buyer of its course, or a free preview. */
+/** True when the user may watch the lesson: an admin, a current buyer of its course, or a free preview. */
 export async function canWatchLesson(userId: string, admin: boolean, lessonId: string) {
-  const row = await db.query.lesson.findFirst({ where: eq(lesson.id, lessonId), columns: { courseId: true, isPreview: true } });
-  if (!row) return false;
-  if (admin || row.isPreview) return true;
-  return Boolean(await getPurchase(userId, row.courseId));
+  return Boolean(await getPlayableLesson(userId, admin, lessonId));
+}
+
+/** The lesson's video details when the user may watch it, otherwise null. */
+export async function getPlayableLesson(userId: string, admin: boolean, lessonId: string) {
+  const row = await db.query.lesson.findFirst({
+    where: eq(lesson.id, lessonId),
+    columns: { courseId: true, isPreview: true, videoId: true, videoProvider: true },
+  });
+  if (!row) return null;
+  if (admin || row.isPreview) return { ...row, purchaseId: null };
+  const owned = await getPurchase(userId, row.courseId);
+  return owned ? { ...row, purchaseId: owned.id } : null;
 }
 
 /**
@@ -130,12 +145,12 @@ export async function canWatchLesson(userId: string, admin: boolean, lessonId: s
  */
 export async function getLibrary(userId: string, admin: boolean) {
   const owned = await db.query.purchase.findMany({
-    where: eq(purchase.userId, userId),
-    columns: { courseId: true },
+    where: and(eq(purchase.userId, userId), activePurchase()),
+    columns: { courseId: true, expiresAt: true },
     with: { tier: { columns: { name: true, privateLessons: true } } },
     orderBy: [asc(purchase.createdAt)],
   });
-  const tierByCourse = new Map(owned.map((p) => [p.courseId, p.tier]));
+  const purchaseByCourse = new Map(owned.map((p) => [p.courseId, p]));
   const courseIds = owned.map((p) => p.courseId);
 
   const courses = admin || courseIds.length
@@ -146,7 +161,9 @@ export async function getLibrary(userId: string, admin: boolean) {
           program: { columns: { title: true, sortOrder: true, published: true } },
           lessons: {
             orderBy: [asc(lesson.sortOrder), asc(lesson.createdAt)],
-            columns: { id: true, title: true, description: true, durationMinutes: true, videoId: true, videoProvider: true },
+            // Video ids are sent only when a lesson is played (see playLesson), so opening the
+            // dashboard doesn't count as watching and the links don't sit in the page.
+            columns: { id: true, title: true, description: true, durationMinutes: true, videoId: true },
           },
         },
         orderBy: [asc(course.sortOrder), asc(course.createdAt)],
@@ -180,8 +197,9 @@ export async function getLibrary(userId: string, admin: boolean) {
       id: c.id,
       title: c.title,
       programTitle: c.program.title,
-      tier: tierByCourse.get(c.id) ?? null,
-      lessons: c.lessons,
+      tier: purchaseByCourse.get(c.id)?.tier ?? null,
+      expiresAt: purchaseByCourse.get(c.id)?.expiresAt ?? null,
+      lessons: c.lessons.map(({ videoId, ...l }) => ({ ...l, hasVideo: Boolean(videoId) })),
     })),
     completed: progress.map((p) => p.lessonId),
     notes: Object.fromEntries(notes.map((n) => [n.lessonId, n.body])),

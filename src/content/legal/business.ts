@@ -7,8 +7,8 @@ export const business = {
   brand: "RITMO",
   /** The legal name of the person or company that sells the courses. */
   legalName: "[legal business name]",
-  /** Province whose laws govern the terms. */
-  province: "[province]",
+  /** Province whose laws govern the terms, as written in each language. */
+  province: { en: "Ontario", uk: "Онтаріо" } as Record<string, string>,
   /** Where customers send questions, refund requests and privacy requests. */
   email: "[contact email]",
   /** Shown as "Last updated" on every legal page. ISO date. */

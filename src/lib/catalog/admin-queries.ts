@@ -32,7 +32,7 @@ export async function getAdminProgram(id: string) {
     ? await db.query.purchase.findMany({
         where: inArray(purchase.courseId, courseIds),
         orderBy: [desc(purchase.createdAt)],
-        columns: { id: true, courseId: true, source: true },
+        columns: { id: true, courseId: true, source: true, expiresAt: true, firstWatchedAt: true },
         with: { user: { columns: { name: true, email: true } }, tier: { columns: { name: true } } },
       })
     : [];

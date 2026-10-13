@@ -1498,6 +1498,33 @@ textarea,
   height: 100%;
   border: 0;
 }
+.videoPoster {
+  display: grid;
+  place-items: center;
+  background: radial-gradient(circle at center, #2a2a2a, #000 70%);
+}
+.playButton {
+  width: 84px;
+  height: 84px;
+  border-radius: 50%;
+  border: 0;
+  background: var(--red);
+  color: white;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+}
+.playButton svg {
+  margin-left: 4px;
+}
+.playButton:disabled {
+  opacity: 0.6;
+}
+.accessUntil {
+  font-size: 12px;
+  color: var(--muted);
+  margin: 14px 0 0;
+}
 .videoPending {
   display: grid;
   place-items: center;

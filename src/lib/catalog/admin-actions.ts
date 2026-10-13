@@ -9,6 +9,7 @@ import { routing, type Locale } from "@/i18n/routing";
 import { NotAuthorizedError, requireAdmin } from "@/lib/auth/session";
 import { CURRENCIES, parsePriceToCents } from "@/lib/money";
 import { parseYouTubeId } from "@/lib/youtube";
+import { accessExpiry } from "./access";
 import type { FormError, FormState } from "./form-state";
 import { CATALOG_TAG } from "./queries";
 
@@ -227,8 +228,12 @@ export async function grantAccess(_: FormState, form: FormData): Promise<FormSta
     if (!student) throw new FieldError("userNotFound", "email");
     await db
       .insert(purchase)
-      .values({ id: newId(), userId: student.id, courseId, tierId, source: "admin" })
-      .onConflictDoUpdate({ target: [purchase.userId, purchase.courseId], set: { tierId, updatedAt: new Date() } });
+      .values({ id: newId(), userId: student.id, courseId, tierId, source: "admin", expiresAt: accessExpiry() })
+      // Granting again renews access for another full period.
+      .onConflictDoUpdate({
+        target: [purchase.userId, purchase.courseId],
+        set: { tierId, expiresAt: accessExpiry(), updatedAt: new Date() },
+      });
   });
 }
 
