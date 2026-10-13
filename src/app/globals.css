@@ -118,12 +118,12 @@ header .wrap {
   justify-content: space-between;
   gap: 20px;
 }
-nav {
+header nav {
   display: flex;
   gap: 32px;
   font-size: 13px;
 }
-nav a:hover {
+header nav a:hover {
   color: var(--red);
 }
 .navRight {
@@ -559,6 +559,71 @@ footer a {
   font-size: 10px;
   color: var(--muted);
 }
+.footerLinks {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 20px;
+}
+.legal {
+  max-width: 760px;
+}
+.legal h1 {
+  font-size: 42px;
+  letter-spacing: -1.7px;
+  line-height: 1.1;
+  margin: 12px 0 10px;
+}
+.legal h2 {
+  font-size: 19px;
+  margin: 38px 0 10px;
+}
+.legal p,
+.legal li {
+  color: var(--muted);
+}
+.legal section p {
+  margin: 0 0 12px;
+}
+.legal ul {
+  padding-left: 20px;
+}
+.legal li + li {
+  margin-top: 6px;
+}
+.legal a {
+  color: var(--white);
+  text-decoration: underline;
+}
+.legalNav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 22px;
+  margin-bottom: 40px;
+  font-size: 13px;
+}
+.legal .legalNav a {
+  color: var(--muted);
+  text-decoration: none;
+}
+.legal .legalNav a[aria-current="page"] {
+  color: var(--white);
+  text-decoration: underline;
+  text-underline-offset: 5px;
+}
+.legalUpdated {
+  font-size: 13px;
+}
+.legalDraft {
+  margin-top: 18px;
+  border: 1px solid var(--red);
+  padding: 12px 16px;
+  font-size: 13px;
+}
+.legal .legalIntro {
+  color: var(--white);
+  font-size: 17px;
+  margin-top: 24px;
+}
 .hidden {
   display: none !important;
 }
@@ -947,7 +1012,7 @@ footer a {
   .wrap {
     width: calc(100% - 48px);
   }
-  nav {
+  header nav {
     gap: 18px;
   }
   .programs {
@@ -998,7 +1063,7 @@ footer a {
   .menuBtn {
     display: grid;
   }
-  nav {
+  header nav {
     display: none;
     position: absolute;
     top: 70px;
@@ -1009,7 +1074,7 @@ footer a {
     flex-direction: column;
     border-bottom: 1px solid #333;
   }
-  nav.open {
+  header nav.open {
     display: flex;
   }
   .hero {
@@ -1328,6 +1393,15 @@ textarea,
 }
 .formError:empty {
   display: none;
+}
+.authAgreement {
+  margin: 0;
+  font-size: 12px;
+  color: var(--muted);
+}
+.authAgreement a {
+  color: var(--white);
+  text-decoration: underline;
 }
 .authSwitch {
   margin-top: 22px;

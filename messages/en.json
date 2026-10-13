@@ -114,6 +114,17 @@
     "demoData": "About demo data",
     "photoCredit": "Photo: Unsplash"
   },
+  "legal": {
+    "eyebrow": "Legal",
+    "navLabel": "Legal pages",
+    "lastUpdated": "Last updated {date}",
+    "draft": "Draft: this text is still being reviewed, and the details in brackets will be filled in before the site launches.",
+    "nav": {
+      "terms": "Terms of Service",
+      "privacy": "Privacy Policy",
+      "refunds": "Refund Policy"
+    }
+  },
   "packages": {
     "back": "All programs",
     "eyebrow": "Choose your format",
@@ -248,7 +259,8 @@
       "oauth": "Google sign-in didn't work. Please try again or use your email."
     },
     "google": "Continue with Google",
-    "or": "or"
+    "or": "or",
+    "agreement": "By creating an account, you agree to our <terms>Terms of Service</terms> and <privacy>Privacy Policy</privacy>."
   },
   "admin": {
     "title": "Manage courses",

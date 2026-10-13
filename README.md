@@ -76,6 +76,10 @@ Admins (the `ADMIN_EMAILS` accounts) manage it at `/en/admin`, linked from their
 - Public pages are cached and refreshed as soon as an admin saves a change.
 - The first migrations seed the prototype's programs, tiers and lesson outlines (no videos) so the site isn't empty.
 
+### Legal pages
+
+`/terms`, `/privacy` and `/refunds` (in every language) are linked from the footer, and sign-up links to the first two. The texts live in `src/content/legal/` (`en.ts`, `uk.ts`; a language without a translation shows English). The business name, province and contact email in `src/content/legal/business.ts` are placeholders until Kate confirms them. Each page shows a draft notice until `reviewed` is set to `true` there, after the texts have been checked by someone qualified. Bump `lastUpdated` whenever a text changes.
+
 ## The original prototype
 
 [`prototype/ritmo.html`](./prototype/ritmo.html) is the original single-file prototype, kept for reference. Open it directly in a browser; it needs no build or network. The app above reproduces it, with these deliberate differences:
