@@ -125,7 +125,7 @@ export const tier = pgTable(
       .notNull()
       .references(() => program.id, { onDelete: "cascade" }),
     name: localized("name").notNull(),
-    /** Price of one course at this tier, in the currency's minor unit (cents). */
+    /** Price of one course at this tier before HST, in the currency's minor unit (cents). HST is added on top. */
     priceCents: integer("price_cents").notNull(),
     /** ISO 4217 code, e.g. "CAD". */
     currency: text("currency").notNull().default("CAD"),

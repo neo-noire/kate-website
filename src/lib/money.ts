@@ -19,11 +19,11 @@ export function parsePriceToCents(input: string): number | null {
   return Math.round(Number(value) * 100);
 }
 
-/** Ontario HST. Prices on the site include it; checkout charges exactly the price shown. */
+/** Ontario HST. Admins enter prices before tax; the site adds HST on top and shows students the total. */
 export const HST_RATE = 0.13;
 
-/** Splits a tax-inclusive price into the amount before tax and the HST it contains. */
-export function hstBreakdown(totalCents: number) {
-  const beforeTax = Math.round(totalCents / (1 + HST_RATE));
-  return { beforeTax, hst: totalCents - beforeTax };
+/** Adds HST to a price before tax. `total` is what the student pays. */
+export function withHst(beforeTaxCents: number) {
+  const hst = Math.round(beforeTaxCents * HST_RATE);
+  return { beforeTax: beforeTaxCents, hst, total: beforeTaxCents + hst };
 }

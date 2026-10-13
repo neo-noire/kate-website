@@ -2,6 +2,8 @@
 
 A personal website for a ballroom dance coach, combining a compact marketing landing page with an online course library and a student learning dashboard.
 
+**Live site:** https://katematus-website.vercel.app/en
+
 **Current status:** a bilingual Next.js App Router + TypeScript site on Neon Postgres with real accounts (email and password, Google once its keys are added), a database course catalog with an admin editor, YouTube lessons, legal pages, and a contact form and newsletter sign-up stored in the database. Online payment (Stripe) and email sending (Resend) are not connected yet. `RITMO` is a placeholder brand; the coach’s final branding, biography, photography, course content and prices still need to be supplied.
 
 ## Run the app
@@ -77,7 +79,7 @@ Admins (the `ADMIN_EMAILS` accounts) manage it at `/en/admin`, linked from their
 - Text a student reads is stored per language; English is required and other languages fall back to it.
 - Public pages are cached and refreshed as soon as an admin saves a change.
 - The first migrations seed the prototype's programs, tiers and lesson outlines (no videos) so the site isn't empty.
-- Prices include 13% Ontario HST (`HST_RATE` in `src/lib/money.ts`): admins enter the final price, and course pages show how much of it is tax. Migration `0005` raised the seeded prices by 13% when this was introduced.
+- Prices are entered before tax and 13% Ontario HST is added on top (`HST_RATE` and `withHst` in `src/lib/money.ts`). Students see the total they pay, with the before-tax price and HST shown next to it.
 
 ### Legal pages
 
