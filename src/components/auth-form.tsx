@@ -135,6 +135,14 @@ export function AuthForm({ mode, google }: { mode: Mode; google: boolean }) {
         <p className="formError" role="alert">
           {error ? t(`errors.${error}`) : ""}
         </p>
+        {mode === "signUp" && (
+          <p className="authAgreement">
+            {t.rich("agreement", {
+              terms: (chunks) => <Link href="/terms">{chunks}</Link>,
+              privacy: (chunks) => <Link href="/privacy">{chunks}</Link>,
+            })}
+          </p>
+        )}
         <button className="btn" type="submit" disabled={pending}>
           {pending ? t(mode === "signUp" ? "signingUp" : "signingIn") : t(mode)}
           {!pending && <ArrowUpRight size={16} aria-hidden />}
