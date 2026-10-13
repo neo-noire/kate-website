@@ -3,7 +3,7 @@
 import { count, eq } from "drizzle-orm";
 import { updateTag } from "next/cache";
 import { db } from "@/db";
-import { course, lesson, program, purchase, tier, user, type Localized } from "@/db/schema";
+import { contactMessage, course, lesson, newsletterSubscriber, program, purchase, tier, user, type Localized } from "@/db/schema";
 import { redirect } from "@/i18n/navigation";
 import { routing, type Locale } from "@/i18n/routing";
 import { NotAuthorizedError, requireAdmin } from "@/lib/auth/session";
@@ -239,4 +239,14 @@ export async function grantAccess(_: FormState, form: FormData): Promise<FormSta
 
 export async function revokeAccess(_: FormState, form: FormData): Promise<FormState> {
   return run(() => db.delete(purchase).where(eq(purchase.id, readId(form))));
+}
+
+// Contact form and newsletter
+
+export async function deleteContactMessage(_: FormState, form: FormData): Promise<FormState> {
+  return run(() => db.delete(contactMessage).where(eq(contactMessage.id, readId(form))));
+}
+
+export async function removeSubscriber(_: FormState, form: FormData): Promise<FormState> {
+  return run(() => db.delete(newsletterSubscriber).where(eq(newsletterSubscriber.email, readId(form, "email"))));
 }

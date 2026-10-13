@@ -9,13 +9,15 @@ type EnrollButtonProps = {
   courseTitle: string;
   tierName: string;
   price: string;
+  /** The HST contained in the price, already formatted. */
+  breakdown: { rate: number; hst: string; beforeTax: string };
   lessonCount: number;
   privateLessons: number;
   featured: boolean;
 };
 
 /** Chooses a tier. Checkout isn't connected yet, so the dialog says how to get access. */
-export function EnrollButton({ programTitle, courseTitle, tierName, price, lessonCount, privateLessons, featured }: EnrollButtonProps) {
+export function EnrollButton({ programTitle, courseTitle, tierName, price, breakdown, lessonCount, privateLessons, featured }: EnrollButtonProps) {
   const t = useTranslations();
   const dialog = useDialogState();
 
@@ -34,6 +36,14 @@ export function EnrollButton({ programTitle, courseTitle, tierName, price, lesso
           <br />
           {privateLessons ? t("enroll.privateLessons", { count: privateLessons }) : t("enroll.independent")}
         </p>
+        <dl className="priceBreakdown">
+          <dt>{t("enroll.beforeTax")}</dt>
+          <dd>{breakdown.beforeTax}</dd>
+          <dt>{t("enroll.hst", { rate: breakdown.rate })}</dt>
+          <dd>{breakdown.hst}</dd>
+          <dt>{t("enroll.total")}</dt>
+          <dd>{price}</dd>
+        </dl>
         <p className="fine">{t("enroll.comingSoon")}</p>
       </Modal>
     </>

@@ -245,3 +245,26 @@ export const purchaseRelations = relations(purchase, ({ one }) => ({
   course: one(course, { fields: [purchase.courseId], references: [course.id] }),
   tier: one(tier, { fields: [purchase.tierId], references: [tier.id] }),
 }));
+
+/** Messages sent through the site's contact form; admins read them on the admin page. */
+export const contactMessage = pgTable(
+  "contact_message",
+  {
+    id: text("id").primaryKey(),
+    name: text("name").notNull(),
+    email: text("email").notNull(),
+    message: text("message").notNull(),
+    locale: text("locale").notNull(),
+    /** The signed-in account that sent it, if any. */
+    userId: text("user_id").references(() => user.id, { onDelete: "set null" }),
+    createdAt: createdAt(),
+  },
+  (table) => [index("contact_message_created_at_idx").on(table.createdAt)],
+);
+
+/** Newsletter sign-ups. Emails are sent through Resend once it is connected. */
+export const newsletterSubscriber = pgTable("newsletter_subscriber", {
+  email: text("email").primaryKey(),
+  locale: text("locale").notNull(),
+  createdAt: createdAt(),
+});

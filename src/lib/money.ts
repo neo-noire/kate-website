@@ -18,3 +18,12 @@ export function parsePriceToCents(input: string): number | null {
   if (!/^\d{1,6}(\.\d{1,2})?$/.test(value)) return null;
   return Math.round(Number(value) * 100);
 }
+
+/** Ontario HST. Prices on the site include it; checkout charges exactly the price shown. */
+export const HST_RATE = 0.13;
+
+/** Splits a tax-inclusive price into the amount before tax and the HST it contains. */
+export function hstBreakdown(totalCents: number) {
+  const beforeTax = Math.round(totalCents / (1 + HST_RATE));
+  return { beforeTax, hst: totalCents - beforeTax };
+}

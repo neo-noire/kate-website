@@ -1,7 +1,7 @@
 import "server-only";
 import { asc, desc, eq, inArray } from "drizzle-orm";
 import { db } from "@/db";
-import { course, lesson, program, purchase, tier } from "@/db/schema";
+import { contactMessage, course, lesson, newsletterSubscriber, program, purchase, tier } from "@/db/schema";
 
 // Admin reads are not cached: they include drafts and must show edits immediately.
 
@@ -40,3 +40,12 @@ export async function getAdminProgram(id: string) {
 }
 
 export type AdminProgram = NonNullable<Awaited<ReturnType<typeof getAdminProgram>>>;
+
+/** The newest messages from the contact form. */
+export async function getContactMessages(limit = 100) {
+  return db.query.contactMessage.findMany({ orderBy: [desc(contactMessage.createdAt)], limit });
+}
+
+export async function getNewsletterSubscribers() {
+  return db.query.newsletterSubscriber.findMany({ orderBy: [desc(newsletterSubscriber.createdAt)] });
+}

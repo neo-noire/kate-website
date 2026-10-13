@@ -104,6 +104,7 @@ async function TiersSection({ program }: { program: AdminProgram }) {
           <TextField
             name="price"
             label={t("fields.price")}
+            hint={t("fields.priceHint")}
             inputMode="decimal"
             defaultValue={item ? (item.priceCents / 100).toFixed(item.priceCents % 100 ? 2 : 0) : ""}
             required

@@ -39,7 +39,7 @@ export function englishLegal(b: Business): Record<LegalDoc, LegalDocument> {
         {
           heading: "Prices and payment",
           body: [
-            "Prices are shown in Canadian dollars (CAD) unless the page says otherwise. Applicable sales taxes (such as GST/HST or PST) are added at checkout.",
+            "Prices are shown in Canadian dollars (CAD) unless the page says otherwise, and include 13% Ontario HST. Each course page shows how much of the price is tax. You pay exactly the price shown.",
             "Payments are processed by Stripe. We never see or store your full card number.",
             "You will receive a receipt by email after your purchase.",
             "We may change prices for future purchases. A price change never affects a course you have already bought.",
@@ -113,7 +113,8 @@ export function englishLegal(b: Business): Record<LegalDoc, LegalDocument> {
               "If you sign in with Google: your name, email address and profile picture from Google. We never see your Google password.",
               "Course activity: the courses you own, the package you chose, when your access ends, when you first played a paid lesson of each course (this decides whether a refund is possible), the lessons you mark as completed and the notes you write in your dashboard.",
               "Purchases: what you bought, when, and the amount. Card details go directly to Stripe, our payment processor; we only receive a confirmation and the last digits of the card.",
-              "Messages you send us: your name, email address and what you wrote.",
+              "Messages you send through the contact form: your name, email address and what you wrote.",
+              "Newsletter: your email address and language, if you subscribe.",
               "Technical data: your IP address and browser type, stored with your sign-in session to keep your account secure, and in our hosting provider's short-lived server logs.",
             ],
           ],
