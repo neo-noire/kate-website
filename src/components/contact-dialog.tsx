@@ -1,11 +1,12 @@
 "use client";
 
 import { ArrowUpRight } from "lucide-react";
-import { useTranslations } from "next-intl";
-import type { FormEvent } from "react";
+import { useLocale, useTranslations } from "next-intl";
+import { useTransition, type FormEvent } from "react";
 import { authClient } from "@/lib/auth/client";
-import { updateDemoState } from "@/lib/demo-store";
+import { sendContactMessage } from "@/lib/site-actions";
 import { useLocalizedValidation } from "@/lib/validation";
+import { Honeypot } from "./honeypot";
 import { Modal } from "./modal";
 import { useToast } from "./toast";
 
@@ -15,13 +16,20 @@ export function ContactDialog({ open, onClose }: { open: boolean; onClose: () =>
   const validation = useLocalizedValidation();
   const user = authClient.useSession().data?.user;
   const toast = useToast();
+  const locale = useLocale();
+  const [pending, startTransition] = useTransition();
 
   function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const data = Object.fromEntries(new FormData(event.currentTarget)) as Record<string, string>;
-    updateDemoState((state) => ({ ...state, feedback: { name: data.name, email: data.email, message: data.message } }));
-    toast(t("contact.saved"));
-    onClose();
+    startTransition(async () => {
+      if (await sendContactMessage({ ...data, name: data.name, email: data.email, message: data.message, locale })) {
+        toast(t("contact.sent"));
+        onClose();
+      } else {
+        toast(t("contact.error"));
+      }
+    });
   }
 
   return (
@@ -40,9 +48,12 @@ export function ContactDialog({ open, onClose }: { open: boolean; onClose: () =>
         </label>
         <label>
           {t("contact.message")}
-          <textarea name="message" placeholder={t("contact.messagePlaceholder")} required />
+          <textarea name="message" maxLength={5000} placeholder={t("contact.messagePlaceholder")} required />
         </label>
-        <button className="btn">{t("contact.submit")} <ArrowUpRight size={16} aria-hidden /></button>
+        <Honeypot />
+        <button className="btn" disabled={pending}>
+          {t("contact.submit")} <ArrowUpRight size={16} aria-hidden />
+        </button>
         <p className="fine">{t("contact.fine")}</p>
       </form>
     </Modal>

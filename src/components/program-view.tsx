@@ -5,7 +5,7 @@ import { Link } from "@/i18n/navigation";
 import { getSession, isAdmin } from "@/lib/auth/session";
 import { getPurchase, type ProgramPage } from "@/lib/catalog/queries";
 import { localize, localizeLines } from "@/lib/localized";
-import { formatPrice } from "@/lib/money";
+import { formatPrice, HST_RATE, hstBreakdown } from "@/lib/money";
 import { EnrollButton } from "./enroll-button";
 import { PreviewLessonButton } from "./preview-lesson-button";
 
@@ -73,6 +73,12 @@ async function Tiers({ page, course, programTitle }: { page: ProgramPage; course
       {page.tiers.map((tier, i) => {
         const name = localize(tier.name, locale);
         const price = formatPrice(tier.priceCents, tier.currency, locale);
+        const { beforeTax, hst } = hstBreakdown(tier.priceCents);
+        const breakdown = {
+          rate: HST_RATE * 100,
+          hst: formatPrice(hst, tier.currency, locale),
+          beforeTax: formatPrice(beforeTax, tier.currency, locale),
+        };
         const items = [
           t("videoLessons", { count: course.lessons.length }),
           ...(tier.privateLessons
@@ -87,6 +93,7 @@ async function Tiers({ page, course, programTitle }: { page: ProgramPage; course
             <div className="price">
               {price} <small>{t("perCourse")}</small>
             </div>
+            <p className="taxNote">{t("taxIncluded", breakdown)}</p>
             <ul>
               {items.map((item) => (
                 <li key={item}>
@@ -100,6 +107,7 @@ async function Tiers({ page, course, programTitle }: { page: ProgramPage; course
               courseTitle={courseTitle}
               tierName={name}
               price={price}
+              breakdown={breakdown}
               lessonCount={course.lessons.length}
               privateLessons={tier.privateLessons}
               featured={tier.featured}

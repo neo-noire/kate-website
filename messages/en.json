@@ -58,7 +58,7 @@
     "dances": "{count, plural, one {# dance} other {# dances}}",
     "lessons": "{count, plural, one {# lesson} other {# lessons}}",
     "online": "Online",
-    "fromPrice": "From {price} / dance",
+    "fromPrice": "From {price} / dance, HST included",
     "open": "Open {name}",
     "all": "All programs",
     "empty": "New programs are coming soon."
@@ -92,8 +92,8 @@
     "emailLabel": "Your email",
     "subscribe": "Subscribe",
     "consent": "I agree to receive course updates.",
-    "demoNotice": "Demo form: data is saved in this browser only.",
-    "success": "Done! Demo subscription saved. No emails are sent."
+    "success": "You're subscribed. Thanks!",
+    "error": "Please check your email address and try again."
   },
   "faq": {
     "partner": {
@@ -110,9 +110,7 @@
     }
   },
   "footer": {
-    "copyright": "© RITMO · Personal coach website concept",
-    "demoData": "About demo data",
-    "photoCredit": "Photo: Unsplash"
+    "copyright": "© RITMO · Online ballroom dance lessons"
   },
   "legal": {
     "eyebrow": "Legal",
@@ -146,7 +144,8 @@
     "owned": "You have this course · {tier}",
     "ownedNoTier": "You have this course",
     "adminAccess": "As an admin, you can watch every lesson.",
-    "openDashboard": "Open in my dashboard"
+    "openDashboard": "Open in my dashboard",
+    "taxIncluded": "Includes {rate}% HST ({hst}) · {beforeTax} before tax"
   },
   "enroll": {
     "eyebrow": "Your selection",
@@ -154,7 +153,10 @@
     "privateLessons": "{count, plural, one {# private lesson} other {# private lessons}}",
     "independent": "Independent practice",
     "dialogLabel": "Course checkout",
-    "comingSoon": "Online payment is coming soon. Until then, your coach can give you access to this course."
+    "comingSoon": "Online payment is coming soon. Until then, your coach can give you access to this course.",
+    "beforeTax": "Price before tax",
+    "hst": "HST ({rate}%)",
+    "total": "Total"
   },
   "dashboard": {
     "eyebrow": "Your space to move",
@@ -213,18 +215,11 @@
     "sub": "Leave a question for your coach.",
     "message": "Message",
     "messagePlaceholder": "What is your goal, or what do you need help with?",
-    "submit": "Save demo message",
-    "fine": "Your message is saved locally only. Nothing is sent to the coach.",
+    "submit": "Send message",
+    "fine": "Your coach will reply by email.",
     "dialogLabel": "Message to your coach",
-    "saved": "Demo message saved in your browser."
-  },
-  "privacy": {
-    "eyebrow": "About this prototype",
-    "title": "Everything stays here.",
-    "body": "Your account, courses, progress and notes are stored securely on our server. The newsletter and contact forms are still demos saved in this browser. There is no payment or email sending yet. Photo: Unsplash.",
-    "clear": "Clear my demo data",
-    "dialogLabel": "Prototype data",
-    "cleared": "Demo data cleared."
+    "sent": "Message sent. Your coach will reply by email.",
+    "error": "Couldn't send your message. Please check the fields and try again."
   },
   "validation": {
     "required": "Please complete this field.",
@@ -332,7 +327,8 @@
       "email": "Student email",
       "course": "Course",
       "tier": "Tier",
-      "noTier": "No tier"
+      "noTier": "No tier",
+      "priceHint": "The final price students pay, including 13% HST."
     },
     "errors": {
       "required": "Please fill in the English version of this field.",
@@ -350,6 +346,15 @@
     "accessUntil": "Access until {date}",
     "expired": "Access ended {date}",
     "firstWatched": "First played {date}",
-    "notWatched": "No paid lesson played yet (refundable)"
+    "notWatched": "No paid lesson played yet (refundable)",
+    "inbox": {
+      "messages": "Messages",
+      "noMessages": "No messages yet.",
+      "subscribers": "Newsletter subscribers",
+      "noSubscribers": "No subscribers yet.",
+      "subscriberCount": "{count, plural, one {# subscriber} other {# subscribers}}",
+      "delete": "Delete",
+      "remove": "Remove"
+    }
   }
 }

@@ -2,7 +2,7 @@
 
 A personal website for a ballroom dance coach, combining a compact marketing landing page with an online course library and a student learning dashboard.
 
-**Current status:** a Next.js App Router + TypeScript app that reproduces the bilingual design prototype with static data, plus real accounts (email and password, Google once its keys are added) stored in Neon Postgres. There is still no payment, email or video delivery; course enrollments, progress and notes are demo data in the browser. `RITMO` is a placeholder brand; the coach’s final branding, biography, photography, course content and prices still need to be supplied.
+**Current status:** a bilingual Next.js App Router + TypeScript site on Neon Postgres with real accounts (email and password, Google once its keys are added), a database course catalog with an admin editor, YouTube lessons, legal pages, and a contact form and newsletter sign-up stored in the database. Online payment (Stripe) and email sending (Resend) are not connected yet. `RITMO` is a placeholder brand; the coach’s final branding, biography, photography, course content and prices still need to be supplied.
 
 ## Run the app
 
@@ -23,7 +23,7 @@ Routes:
 | Route | What it is |
 | --- | --- |
 | `/en`, `/uk` | Landing page: hero, program catalog with filters, approach, newsletter, FAQ |
-| `/{lang}/programs/{program}` and `/{lang}/programs/{program}/{dance}` | Dance tabs and the three packages for one dance, with demo enrollment |
+| `/{lang}/programs/{program}` and `/{lang}/programs/{program}/{dance}` | Dance tabs and the pricing tiers for one dance (checkout is not connected yet) |
 | `/{lang}/sign-in`, `/{lang}/sign-up` | Account pages (email and password; a Google button appears once Google keys are configured) |
 | `/{lang}/dashboard` | Student dashboard: lessons, placeholder player, progress and notes. Signed-out visitors are redirected to sign in |
 | `/api/auth/*` | Better Auth endpoints |
@@ -38,7 +38,7 @@ Code layout:
 - `src/app/[lang]/`: routes; the root layout sits under `[lang]` so `<html lang>`, metadata and `hreflang` links are per locale.
 - `src/lib/auth/`: [Better Auth](https://better-auth.com) server config, React client and the safe post-sign-in redirect. `src/proxy.ts` redirects signed-out visitors away from the dashboard; the dashboard page checks the session again on the server.
 - `src/db/`: Drizzle schema and client (`pg` driver). Migrations live in `drizzle/`; `npm run db:generate` creates one from schema changes and `npm run build` applies pending ones before building (on Vercel the build fails if the database is not connected).
-- `src/lib/demo-store.ts`: the prototype-only `localStorage` store (key `ritmo-demo-v2`) for enrollments, progress and notes. Replace with database-backed records when payments arrive.
+- `src/lib/site-actions.ts`: the contact form and newsletter sign-up. Both save to the database (with a hidden honeypot field against bots); admins read messages and subscribers on `/admin`.
 - `src/app/globals.css`: the prototype’s stylesheet, ported with its class names intact. Form fields are at least 16px so iOS Safari does not zoom in on focus.
 - Icons come from [Lucide](https://lucide.dev) (`lucide-react`), not Unicode symbols, which iOS renders as emoji.
 
@@ -50,7 +50,7 @@ Code layout:
 
 Pages for the new locale are prerendered automatically, and redirects, `hreflang` links and the language picker pick it up from the routing config.
 
-Accounts are real: passwords are hashed by Better Auth and sessions are stored in Postgres. Enrollments, progress, notes and requests are still stored only in this browser’s `localStorage`. Nothing is sent to a coach or email provider. Demo data can be cleared through **About demo data** in the footer.
+Accounts, purchases, progress, notes, contact messages and newsletter sign-ups are stored in Postgres. Nothing is emailed yet: contact messages and subscribers are listed on the admin page until Resend is connected.
 
 ### Accounts and environment variables
 
@@ -77,6 +77,7 @@ Admins (the `ADMIN_EMAILS` accounts) manage it at `/en/admin`, linked from their
 - Text a student reads is stored per language; English is required and other languages fall back to it.
 - Public pages are cached and refreshed as soon as an admin saves a change.
 - The first migrations seed the prototype's programs, tiers and lesson outlines (no videos) so the site isn't empty.
+- Prices include 13% Ontario HST (`HST_RATE` in `src/lib/money.ts`): admins enter the final price, and course pages show how much of it is tax. Migration `0005` raised the seeded prices by 13% when this was introduced.
 
 ### Legal pages
 
