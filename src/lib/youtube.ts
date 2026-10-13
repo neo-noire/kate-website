@@ -28,6 +28,6 @@ export function youTubeWatchUrl(id: string) {
 }
 
 /** Privacy-enhanced embed: no YouTube cookies until the video plays. */
-export function youTubeEmbedUrl(id: string) {
-  return `https://www.youtube-nocookie.com/embed/${id}?rel=0&modestbranding=1&playsinline=1`;
+export function youTubeEmbedUrl(id: string, { autoplay = false } = {}) {
+  return `https://www.youtube-nocookie.com/embed/${id}?rel=0&modestbranding=1&playsinline=1${autoplay ? "&autoplay=1" : ""}`;
 }

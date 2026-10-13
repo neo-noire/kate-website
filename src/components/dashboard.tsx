@@ -1,7 +1,7 @@
 "use client";
 
 import { Check, LogOut, Plus, Settings } from "lucide-react";
-import { useLocale, useTranslations } from "next-intl";
+import { useFormatter, useLocale, useTranslations } from "next-intl";
 import { useState, useTransition } from "react";
 import { getPathname, Link } from "@/i18n/navigation";
 import { authClient } from "@/lib/auth/client";
@@ -9,7 +9,7 @@ import type { Library } from "@/lib/catalog/queries";
 import { saveLessonNote, setLessonCompleted } from "@/lib/catalog/student-actions";
 import { localize } from "@/lib/localized";
 import { useToast } from "./toast";
-import { YouTubePlayer } from "./youtube-player";
+import { LessonVideo } from "./lesson-video";
 
 type Tab = "about" | "notes" | "practice";
 type Course = Library["courses"][number];
@@ -82,6 +82,7 @@ function Studio({ admin, library, initialCourseId }: Omit<DashboardProps, "userN
   const t = useTranslations();
   const locale = useLocale();
   const toast = useToast();
+  const format = useFormatter();
   const [, startTransition] = useTransition();
   const [completed, setCompleted] = useState(() => new Set(library.completed));
   const [notes, setNotes] = useState(library.notes);
@@ -143,6 +144,11 @@ function Studio({ admin, library, initialCourseId }: Omit<DashboardProps, "userN
             </button>
           ))}
         </div>
+        {course.expiresAt && (
+          <p className="accessUntil">
+            {t("dashboard.accessUntil", { date: format.dateTime(course.expiresAt, { dateStyle: "long" }) })}
+          </p>
+        )}
         {course.tier && (
           <div className="bookingCard">
             <span className="eyebrow">{t("dashboard.privatePractice")}</span>
@@ -163,8 +169,8 @@ function Studio({ admin, library, initialCourseId }: Omit<DashboardProps, "userN
           <p className="lessonText">{t("dashboard.noLessons")}</p>
         ) : (
           <>
-            {lesson.videoId ? (
-              <YouTubePlayer key={lesson.id} videoId={lesson.videoId} title={localize(lesson.title, locale)} />
+            {lesson.hasVideo ? (
+              <LessonVideo key={lesson.id} lessonId={lesson.id} title={localize(lesson.title, locale)} />
             ) : (
               <div className="videoFrame videoPending">
                 <p>{t("dashboard.videoComingSoon")}</p>

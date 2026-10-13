@@ -1,3 +1,4 @@
+import { ACCESS_MONTHS } from "@/lib/catalog/access";
 import type { Business } from "./business";
 import type { LegalDoc, LegalDocument } from "./types";
 
@@ -11,7 +12,7 @@ export function englishLegal(b: Business): Record<LegalDoc, LegalDocument> {
           heading: "Your account",
           body: [
             "You need an account to buy and watch courses. Give us accurate details and keep your password private. You are responsible for what happens under your account.",
-            "You must be at least 18, or have the permission of a parent or guardian who agrees to these terms for you.",
+            "You must be at least 18 years old to create an account or buy a course.",
             "An account is for one person. Please don't share your login.",
           ],
         },
@@ -23,15 +24,16 @@ export function englishLegal(b: Business): Record<LegalDoc, LegalDocument> {
               "a personal, non-transferable right to watch that course's lessons online for your own learning;",
               "any private lessons the package includes, as described on the course page.",
             ],
-            "You keep access for as long as we offer the course, and for at least 12 months after your purchase. If we stop offering a course earlier, we will refund the unused part of what you paid or give you access to a similar course.",
-            "We may improve or update lessons over time. We won't remove a lesson from a course you bought unless we replace it with something of similar value.",
+            `Your access to a course's lessons lasts ${ACCESS_MONTHS} months from the date of purchase. Your dashboard shows the date it ends. After that, you can buy the course again, including any newer version of it.`,
+            "Our courses keep evolving, so lessons may be improved, replaced or added over time. While your access lasts, we won't remove a lesson from your course unless we replace it with something of similar value.",
+            "If we stop offering a course before your access ends, we will refund the unused part of what you paid or give you access to a similar course.",
           ],
         },
         {
           heading: "Private lessons",
           body: [
             "Private lessons included in a package are scheduled with your coach on a separate booking platform, not on this site. That platform's own rules apply to booking, rescheduling and missed sessions.",
-            "Please use your private lessons within 6 months of your purchase. If you can't, contact us before that date and we will try to work something out.",
+            "Private lessons must be used within 6 months of your purchase, even though access to the videos ends sooner. If you can't make it in time, contact us before that date and we will try to work something out.",
           ],
         },
         {
@@ -89,7 +91,7 @@ export function englishLegal(b: Business): Record<LegalDoc, LegalDocument> {
         {
           heading: "Governing law",
           body: [
-            `These terms are governed by the laws of ${b.province} and the federal laws of Canada that apply there. If you live in another province, you also keep the protections of your own province's consumer laws.`,
+            `These terms are governed by the laws of ${b.province.en} and the federal laws of Canada that apply there. If you live in another province, you also keep the protections of your own province's consumer laws.`,
           ],
         },
         {
@@ -109,7 +111,7 @@ export function englishLegal(b: Business): Record<LegalDoc, LegalDocument> {
             [
               "Account details: your name, email address and password. Passwords are stored only as a secure hash, never in readable form.",
               "If you sign in with Google: your name, email address and profile picture from Google. We never see your Google password.",
-              "Course activity: the courses you own, the package you chose, the lessons you mark as completed and the notes you write in your dashboard.",
+              "Course activity: the courses you own, the package you chose, when your access ends, when you first played a paid lesson of each course (this decides whether a refund is possible), the lessons you mark as completed and the notes you write in your dashboard.",
               "Purchases: what you bought, when, and the amount. Card details go directly to Stripe, our payment processor; we only receive a confirmation and the last digits of the card.",
               "Messages you send us: your name, email address and what you wrote.",
               "Technical data: your IP address and browser type, stored with your sign-in session to keep your account secure, and in our hosting provider's short-lived server logs.",
@@ -186,7 +188,7 @@ export function englishLegal(b: Business): Record<LegalDoc, LegalDocument> {
         {
           heading: "Children",
           body: [
-            "The site isn't aimed at children under 13, and we don't knowingly collect their information. Teens under 18 need a parent or guardian's permission to buy a course.",
+            "The site is for adults. You must be 18 or older to create an account, and we don't knowingly collect information about anyone younger. If you believe a minor has created an account, contact us and we will delete it.",
           ],
         },
         {
@@ -211,9 +213,10 @@ export function englishLegal(b: Business): Record<LegalDoc, LegalDocument> {
           body: [
             "You can get a full refund within 14 days of your purchase if both of these are true:",
             [
-              "you have watched no more than the first lesson of the course;",
+              "you haven't played any paid lesson of the course yet (free preview lessons don't count);",
               "none of the private lessons included in your package has taken place yet.",
             ],
+            "Once you play a lesson, you have seen the content you paid for, so the course can no longer be refunded. Our site records the first time you play a paid lesson of each course.",
           ],
         },
         {

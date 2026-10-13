@@ -202,7 +202,10 @@
     "videoComingSoon": "The video for this lesson is coming soon.",
     "noLessons": "Lessons for this course are coming soon.",
     "manage": "Manage courses",
-    "allCourses": "All courses (admin view)"
+    "allCourses": "All courses (admin view)",
+    "play": "Play {title}",
+    "playError": "This lesson can't be played right now. Please refresh the page.",
+    "accessUntil": "Access until {date}"
   },
   "contact": {
     "eyebrow": "Personal support",
@@ -292,7 +295,7 @@
       "coursesHint": "One course per dance, each with its own lessons.",
       "lessons": "Lessons",
       "access": "Access",
-      "accessHint": "Payments aren't connected yet. Give a registered student access to a course here."
+      "accessHint": "Payments aren't connected yet. Give a registered student access to a course here. Access lasts 3 months; granting it again renews it."
     },
     "newTier": "New tier",
     "newCourse": "New course",
@@ -343,6 +346,10 @@
       "notFound": "This item no longer exists. Reload the page.",
       "forbidden": "Only admins can do this.",
       "generic": "Something went wrong. Please try again."
-    }
+    },
+    "accessUntil": "Access until {date}",
+    "expired": "Access ended {date}",
+    "firstWatched": "First played {date}",
+    "notWatched": "No paid lesson played yet (refundable)"
   }
 }

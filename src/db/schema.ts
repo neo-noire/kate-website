@@ -179,6 +179,10 @@ export const purchase = pgTable(
     tierId: text("tier_id").references(() => tier.id, { onDelete: "set null" }),
     /** "admin" for access granted by hand; "stripe" once checkout exists. */
     source: text("source").notNull(),
+    /** When access ends. Purchases last ACCESS_MONTHS (src/lib/catalog/access.ts); null never expires. */
+    expiresAt: timestamp("expires_at", { withTimezone: true }),
+    /** The first time the student played a paid lesson of the course; decides refund eligibility. */
+    firstWatchedAt: timestamp("first_watched_at", { withTimezone: true }),
     createdAt: createdAt(),
     updatedAt: updatedAt(),
   },

@@ -1,6 +1,6 @@
 import { ArrowLeft, ArrowUpRight } from "lucide-react";
 import type { Metadata } from "next";
-import { getLocale, getTranslations } from "next-intl/server";
+import { getFormatter, getLocale, getTranslations } from "next-intl/server";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import { ActionForm, CheckboxField, LocalizedField, SelectField, TextField } from "@/components/admin/forms";
@@ -239,8 +239,10 @@ async function CoursesSection({ program }: { program: AdminProgram }) {
 }
 
 async function AccessSection({ program }: { program: AdminProgram }) {
-  const [t, locale] = await Promise.all([getTranslations("admin"), getLocale()]);
+  const [t, locale, format] = await Promise.all([getTranslations("admin"), getLocale(), getFormatter()]);
   const courseTitle = new Map(program.courses.map((c) => [c.id, localize(c.title, locale)]));
+  const date = (value: Date) => format.dateTime(value, { dateStyle: "medium" });
+  const now = new Date();
 
   return (
     <section className="adminCard">
@@ -276,6 +278,12 @@ async function AccessSection({ program }: { program: AdminProgram }) {
               <small>
                 {courseTitle.get(p.courseId)}
                 {p.tier ? ` · ${localize(p.tier.name, locale)}` : ""} · {t(`source.${p.source === "stripe" ? "stripe" : "admin"}`)}
+              </small>
+              <small>
+                {p.expiresAt &&
+                  (p.expiresAt > now ? t("accessUntil", { date: date(p.expiresAt) }) : t("expired", { date: date(p.expiresAt) }))}
+                {p.expiresAt && " · "}
+                {p.firstWatchedAt ? t("firstWatched", { date: date(p.firstWatchedAt) }) : t("notWatched")}
               </small>
               <ActionForm action={revokeAccess} submitLabel={t("revoke")} confirm={t("confirmDelete")} danger hidden={{ id: p.id }} />
             </li>
