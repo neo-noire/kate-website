@@ -22,10 +22,12 @@ type DashboardProps = {
   library: Library;
   /** Course to open first, e.g. from a course page's "Open in my dashboard". */
   initialCourseId?: string;
+  /** Set when the student just came back from Stripe Checkout. */
+  checkout?: "paid" | "pending";
 };
 
 /** The student dashboard: the courses this student owns (every course for admins). */
-export function Dashboard({ userName, admin, library, initialCourseId }: DashboardProps) {
+export function Dashboard({ userName, admin, library, initialCourseId, checkout }: DashboardProps) {
   const t = useTranslations();
   const locale = useLocale();
 
@@ -61,6 +63,12 @@ export function Dashboard({ userName, admin, library, initialCourseId }: Dashboa
             </button>
           </div>
         </div>
+
+        {checkout && (
+          <p className="ownedBanner" role="status">
+            {checkout === "paid" ? t("dashboard.checkoutPaid") : t("dashboard.checkoutPending")}
+          </p>
+        )}
 
         {library.courses.length ? (
           <Studio admin={admin} library={library} initialCourseId={initialCourseId} />

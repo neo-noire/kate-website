@@ -7,6 +7,7 @@ import { requireAdminPage } from "@/lib/auth/admin-page";
 import { createProgram, deleteContactMessage, removeSubscriber } from "@/lib/catalog/admin-actions";
 import { getAdminPrograms, getContactMessages, getNewsletterSubscribers } from "@/lib/catalog/admin-queries";
 import { localize } from "@/lib/localized";
+import { missingStripeEnv } from "@/lib/stripe/server";
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations("admin");
@@ -38,6 +39,7 @@ async function AdminHome() {
       <div className="eyebrow">{t("eyebrow")}</div>
       <h1>{t("title")}</h1>
       <p className="sub">{t("intro")}</p>
+      <PaymentsWarning />
 
       <section className="adminCard">
         <h2>{t("programs")}</h2>
@@ -122,5 +124,17 @@ async function AdminHome() {
         )}
       </section>
     </main>
+  );
+}
+
+/** Tells admins that checkout is off until the Stripe settings are added in Vercel. */
+async function PaymentsWarning() {
+  const missing = missingStripeEnv();
+  if (!missing.length) return null;
+  const t = await getTranslations("admin");
+  return (
+    <p className="legalDraft" role="status">
+      {t("paymentsOff", { names: missing.join(", ") })}
+    </p>
   );
 }

@@ -6,6 +6,7 @@ import { getSession, isAdmin } from "@/lib/auth/session";
 import { getPurchase, type ProgramPage } from "@/lib/catalog/queries";
 import { localize, localizeLines } from "@/lib/localized";
 import { formatPrice, HST_RATE, withHst } from "@/lib/money";
+import { isStripeConfigured } from "@/lib/stripe/server";
 import { EnrollButton } from "./enroll-button";
 import { PreviewLessonButton } from "./preview-lesson-button";
 
@@ -67,6 +68,7 @@ async function Tiers({ page, course, programTitle }: { page: ProgramPage; course
   const [t, locale] = await Promise.all([getTranslations("packages"), getLocale()]);
   if (!page.tiers.length) return <p className="fine">{t("noTiers")}</p>;
   const courseTitle = localize(course.title, locale);
+  const paymentsEnabled = isStripeConfigured();
 
   return (
     <div className="planGrid">
@@ -108,6 +110,9 @@ async function Tiers({ page, course, programTitle }: { page: ProgramPage; course
               tierName={name}
               price={price}
               breakdown={breakdown}
+              tierId={tier.id}
+              courseId={course.id}
+              paymentsEnabled={paymentsEnabled}
               lessonCount={course.lessons.length}
               privateLessons={tier.privateLessons}
               featured={tier.featured}

@@ -153,10 +153,13 @@
     "privateLessons": "{count, plural, one {# private lesson} other {# private lessons}}",
     "independent": "Independent practice",
     "dialogLabel": "Course checkout",
-    "comingSoon": "Online payment is coming soon. Until then, your coach can give you access to this course.",
+    "comingSoon": "Online payment isn't open yet. Until it is, your coach can give you access to this course.",
     "beforeTax": "Price before tax",
     "hst": "HST ({rate}%)",
-    "total": "Total"
+    "total": "Total",
+    "pay": "Pay {price}",
+    "secure": "You'll pay securely on Stripe and come straight back to your dashboard.",
+    "failed": "We couldn't start the payment. Please try again in a moment, or contact us if it keeps happening."
   },
   "dashboard": {
     "eyebrow": "Your space to move",
@@ -207,7 +210,9 @@
     "allCourses": "All courses (admin view)",
     "play": "Play {title}",
     "playError": "This lesson can't be played right now. Please refresh the page.",
-    "accessUntil": "Access until {date}"
+    "accessUntil": "Access until {date}",
+    "checkoutPaid": "Payment received, thank you! Your course is ready below.",
+    "checkoutPending": "Thank you! Your payment is still being confirmed. The course appears here as soon as it clears."
   },
   "contact": {
     "eyebrow": "Personal support",
@@ -356,6 +361,7 @@
       "subscriberCount": "{count, plural, one {# subscriber} other {# subscribers}}",
       "delete": "Delete",
       "remove": "Remove"
-    }
+    },
+    "paymentsOff": "Online payment is off: students can't buy courses yet. Add {names} in Vercel (Settings, Environment Variables), then redeploy."
   }
 }

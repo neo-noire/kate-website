@@ -4,7 +4,7 @@ A personal website for a ballroom dance coach, combining a compact marketing lan
 
 **Live site:** https://katematus-website.vercel.app/en
 
-**Current status:** a bilingual Next.js App Router + TypeScript site on Neon Postgres with real accounts (email and password, Google once its keys are added), a database course catalog with an admin editor, YouTube lessons, legal pages, and a contact form and newsletter sign-up stored in the database. Online payment (Stripe) and email sending (Resend) are not connected yet. `RITMO` is a placeholder brand; the coach’s final branding, biography, photography, course content and prices still need to be supplied.
+**Current status:** a bilingual Next.js App Router + TypeScript site on Neon Postgres with real accounts (email and password, Google once its keys are added), a database course catalog with an admin editor, YouTube lessons, legal pages, and a contact form and newsletter sign-up stored in the database. Stripe Checkout is built and switches on once its keys are added in Vercel; email sending (Resend) is not connected yet. `RITMO` is a placeholder brand; the coach’s final branding, biography, photography, course content and prices still need to be supplied.
 
 ## Run the app
 
@@ -62,8 +62,20 @@ Accounts, purchases, progress, notes, contact messages and newsletter sign-ups a
 | `BETTER_AUTH_SECRET` | A random secret, set in Vercel for production and preview |
 | `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` | Optional. From a Google Cloud OAuth client; the Google button appears after the next deploy |
 | `ADMIN_EMAILS` | Comma-separated emails of the accounts that can manage courses, e.g. `kate@example.com,me@example.com` |
+| `STRIPE_SECRET_KEY` | Stripe Dashboard, Developers, API keys: the secret key (`sk_test_…` to try it, `sk_live_…` for real payments) |
+| `STRIPE_WEBHOOK_SECRET` | The signing secret (`whsec_…`) of the webhook endpoint below |
 
 For Google, create an OAuth client of type *Web application* and add the redirect URI `https://<site host>/api/auth/callback/google` for each host people sign in on (for now `https://katematus-website.vercel.app`). Signing in with Google links to an existing email-and-password account with the same address.
+
+### Payments (Stripe)
+
+Students choose a package on a course page and pay on Stripe Checkout. Until both Stripe variables are set (and the site redeployed), the package dialog says online payment isn't open yet and the admin page names the missing variables.
+
+1. In Stripe, add a webhook endpoint `https://<site host>/api/stripe/webhook` (for now `https://katematus-website.vercel.app/api/stripe/webhook`) with the events `checkout.session.completed`, `checkout.session.async_payment_succeeded` and `charge.refunded`.
+2. Put the secret key and that endpoint's signing secret in Vercel (production, and preview if you want to test there with test keys), then redeploy.
+3. In Stripe's settings, turn on email receipts for successful payments and refunds; the terms promise a receipt.
+
+How it works: checkout charges the tier price plus 13% HST, using a 13% "HST" tax rate the site creates in Stripe on first use, so receipts show the tax. When payment succeeds, the webhook (or the student's return to their dashboard, whichever comes first) gives 3 months of access and records the amount, tax and Stripe payment on the purchase. A full refund in Stripe ends access; partial refunds don't. The student must be signed in, and someone who already owns the course is sent to their dashboard instead of paying twice.
 
 Password reset and email verification need an email provider (Resend) and are not set up yet ([#6](https://github.com/neo-noire/kate-website/issues/6)).
 
@@ -71,7 +83,7 @@ Password reset and email verification need an email provider (Resend) and are no
 
 The catalog lives in the database. A **program** (e.g. Beginner 1.0) holds one **course** per dance, each with its **lessons**, and has **pricing tiers** (e.g. Solo, Personal, Mentorship). A student buys one course at one tier.
 
-Admins (the `ADMIN_EMAILS` accounts) manage it at `/en/admin`, linked from their dashboard as "Manage courses": edit text in each language, set prices, paste YouTube links for lessons, mark free previews, publish programs and give students access by email. Until Stripe checkout exists, giving access there is how a student gets a course.
+Admins (the `ADMIN_EMAILS` accounts) manage it at `/en/admin`, linked from their dashboard as "Manage courses": edit text in each language, set prices, paste YouTube links for lessons, mark free previews, publish programs and give students access by email. Giving access there is free (for gifts, private-lesson students or fixing a problem); paying students get access automatically.
 
 - Lesson videos are YouTube embeds (use unlisted videos). A paid lesson's video id is sent only when its owner presses play, but anyone holding an unlisted link can still watch it.
 - The first time a student plays a paid lesson of a course is saved on their purchase and shown on the admin page; refunds are only possible before then (free previews don't count).
