@@ -1,7 +1,10 @@
 "use client";
 
-import { ArrowUpRight } from "lucide-react";
-import { useTranslations } from "next-intl";
+import { ArrowUpRight, Lock } from "lucide-react";
+import { useLocale, useTranslations } from "next-intl";
+import { useActionState } from "react";
+import { useFormStatus } from "react-dom";
+import { startCheckout } from "@/lib/checkout-actions";
 import { Modal, useDialogState } from "./modal";
 
 type EnrollButtonProps = {
@@ -9,17 +12,35 @@ type EnrollButtonProps = {
   courseTitle: string;
   tierName: string;
   price: string;
-  /** The HST contained in the price, already formatted. */
+  /** The price before tax and the HST added to it, already formatted. */
   breakdown: { rate: number; hst: string; beforeTax: string };
+  tierId: string;
+  courseId: string;
+  /** False until the Stripe keys are set; the dialog then says payment isn't open yet. */
+  paymentsEnabled: boolean;
   lessonCount: number;
   privateLessons: number;
   featured: boolean;
 };
 
-/** Chooses a tier. Checkout isn't connected yet, so the dialog says how to get access. */
-export function EnrollButton({ programTitle, courseTitle, tierName, price, breakdown, lessonCount, privateLessons, featured }: EnrollButtonProps) {
+/** Chooses a tier and goes on to Stripe Checkout. */
+export function EnrollButton({
+  programTitle,
+  courseTitle,
+  tierName,
+  price,
+  breakdown,
+  tierId,
+  courseId,
+  paymentsEnabled,
+  lessonCount,
+  privateLessons,
+  featured,
+}: EnrollButtonProps) {
   const t = useTranslations();
+  const locale = useLocale();
   const dialog = useDialogState();
+  const [checkout, pay] = useActionState(startCheckout, { failed: false });
 
   return (
     <>
@@ -44,8 +65,31 @@ export function EnrollButton({ programTitle, courseTitle, tierName, price, break
           <dt>{t("enroll.total")}</dt>
           <dd>{price}</dd>
         </dl>
-        <p className="fine">{t("enroll.comingSoon")}</p>
+        {paymentsEnabled ? (
+          <form action={pay}>
+            <input type="hidden" name="tierId" value={tierId} />
+            <input type="hidden" name="courseId" value={courseId} />
+            <input type="hidden" name="locale" value={locale} />
+            <PayButton label={t("enroll.pay", { price })} />
+            <p className="fine" role={checkout.failed ? "alert" : undefined}>
+              {checkout.failed ? t("enroll.failed") : t("enroll.secure")}
+            </p>
+          </form>
+        ) : (
+          <p className="legalDraft" role="status">
+            {t("enroll.comingSoon")}
+          </p>
+        )}
       </Modal>
     </>
+  );
+}
+
+function PayButton({ label }: { label: string }) {
+  const { pending } = useFormStatus();
+  return (
+    <button className="btn" type="submit" disabled={pending} aria-busy={pending}>
+      <Lock size={16} aria-hidden /> {label}
+    </button>
   );
 }

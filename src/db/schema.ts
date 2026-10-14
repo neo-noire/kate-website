@@ -177,8 +177,17 @@ export const purchase = pgTable(
       .references(() => course.id, { onDelete: "cascade" }),
     /** Null when the tier was deleted after purchase; access to the course remains. */
     tierId: text("tier_id").references(() => tier.id, { onDelete: "set null" }),
-    /** "admin" for access granted by hand; "stripe" once checkout exists. */
+    /** "admin" for access granted by hand; "stripe" for a paid checkout. */
     source: text("source").notNull(),
+    /** The Stripe Checkout Session that paid for the current access period; makes fulfillment idempotent. */
+    stripeCheckoutSessionId: text("stripe_checkout_session_id"),
+    /** The Stripe payment, so a refund in Stripe can end access. */
+    stripePaymentIntentId: text("stripe_payment_intent_id"),
+    /** What the student paid, HST included, in minor units; null for access granted by hand. */
+    amountCents: integer("amount_cents"),
+    /** The HST part of amountCents. */
+    taxCents: integer("tax_cents"),
+    currency: text("currency"),
     /** When access ends. Purchases last ACCESS_MONTHS (src/lib/catalog/access.ts); null never expires. */
     expiresAt: timestamp("expires_at", { withTimezone: true }),
     /** The first time the student played a paid lesson of the course; decides refund eligibility. */
@@ -189,6 +198,7 @@ export const purchase = pgTable(
   (table) => [
     uniqueIndex("purchase_user_course_idx").on(table.userId, table.courseId),
     index("purchase_course_id_idx").on(table.courseId),
+    index("purchase_payment_intent_idx").on(table.stripePaymentIntentId),
   ],
 );
 

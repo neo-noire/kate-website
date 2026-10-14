@@ -50,6 +50,13 @@
       "when": 1791857849269,
       "tag": "0006_prices_before_hst",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1791937001501,
+      "tag": "0007_stripe_checkout",
+      "breakpoints": true
     }
   ]
 }
