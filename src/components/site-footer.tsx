@@ -9,8 +9,10 @@ export async function SiteFooter() {
     <footer>
       <div className="wrap">
         <Link className="brand" href="/">
-          <i />
-          RITMO
+          <div>
+            <span className="text-primary">Latin</span>
+            <span>Kate</span>
+          </div>
         </Link>
         <p>{t("copyright")}</p>
         <nav className="footerLinks" aria-label={tLegal("navLabel")}>

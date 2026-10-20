@@ -3,6 +3,7 @@
 import { ArrowUpRight } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import { useState, useSyncExternalStore, type FormEvent } from "react";
+import { VerifyEmailStep } from "@/components/verify-email-step";
 import { getPathname, Link } from "@/i18n/navigation";
 import { authClient } from "@/lib/auth/client";
 import { safeNextPath } from "@/lib/auth/next-path";
@@ -39,7 +40,7 @@ function errorKey(error: { code?: string; status?: number }): ErrorKey {
   }
 }
 
-export function AuthForm({ mode, google }: { mode: Mode; google: boolean }) {
+export function AuthForm({ mode, google, emailVerification }: { mode: Mode; google: boolean; emailVerification: boolean }) {
   const t = useTranslations("auth");
   const validation = useLocalizedValidation();
   const locale = useLocale();
@@ -47,6 +48,7 @@ export function AuthForm({ mode, google }: { mode: Mode; google: boolean }) {
   const nextPath = safeNextPath(query.get("next"));
   const [pending, setPending] = useState(false);
   const [submitError, setError] = useState<ErrorKey | null>(null);
+  const [emailToVerify, setEmailToVerify] = useState<string | null>(null);
   // Google sends people back here with ?error=… when sign-in fails or is cancelled.
   const error = submitError ?? (query.has("error") ? "oauth" : null);
 
@@ -76,6 +78,13 @@ export function AuthForm({ mode, google }: { mode: Mode; google: boolean }) {
       mode === "signUp"
         ? await authClient.signUp.email({ name: String(data.get("name")).trim(), email, password })
         : await authClient.signIn.email({ email, password });
+    // Unverified password accounts get a code by email (sent on sign-up and on a sign-in attempt).
+    // Sign-up with an address that already has an account looks the same, so nobody can probe which emails exist.
+    if (error?.code === "EMAIL_NOT_VERIFIED" || (!error && mode === "signUp" && emailVerification)) {
+      setEmailToVerify(email);
+      setPending(false);
+      return;
+    }
     if (error) {
       setError(errorKey(error));
       setPending(false);
@@ -84,6 +93,10 @@ export function AuthForm({ mode, google }: { mode: Mode; google: boolean }) {
     // A full page load, not a client navigation: the router may hold a copy of the
     // dashboard prefetched while signed out (a redirect back here).
     window.location.assign(getPathname({ href: nextPath, locale }));
+  }
+
+  if (emailToVerify) {
+    return <VerifyEmailStep email={emailToVerify} nextPath={nextPath} onChangeEmail={() => setEmailToVerify(null)} />;
   }
 
   const otherMode = mode === "signIn" ? "signUp" : "signIn";

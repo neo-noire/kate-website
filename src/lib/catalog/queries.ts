@@ -30,7 +30,7 @@ export async function getCatalog() {
     orderBy: [asc(program.sortOrder), asc(program.createdAt)],
     columns: { id: true, slug: true, title: true, description: true, tag: true, category: true },
     with: {
-      courses: { columns: { id: true }, with: { lessons: { columns: { id: true } } } },
+      courses: { columns: { id: true }, with: { lessons: { columns: { id: true, durationMinutes: true } } } },
       tiers: { columns: { priceCents: true, currency: true } },
     },
   });
@@ -44,6 +44,7 @@ export async function getCatalog() {
       ...rest,
       courseCount: courses.length,
       lessonCount: courses.reduce((sum, c) => sum + c.lessons.length, 0),
+      totalMinutes: courses.reduce((sum, c) => sum + c.lessons.reduce((acc, l) => acc + (l.durationMinutes ?? 0), 0), 0),
       fromPrice: cheapest ?? null,
     };
   });

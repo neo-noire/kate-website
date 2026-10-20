@@ -14,10 +14,12 @@ function adminEmails() {
 
 /**
  * Admins can edit the catalog and grant access. The ADMIN_EMAILS setting is the main list;
- * a user's `role` column can also make them an admin.
+ * a user's `role` column can also make them an admin. An email only counts once it is verified:
+ * sign-up accepts any address, so otherwise whoever registered an admin's address first would
+ * become admin.
  */
-export function isAdmin(user: { email: string; role?: string | null }) {
-  return user.role === "admin" || adminEmails().has(user.email.toLowerCase());
+export function isAdmin(user: { email: string; emailVerified: boolean; role?: string | null }) {
+  return user.role === "admin" || (user.emailVerified && adminEmails().has(user.email.toLowerCase()));
 }
 
 /** The signed-in user's session for this request, or null. Reads request headers. */

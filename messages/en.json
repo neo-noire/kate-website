@@ -1,7 +1,7 @@
 {
   "meta": {
     "title": "RITMO — find your rhythm",
-    "description": "Online ballroom dance lessons. Latin at your pace, with personal support from your coach."
+    "description": "Online lady latin dance lessons. Latin at your pace, with personal support from your coach."
   },
   "languageLabel": "Interface language",
   "common": {
@@ -18,13 +18,13 @@
     "myDashboard": "My dashboard"
   },
   "hero": {
-    "photoAlt": "A couple performing a ballroom dance",
-    "eyebrow": "Online ballroom dance lessons",
+    "photoAlt": "Latin Kate performing latin dance",
+    "eyebrow": "Online lady latin dance lessons",
     "titleLine1": "Your move.",
     "titleLine2": "Your ",
     "titleAccent": "rhythm.",
     "lead1": "From your first step to confident dancing.",
-    "lead2": "Latin at your pace — with personal support from your coach.",
+    "lead2": "Latin at your pace — with personal support from Kate.",
     "choosePrograms": "Choose a program",
     "previewLesson": "Preview a lesson",
     "stats": {
@@ -57,6 +57,9 @@
     "showLess": "Show less",
     "dances": "{count, plural, one {# dance} other {# dances}}",
     "lessons": "{count, plural, one {# lesson} other {# lessons}}",
+    "durationHours": "{hours} h",
+    "durationMinutes": "{minutes} min",
+    "durationHoursMinutes": "{hours} h {minutes} min",
     "online": "Online",
     "fromPrice": "From {price} / dance, HST included",
     "open": "Open {name}",
@@ -67,7 +70,7 @@
     "eyebrow": "02 / A personal approach",
     "titleLine1": "Dancing starts",
     "titleLine2": "with you.",
-    "body": "No partner or experience needed. Just a little space and a desire to move. Watch the lessons, practice and work with your coach on what matters to you.",
+    "body": "No partner or experience needed. Just a little space and a desire to move. Watch the lessons, practice and work with Kate on what matters to you.",
     "cta": "Let's plan your first step",
     "steps": {
       "understand": {
@@ -96,13 +99,25 @@
     "error": "Please check your email address and try again."
   },
   "faq": {
+    "startFrom": {
+      "question": "Where should I start from?",
+      "answer": "TODO"
+    },
+    "levelSelection": {
+      "question": "How to choose the level?",
+      "answer": "TODO"
+    },
+    "classes": {
+      "question": "How do private classes work?",
+      "answer": "TODO"
+    },
+    "structure": {
+      "question": "What is the structure of the course?",
+      "answer": "TODO"
+    },
     "partner": {
       "question": "Do I need a partner or previous experience?",
       "answer": "Not for the introductory courses. The exercises are designed for solo practice. You just need enough space and comfortable clothes."
-    },
-    "singleDance": {
-      "question": "Can I purchase just one dance?",
-      "answer": "Yes. Each dance is a separate course with 4 lessons and its own package. Complete all 3 dances to finish Intro, or all 5 for Beginner."
     },
     "privateLessons": {
       "question": "How do private lessons work?",
@@ -110,7 +125,7 @@
     }
   },
   "footer": {
-    "copyright": "© RITMO · Online ballroom dance lessons"
+    "copyright": "© LatinKate · Online lady latin dance lessons"
   },
   "legal": {
     "eyebrow": "Legal",
@@ -183,8 +198,7 @@
     "completionRemoved": "Completion mark removed.",
     "tabs": {
       "about": "About the lesson",
-      "notes": "My notes",
-      "practice": "Practice"
+      "notes": "My notes"
     },
     "aboutTitle": "{lesson}: step by step",
     "aboutFine": "Prepare comfortable shoes and enough space to move.",
@@ -192,12 +206,6 @@
     "notesPlaceholder": "What would you like to focus on next time?",
     "saveNote": "Save note",
     "noteSaved": "Note saved.",
-    "practiceTitle": "Your practice after the lesson",
-    "practice": {
-      "repeat": "Repeat the basic movement slowly for 2 minutes.",
-      "count": "Count out loud and feel the weight transfer.",
-      "combine": "Try a short combination and note what you want to discuss with your coach."
-    },
     "courseProgressTier": "{done}/{total} lessons · {tier}",
     "lessonMinutes": "{minutes} min",
     "saveError": "Couldn't save. Please try again.",
@@ -259,11 +267,25 @@
       "passwordTooShort": "Use a password of at least 8 characters.",
       "tooManyRequests": "Too many attempts. Please wait a minute and try again.",
       "generic": "Something went wrong. Please try again.",
-      "oauth": "Google sign-in didn't work. Please try again or use your email."
+      "oauth": "Google sign-in didn't work. Please try again or use your email.",
+      "invalidCode": "That code isn't right. Check it and try again.",
+      "codeExpired": "That code has expired. Send a new one.",
+      "tooManyAttempts": "Too many wrong codes. Send a new one."
     },
     "google": "Continue with Google",
     "or": "or",
-    "agreement": "By creating an account, you agree to our <terms>Terms of Service</terms> and <privacy>Privacy Policy</privacy>."
+    "agreement": "By creating an account, you agree to our <terms>Terms of Service</terms> and <privacy>Privacy Policy</privacy>.",
+    "verify": {
+      "title": "Check your email.",
+      "body": "We sent a 6-digit code to {email}. It expires in 5 minutes.",
+      "codeLabel": "Verification code",
+      "submit": "Verify",
+      "verifying": "Verifying…",
+      "resend": "Send a new code",
+      "resent": "A new code is on its way.",
+      "changeEmail": "Use a different email",
+      "noEmail": "Nothing arrived? Check your spam folder. If you already have an account, sign in instead."
+    }
   },
   "admin": {
     "title": "Manage courses",
@@ -272,6 +294,8 @@
     "programs": "Programs",
     "newProgram": "New program",
     "create": "Create",
+    "edit": "Edit",
+    "cancel": "Cancel",
     "save": "Save",
     "saved": "Saved.",
     "delete": "Delete",

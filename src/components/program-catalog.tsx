@@ -18,6 +18,14 @@ const categoryKey = (program: CatalogProgram) => program.category?.en.trim() || 
 export function ProgramCatalog({ programs }: { programs: CatalogProgram[] }) {
   const t = useTranslations();
   const locale = useLocale();
+
+  function formatDuration(totalMinutes: number) {
+    const hours = Math.floor(totalMinutes / 60);
+    const minutes = totalMinutes % 60;
+    if (!hours) return t("catalog.durationMinutes", { minutes });
+    if (!minutes) return t("catalog.durationHours", { hours });
+    return t("catalog.durationHoursMinutes", { hours, minutes });
+  }
   const [filter, setFilter] = useState<string | null>(null);
   const [expanded, setExpanded] = useState(false);
 
@@ -66,8 +74,9 @@ export function ProgramCatalog({ programs }: { programs: CatalogProgram[] }) {
                 <h3>{title}</h3>
                 <p>{localize(program.description, locale)}</p>
                 <div className="meta">
-                  <span>{t("catalog.dances", { count: program.courseCount })}</span>
+                  {program.courseCount > 1 && <span>{t("catalog.dances", { count: program.courseCount })}</span>}
                   <span>{t("catalog.lessons", { count: program.lessonCount })}</span>
+                  {program.totalMinutes > 0 && <span>{formatDuration(program.totalMinutes)}</span>}
                   <span>{t("catalog.online")}</span>
                 </div>
                 <div className="cardBottom">

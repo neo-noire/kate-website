@@ -3,6 +3,7 @@
 import { ArrowUpRight, Menu, X } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useState } from "react";
+import { Button } from "@/components/ui/button";
 import { Link } from "@/i18n/navigation";
 import { LanguagePicker } from "./language-picker";
 
@@ -23,11 +24,10 @@ export function SiteHeader() {
     <header>
       <div className="wrap">
         <Link className="brand" href="/" onClick={close}>
-          <i />
-          RITMO
-          <span aria-hidden="true" style={{ fontSize: 12, color: "var(--red)", letterSpacing: 0 }}>
-            .
-          </span>
+          <div>
+            <span className="text-primary">Latin</span>
+            <span>Kate</span>
+          </div>
         </Link>
         <nav className={menuOpen ? "open" : undefined}>
           {anchors.map((anchor) => (
@@ -39,16 +39,22 @@ export function SiteHeader() {
         <div className="navRight">
           <LanguagePicker />
           {/* Signed-out visitors are sent to sign in, then come back to the dashboard. */}
-          <Link className="btn outline" href="/dashboard" onClick={close}>
-            {t("myDashboard")} <ArrowUpRight size={16} aria-hidden />
-          </Link>
+          <Button asChild variant="outline" size="sm">
+            <Link href="/dashboard" onClick={close}>
+              {t("myDashboard")} <ArrowUpRight aria-hidden />
+            </Link>
+          </Button>
           <button
             className="menuBtn"
             aria-label={t("openMenu")}
             aria-expanded={menuOpen}
             onClick={() => setMenuOpen(!menuOpen)}
           >
-            {menuOpen ? <X size={24} aria-hidden /> : <Menu size={24} aria-hidden />}
+            {menuOpen ? (
+              <X size={24} aria-hidden />
+            ) : (
+              <Menu size={24} aria-hidden />
+            )}
           </button>
         </div>
       </div>
