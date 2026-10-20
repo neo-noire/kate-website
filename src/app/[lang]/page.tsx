@@ -15,7 +15,13 @@ const tickerDances = ["CHA-CHA-CHA", "SAMBA", "RUMBA", "PASO DOBLE", "JIVE"];
 
 const heroStats = ["lessons", "formats", "pace"] as const;
 const approachSteps = ["understand", "format", "complete"] as const;
-const faqItems = ["partner", "singleDance", "privateLessons"] as const;
+const faqItems = [
+  "startFrom",
+  "levelSelection",
+  "classes",
+  "structure",
+  "partner",
+] as const;
 
 export async function generateMetadata(): Promise<Metadata> {
   return { alternates: localeAlternates(await getLocale()) };
@@ -32,7 +38,13 @@ export default async function HomePage() {
   return (
     <main>
       <section className="hero">
-        <Image className="heroPhoto" src={heroPhoto} alt={t("hero.photoAlt")} preload sizes="(max-width: 640px) 100vw, 90vw" />
+        <Image
+          className="heroPhoto"
+          src={heroPhoto}
+          alt={t("hero.photoAlt")}
+          preload
+          sizes="(max-width: 640px) 100vw, 90vw"
+        />
         <div className="wrap">
           <div className="eyebrow">{t("hero.eyebrow")}</div>
           <h1>
@@ -53,7 +65,9 @@ export default async function HomePage() {
             {preview && (
               <PreviewLessonButton
                 videoId={preview.videoId}
-                title={t("hero.previewTitle", { title: localize(preview.title, locale) })}
+                title={t("hero.previewTitle", {
+                  title: localize(preview.title, locale),
+                })}
               >
                 <Play size={16} aria-hidden /> {t("hero.previewLesson")}
               </PreviewLessonButton>
@@ -61,7 +75,10 @@ export default async function HomePage() {
           </div>
           <div className="heroBottom">
             {heroStats.map((key, i) => (
-              <span key={key} style={i === heroStats.length - 1 ? { border: 0 } : undefined}>
+              <span
+                key={key}
+                style={i === heroStats.length - 1 ? { border: 0 } : undefined}
+              >
                 <b>{t(`hero.stats.${key}.value`)}</b>
                 {t(`hero.stats.${key}.label`)}
               </span>

@@ -4,6 +4,7 @@ import { useLocale, useTranslations } from "next-intl";
 import { useRouter } from "@/i18n/navigation";
 import { localeLabels, routing } from "@/i18n/routing";
 import { hasLocale } from "next-intl";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 export function LanguagePicker() {
   const locale = useLocale();
@@ -22,17 +23,17 @@ export function LanguagePicker() {
   }
 
   return (
-    <select
-      className="languagePicker"
-      aria-label={t("languageLabel")}
-      value={locale}
-      onChange={(event) => change(event.target.value)}
-    >
-      {routing.locales.map((value) => (
-        <option key={value} value={value}>
-          {localeLabels[value]}
-        </option>
-      ))}
-    </select>
+    <Select value={locale} onValueChange={change}>
+      <SelectTrigger size="sm" className="w-[4.5rem] font-bold" aria-label={t("languageLabel")}>
+        <SelectValue />
+      </SelectTrigger>
+      <SelectContent>
+        {routing.locales.map((value) => (
+          <SelectItem key={value} value={value}>
+            {localeLabels[value]}
+          </SelectItem>
+        ))}
+      </SelectContent>
+    </Select>
   );
 }

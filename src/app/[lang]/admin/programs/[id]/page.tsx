@@ -3,7 +3,11 @@ import type { Metadata } from "next";
 import { getFormatter, getLocale, getTranslations } from "next-intl/server";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
+import { ConfirmDelete, FormDialog } from "@/components/admin/dialogs";
 import { ActionForm, CheckboxField, LocalizedField, SelectField, TextField } from "@/components/admin/forms";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import { Badge } from "@/components/ui/badge";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Link } from "@/i18n/navigation";
 import { requireAdminPage } from "@/lib/auth/admin-page";
 import {
@@ -64,30 +68,45 @@ async function ProgramEditor({ params }: Pick<PageProps<"/[lang]/admin/programs/
         </p>
       )}
 
-      <section className="adminCard">
-        <h2>{t("sections.details")}</h2>
-        <ActionForm action={updateProgram} submitLabel={t("save")} hidden={{ id: program.id }}>
-          <LocalizedField name="title" label={t("fields.title")} defaultValue={program.title} required />
-          <TextField name="slug" label={t("fields.slug")} hint={t("fields.slugHint")} defaultValue={program.slug} required />
-          <LocalizedField name="description" label={t("fields.description")} defaultValue={program.description} multiline />
-          <LocalizedField name="tag" label={t("fields.tag")} hint={t("fields.tagHint")} defaultValue={program.tag} />
-          <LocalizedField name="category" label={t("fields.category")} hint={t("fields.categoryHint")} defaultValue={program.category} />
-          <TextField name="sortOrder" label={t("fields.sortOrder")} type="number" defaultValue={program.sortOrder} />
-          <CheckboxField name="published" label={t("fields.published")} defaultChecked={program.published} />
-        </ActionForm>
-      </section>
+      <Tabs defaultValue="details" className="mt-6">
+        <TabsList>
+          <TabsTrigger value="details">{t("sections.details")}</TabsTrigger>
+          <TabsTrigger value="tiers">
+            {t("sections.tiers")} <Badge variant="secondary">{program.tiers.length}</Badge>
+          </TabsTrigger>
+          <TabsTrigger value="courses">
+            {t("sections.courses")} <Badge variant="secondary">{program.courses.length}</Badge>
+          </TabsTrigger>
+          <TabsTrigger value="access">
+            {t("sections.access")} <Badge variant="secondary">{program.purchases.length}</Badge>
+          </TabsTrigger>
+        </TabsList>
 
-      <TiersSection program={program} />
-      <CoursesSection program={program} />
-      <AccessSection program={program} />
+        <TabsContent value="details" className="adminCard">
+          <ActionForm action={updateProgram} submitLabel={t("save")} hidden={{ id: program.id }}>
+            <LocalizedField name="title" label={t("fields.title")} defaultValue={program.title} required />
+            <TextField name="slug" label={t("fields.slug")} hint={t("fields.slugHint")} defaultValue={program.slug} required />
+            <LocalizedField name="description" label={t("fields.description")} defaultValue={program.description} multiline />
+            <LocalizedField name="tag" label={t("fields.tag")} hint={t("fields.tagHint")} defaultValue={program.tag} />
+            <LocalizedField name="category" label={t("fields.category")} hint={t("fields.categoryHint")} defaultValue={program.category} />
+            <TextField name="sortOrder" label={t("fields.sortOrder")} type="number" defaultValue={program.sortOrder} />
+            <CheckboxField name="published" label={t("fields.published")} defaultChecked={program.published} />
+          </ActionForm>
+          <div className="mt-8 border-t border-border pt-4">
+            <ConfirmDelete action={deleteProgram} id={program.id} label={`${t("delete")} · ${title}`} title={title} />
+          </div>
+        </TabsContent>
 
-      <ActionForm
-        action={deleteProgram}
-        submitLabel={`${t("delete")} · ${title}`}
-        confirm={t("confirmDelete")}
-        danger
-        hidden={{ id: program.id }}
-      />
+        <TabsContent value="tiers" className="adminCard">
+          <TiersSection program={program} />
+        </TabsContent>
+        <TabsContent value="courses" className="adminCard">
+          <CoursesSection program={program} />
+        </TabsContent>
+        <TabsContent value="access" className="adminCard">
+          <AccessSection program={program} />
+        </TabsContent>
+      </Tabs>
     </main>
   );
 }
@@ -130,31 +149,37 @@ async function TiersSection({ program }: { program: AdminProgram }) {
   }
 
   return (
-    <section className="adminCard">
-      <h2>{t("sections.tiers")}</h2>
-      <p className="fine">{t("sections.tiersHint")}</p>
-      {program.tiers.map((item) => (
-        <details key={item.id} className="adminItem">
-          <summary>
-            {localize(item.name, locale)} ·{" "}
-            {t("fields.priceSummary", {
-              price: formatPrice(item.priceCents, item.currency, locale),
-              total: formatPrice(withHst(item.priceCents).total, item.currency, locale),
-            })}
-          </summary>
-          <ActionForm action={updateTier} submitLabel={t("save")} hidden={{ id: item.id }}>
-            {fields(item)}
+    <>
+      <SectionHeader title={t("sections.tiers")} hint={t("sections.tiersHint")}>
+        <FormDialog mode="add" title={t("newTier")}>
+          <ActionForm action={createTier} submitLabel={t("add")} resetOnSuccess hidden={{ programId: program.id }}>
+            {fields()}
           </ActionForm>
-          <ActionForm action={deleteTier} submitLabel={t("delete")} confirm={t("confirmDelete")} danger hidden={{ id: item.id }} />
-        </details>
-      ))}
-      <details className="adminItem new">
-        <summary>{t("newTier")}</summary>
-        <ActionForm action={createTier} submitLabel={t("add")} resetOnSuccess hidden={{ programId: program.id }}>
-          {fields()}
-        </ActionForm>
-      </details>
-    </section>
+        </FormDialog>
+      </SectionHeader>
+      <ul className="m-0 list-none p-0">
+        {program.tiers.map((item) => (
+          <li key={item.id} className="flex flex-wrap items-center gap-x-4 gap-y-2 border-t border-border py-3">
+            <span className="font-medium">{localize(item.name, locale)}</span>
+            {item.featured && <Badge>{t("fields.featured")}</Badge>}
+            <small className="text-muted-foreground">
+              {t("fields.priceSummary", {
+                price: formatPrice(item.priceCents, item.currency, locale),
+                total: formatPrice(withHst(item.priceCents).total, item.currency, locale),
+              })}
+            </small>
+            <span className="ml-auto flex items-center gap-1">
+              <FormDialog mode="edit" title={localize(item.name, locale)}>
+                <ActionForm action={updateTier} submitLabel={t("save")} hidden={{ id: item.id }}>
+                  {fields(item)}
+                </ActionForm>
+              </FormDialog>
+              <ConfirmDelete action={deleteTier} id={item.id} title={localize(item.name, locale)} />
+            </span>
+          </li>
+        ))}
+      </ul>
+    </>
   );
 }
 
@@ -198,48 +223,61 @@ async function CoursesSection({ program }: { program: AdminProgram }) {
   }
 
   return (
-    <section className="adminCard">
-      <h2>{t("sections.courses")}</h2>
-      <p className="fine">{t("sections.coursesHint")}</p>
-      {program.courses.map((course) => (
-        <details key={course.id} className="adminItem">
-          <summary>
-            {localize(course.title, locale)} · {t("lessonCount", { count: course.lessons.length })}
-          </summary>
-          <ActionForm action={updateCourse} submitLabel={t("save")} hidden={{ id: course.id }}>
-            {courseFields(course)}
+    <>
+      <SectionHeader title={t("sections.courses")} hint={t("sections.coursesHint")}>
+        <FormDialog mode="add" title={t("newCourse")}>
+          <ActionForm action={createCourse} submitLabel={t("add")} resetOnSuccess hidden={{ programId: program.id }}>
+            {courseFields()}
           </ActionForm>
-
-          <h3>{t("sections.lessons")}</h3>
-          {course.lessons.map((lesson, i) => (
-            <details key={lesson.id} className="adminItem">
-              <summary>
-                {String(i + 1).padStart(2, "0")}. {localize(lesson.title, locale)}
-                <span className={`badge${lesson.videoId ? " live" : ""}`}>{lesson.videoId ? t("hasVideo") : t("noVideo")}</span>
-              </summary>
-              <ActionForm action={updateLesson} submitLabel={t("save")} hidden={{ id: lesson.id }}>
-                {lessonFields(course, lesson)}
-              </ActionForm>
-              <ActionForm action={deleteLesson} submitLabel={t("delete")} confirm={t("confirmDelete")} danger hidden={{ id: lesson.id }} />
-            </details>
-          ))}
-          <details className="adminItem new">
-            <summary>{t("newLesson")}</summary>
-            <ActionForm action={createLesson} submitLabel={t("add")} resetOnSuccess hidden={{ courseId: course.id }}>
-              {lessonFields(course)}
-            </ActionForm>
-          </details>
-
-          <ActionForm action={deleteCourse} submitLabel={t("delete")} confirm={t("confirmDelete")} danger hidden={{ id: course.id }} />
-        </details>
-      ))}
-      <details className="adminItem new">
-        <summary>{t("newCourse")}</summary>
-        <ActionForm action={createCourse} submitLabel={t("add")} resetOnSuccess hidden={{ programId: program.id }}>
-          {courseFields()}
-        </ActionForm>
-      </details>
-    </section>
+        </FormDialog>
+      </SectionHeader>
+      <Accordion type="multiple">
+        {program.courses.map((course) => (
+          <AccordionItem key={course.id} value={course.id}>
+            <AccordionTrigger>
+              <span className="flex flex-wrap items-center gap-3">
+                {localize(course.title, locale)}
+                <Badge variant="secondary">{t("lessonCount", { count: course.lessons.length })}</Badge>
+              </span>
+            </AccordionTrigger>
+            <AccordionContent>
+              <div className="flex flex-wrap items-center gap-1 pb-2">
+                <FormDialog mode="edit" title={localize(course.title, locale)}>
+                  <ActionForm action={updateCourse} submitLabel={t("save")} hidden={{ id: course.id }}>
+                    {courseFields(course)}
+                  </ActionForm>
+                </FormDialog>
+                <FormDialog mode="add" title={t("newLesson")}>
+                  <ActionForm action={createLesson} submitLabel={t("add")} resetOnSuccess hidden={{ courseId: course.id }}>
+                    {lessonFields(course)}
+                  </ActionForm>
+                </FormDialog>
+                <span className="ml-auto">
+                  <ConfirmDelete action={deleteCourse} id={course.id} label={t("delete")} title={localize(course.title, locale)} />
+                </span>
+              </div>
+              <ul className="m-0 list-none p-0">
+                {course.lessons.map((lesson, i) => (
+                  <li key={lesson.id} className="flex flex-wrap items-center gap-x-3 gap-y-2 border-t border-border py-2">
+                    <span className="text-muted-foreground tabular-nums">{String(i + 1).padStart(2, "0")}</span>
+                    <span>{localize(lesson.title, locale)}</span>
+                    <Badge variant={lesson.videoId ? "default" : "secondary"}>{lesson.videoId ? t("hasVideo") : t("noVideo")}</Badge>
+                    <span className="ml-auto flex items-center gap-1">
+                      <FormDialog mode="edit" title={localize(lesson.title, locale)}>
+                        <ActionForm action={updateLesson} submitLabel={t("save")} hidden={{ id: lesson.id }}>
+                          {lessonFields(course, lesson)}
+                        </ActionForm>
+                      </FormDialog>
+                      <ConfirmDelete action={deleteLesson} id={lesson.id} title={localize(lesson.title, locale)} />
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            </AccordionContent>
+          </AccordionItem>
+        ))}
+      </Accordion>
+    </>
   );
 }
 
@@ -250,29 +288,31 @@ async function AccessSection({ program }: { program: AdminProgram }) {
   const now = new Date();
 
   return (
-    <section className="adminCard">
-      <h2>{t("sections.access")}</h2>
-      <p className="fine">{t("sections.accessHint")}</p>
-      {program.courses.length > 0 && (
-        <ActionForm action={grantAccess} submitLabel={t("grant")} resetOnSuccess>
-          <TextField name="email" label={t("fields.email")} type="email" required />
-          <div className="adminRow">
-            <SelectField
-              name="courseId"
-              label={t("fields.course")}
-              options={program.courses.map((c) => ({ value: c.id, label: localize(c.title, locale) }))}
-            />
-            <SelectField
-              name="tierId"
-              label={t("fields.tier")}
-              options={[
-                ...program.tiers.map((tier) => ({ value: tier.id, label: localize(tier.name, locale) })),
-                { value: "", label: t("fields.noTier") },
-              ]}
-            />
-          </div>
-        </ActionForm>
-      )}
+    <>
+      <SectionHeader title={t("sections.access")} hint={t("sections.accessHint")}>
+        {program.courses.length > 0 && (
+          <FormDialog mode="add" title={t("grant")}>
+            <ActionForm action={grantAccess} submitLabel={t("grant")} resetOnSuccess>
+              <TextField name="email" label={t("fields.email")} type="email" required />
+              <div className="adminRow">
+                <SelectField
+                  name="courseId"
+                  label={t("fields.course")}
+                  options={program.courses.map((c) => ({ value: c.id, label: localize(c.title, locale) }))}
+                />
+                <SelectField
+                  name="tierId"
+                  label={t("fields.tier")}
+                  options={[
+                    ...program.tiers.map((tier) => ({ value: tier.id, label: localize(tier.name, locale) })),
+                    { value: "", label: t("fields.noTier") },
+                  ]}
+                />
+              </div>
+            </ActionForm>
+          </FormDialog>
+        )}
+      </SectionHeader>
       {program.purchases.length ? (
         <ul className="adminList">
           {program.purchases.map((p) => (
@@ -290,13 +330,27 @@ async function AccessSection({ program }: { program: AdminProgram }) {
                 {p.expiresAt && " · "}
                 {p.firstWatchedAt ? t("firstWatched", { date: date(p.firstWatchedAt) }) : t("notWatched")}
               </small>
-              <ActionForm action={revokeAccess} submitLabel={t("revoke")} confirm={t("confirmDelete")} danger hidden={{ id: p.id }} />
+              <span className="ml-auto">
+                <ConfirmDelete action={revokeAccess} id={p.id} label={t("revoke")} title={p.user.email} />
+              </span>
             </li>
           ))}
         </ul>
       ) : (
         <p className="fine">{t("noAccess")}</p>
       )}
-    </section>
+    </>
+  );
+}
+
+function SectionHeader({ title, hint, children }: { title: string; hint: string; children?: React.ReactNode }) {
+  return (
+    <div className="mb-4 flex flex-wrap items-start justify-between gap-3">
+      <div>
+        <h2>{title}</h2>
+        <p className="fine">{hint}</p>
+      </div>
+      {children}
+    </div>
   );
 }

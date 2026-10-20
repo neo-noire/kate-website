@@ -4,6 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
+    "stripe": "stripe listen --forward-to localhost:3000/api/stripe/webhook",
     "build": "node scripts/migrate.mjs && next build",
     "start": "next start",
     "lint": "eslint",
@@ -12,16 +13,25 @@
     "db:migrate": "node scripts/migrate.mjs"
   },
   "dependencies": {
+    "@tailwindcss/postcss": "^4.3.3",
     "better-auth": "1.7.7",
+    "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
+    "cn": "^0.5.0",
     "drizzle-orm": "0.45.4",
+    "input-otp": "^1.5.0",
     "lucide-react": "1.55.0",
     "next": "16.4.0",
     "next-intl": "^4.14.9",
     "pg": "8.23.1",
+    "postcss": "^8.5.30",
+    "radix-ui": "^1.8.1",
     "react": "19.3.0",
     "react-dom": "19.3.0",
     "server-only": "0.0.1",
     "stripe": "22.6.2",
+    "tailwind-merge": "^3.7.0",
+    "tailwindcss": "^4.3.3",
     "zod": "4.6.5"
   },
   "devDependencies": {

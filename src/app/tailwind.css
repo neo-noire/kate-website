@@ -1,0 +1,45 @@
+/* Full Tailwind: theme, preflight and utilities. Everything is in a cascade layer, so the unlayered
+   rules in globals.css still win over preflight and utilities. shadcn's color names map onto its variables. */
+@layer theme, base, components, utilities;
+@import "tailwindcss/theme.css" layer(theme);
+@import "tailwindcss/preflight.css" layer(base);
+@import "tailwindcss/utilities.css" layer(utilities);
+
+@theme inline {
+  --color-background: var(--bg);
+  --color-foreground: var(--white);
+  --color-border: var(--line);
+  --color-input: var(--line);
+  --color-ring: var(--red);
+  --color-muted-foreground: var(--muted);
+  --color-destructive: var(--red);
+  --color-primary: var(--red);
+  --color-primary-foreground: var(--white);
+  --color-secondary: color-mix(in srgb, var(--white) 8%, var(--bg));
+  --color-secondary-foreground: var(--white);
+  --color-accent: color-mix(in srgb, var(--white) 8%, var(--bg));
+  --color-accent-foreground: var(--white);
+  --color-muted: var(--panel);
+  --color-popover: var(--panel);
+  --color-popover-foreground: var(--white);
+}
+
+@theme {
+  --animate-caret-blink: caret-blink 1.25s ease-out infinite;
+  @keyframes caret-blink {
+    0%,
+    70%,
+    100% {
+      opacity: 1;
+    }
+    20%,
+    50% {
+      opacity: 0;
+    }
+  }
+}
+
+/* globals.css styles every input:focus-visible; the OTP's hidden input needs no ring (the slots show focus). */
+input[data-slot="input-otp"]:focus-visible {
+  outline: none;
+}

@@ -11,10 +11,8 @@ import { localize } from "@/lib/localized";
 import { useToast } from "./toast";
 import { LessonVideo } from "./lesson-video";
 
-type Tab = "about" | "notes" | "practice";
+type Tab = "about" | "notes";
 type Course = Library["courses"][number];
-
-const practiceTips = ["repeat", "count", "combine"] as const;
 
 type DashboardProps = {
   userName: string;
@@ -200,7 +198,7 @@ function Studio({ admin, library, initialCourseId }: Omit<DashboardProps, "userN
             </div>
 
             <div className="contentTabs" role="tablist">
-              {(["about", "notes", "practice"] as const).map((id) => (
+              {(["about", "notes"] as const).map((id) => (
                 <button
                   key={id}
                   role="tab"
@@ -229,16 +227,6 @@ function Studio({ admin, library, initialCourseId }: Omit<DashboardProps, "userN
                   saved={notes[lesson.id] ?? ""}
                   onSaved={(body) => setNotes((current) => ({ ...current, [lesson.id]: body }))}
                 />
-              )}
-              {tab === "practice" && (
-                <>
-                  <h3>{t("dashboard.practiceTitle")}</h3>
-                  <ul>
-                    {practiceTips.map((key) => (
-                      <li key={key}>{t(`dashboard.practice.${key}`)}</li>
-                    ))}
-                  </ul>
-                </>
               )}
             </div>
           </>

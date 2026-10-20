@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
 import { AuthForm } from "@/components/auth-form";
-import { googleEnabled } from "@/lib/auth/providers";
+import { emailEnabled, googleEnabled } from "@/lib/auth/providers";
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations("auth");
@@ -15,7 +15,7 @@ export default async function SignUpPage() {
       <div className="eyebrow">{t("eyebrow")}</div>
       <h1>{t("signUpTitle")}</h1>
       <p className="sub">{t("signUpBody")}</p>
-      <AuthForm mode="signUp" google={googleEnabled} />
+      <AuthForm mode="signUp" google={googleEnabled} emailVerification={emailEnabled} />
     </main>
   );
 }
