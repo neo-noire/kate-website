@@ -135,7 +135,7 @@ function GlanceRow({ label, value }: { label: string; value: string }) {
 
 /** Bolds a leading number ("4 private sessions") so the difference between plans reads at a glance. */
 function withBoldNumber(text: string) {
-  const [, number, rest] = text.match(/^(\d+)(.*)$/s) ?? [];
+  const [, number, rest] = text.match(/^(\d+)([\s\S]*)$/) ?? [];
   return number ? (
     <>
       <strong className="text-base text-foreground">{number}</strong>
