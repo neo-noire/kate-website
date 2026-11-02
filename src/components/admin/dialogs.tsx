@@ -75,6 +75,8 @@ export function FormDialog({ title, mode, variant = "outline", iconOnly, childre
 type ConfirmDeleteProps = {
   action: (state: FormState, form: FormData) => Promise<FormState>;
   id: string;
+  /** Name of the form field the action reads the id from. */
+  idField?: string;
   /** Text of the button that opens the confirmation. Omit for an icon-only button. */
   label?: string;
   /** Dialog heading, e.g. the name of the thing being deleted. */
@@ -85,14 +87,14 @@ type ConfirmDeleteProps = {
 };
 
 /** A delete button that asks in a dialog first. Replaces the browser's window.confirm. */
-export function ConfirmDelete({ action, id, label, title, open, onOpenChange }: ConfirmDeleteProps) {
+export function ConfirmDelete({ action, id, idField = "id", label, title, open, onOpenChange }: ConfirmDeleteProps) {
   const t = useTranslations("admin");
   const locale = useLocale();
   const [state, formAction, pending] = useActionState(action, initialFormState);
 
   function remove() {
     const data = new FormData();
-    data.set("id", id);
+    data.set(idField, id);
     data.set("locale", locale);
     startTransition(() => formAction(data));
   }

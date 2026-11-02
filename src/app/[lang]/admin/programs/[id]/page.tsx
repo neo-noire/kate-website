@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import { getFormatter, getLocale, getTranslations } from "next-intl/server";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
+import { CardRow, Mark, SectionHeader } from "@/components/admin/card-row";
 import { ItemActions } from "@/components/admin/item-actions";
 import { ConfirmDelete, FormDialog } from "@/components/admin/dialogs";
 import { ActionForm, CheckboxField, LocalizedField, SelectField, TextField } from "@/components/admin/forms";
@@ -29,7 +30,6 @@ import {
 import { getAdminProgram, type AdminProgram } from "@/lib/catalog/admin-queries";
 import { localize } from "@/lib/localized";
 import { CURRENCIES, formatPrice, withHst } from "@/lib/money";
-import { cn } from "@/lib/utils";
 import { youTubeWatchUrl } from "@/lib/youtube";
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -382,30 +382,5 @@ async function AccessSection({ program }: { program: AdminProgram }) {
         <p className="fine">{t("noAccess")}</p>
       )}
     </>
-  );
-}
-
-function SectionHeader({ title, hint, children }: { title: string; hint: string; children?: React.ReactNode }) {
-  return (
-    <div className="mb-5 flex flex-wrap items-end justify-between gap-3">
-      <div>
-        <h2 className="m-0 text-2xl font-black tracking-tight">{title}</h2>
-        <p className="m-0 text-[13px] text-muted-foreground">{hint}</p>
-      </div>
-      {children}
-    </div>
-  );
-}
-
-/** A rounded row on the panel background: the shared look of tier, course and access cards. */
-function CardRow({ children, className }: { children: React.ReactNode; className?: string }) {
-  return <li className={cn("flex items-center gap-3.5 rounded-xl border border-border bg-[var(--panel)] py-3 pr-3 pl-4", className)}>{children}</li>;
-}
-
-function Mark({ children }: { children: React.ReactNode }) {
-  return (
-    <span className="grid size-10 shrink-0 place-items-center rounded-[10px] border border-border bg-secondary text-base font-black text-primary">
-      {children}
-    </span>
   );
 }

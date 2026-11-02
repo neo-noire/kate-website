@@ -1,7 +1,13 @@
+import { ChevronRight } from "lucide-react";
 import type { Metadata } from "next";
 import { getFormatter, getLocale, getTranslations } from "next-intl/server";
 import { Suspense } from "react";
+import { CardRow, Mark, SectionHeader } from "@/components/admin/card-row";
+import { FormDialog } from "@/components/admin/dialogs";
 import { ActionForm, LocalizedField, TextField } from "@/components/admin/forms";
+import { ItemActions } from "@/components/admin/item-actions";
+import { Badge } from "@/components/ui/badge";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Link } from "@/i18n/navigation";
 import { requireAdminPage } from "@/lib/auth/admin-page";
 import { createProgram, deleteContactMessage, removeSubscriber } from "@/lib/catalog/admin-actions";
@@ -41,88 +47,106 @@ async function AdminHome() {
       <p className="sub">{t("intro")}</p>
       <PaymentsWarning />
 
-      <section className="adminCard">
-        <h2>{t("programs")}</h2>
-        {programs.length ? (
-          <ul className="adminList">
-            {programs.map((p) => (
-              <li key={p.id}>
-                <Link href={`/admin/programs/${p.id}`}>{localize(p.title, locale)}</Link>
-                <span className={`badge${p.published ? " live" : ""}`}>{p.published ? t("published") : t("draft")}</span>
-                <small>
-                  {t("courseCount", { count: p.courses.length })} · {t("tierCount", { count: p.tiers.length })}
-                </small>
-              </li>
-            ))}
-          </ul>
-        ) : (
-          <p className="fine">{t("noPrograms")}</p>
-        )}
-      </section>
+      <Tabs defaultValue="programs" className="mt-6">
+        <TabsList>
+          <TabsTrigger value="programs">
+            {t("programs")} <Badge variant="secondary">{programs.length}</Badge>
+          </TabsTrigger>
+          <TabsTrigger value="messages">
+            {t("inbox.messages")} <Badge variant="secondary">{messages.length}</Badge>
+          </TabsTrigger>
+          <TabsTrigger value="subscribers">
+            {t("inbox.subscribers")} <Badge variant="secondary">{subscribers.length}</Badge>
+          </TabsTrigger>
+        </TabsList>
 
-      <section className="adminCard">
-        <h2>{t("newProgram")}</h2>
-        <ActionForm action={createProgram} submitLabel={t("create")}>
-          <LocalizedField name="title" label={t("fields.title")} required />
-          <TextField name="slug" label={t("fields.slug")} hint={t("fields.slugHint")} required />
-        </ActionForm>
-      </section>
+        <TabsContent value="programs" className="mt-6">
+          <SectionHeader title={t("programs")}>
+            <FormDialog mode="add" variant="default" title={t("newProgram")}>
+              <ActionForm action={createProgram} submitLabel={t("create")}>
+                <LocalizedField name="title" label={t("fields.title")} required />
+                <TextField name="slug" label={t("fields.slug")} hint={t("fields.slugHint")} required />
+              </ActionForm>
+            </FormDialog>
+          </SectionHeader>
+          {programs.length ? (
+            <ul className="m-0 grid list-none gap-3 p-0">
+              {programs.map((p) => {
+                const title = localize(p.title, locale);
+                return (
+                  <CardRow key={p.id} className="group relative p-0 hover:border-muted-foreground/50">
+                    <Link href={`/admin/programs/${p.id}`} className="flex flex-1 items-center gap-3.5 py-3 pr-3 pl-4">
+                      <Mark>{title.charAt(0)}</Mark>
+                      <span className="grid min-w-0 flex-1 gap-0.5">
+                        <span className="flex flex-wrap items-center gap-2 font-bold">
+                          {title}
+                          <Badge variant={p.published ? "default" : "secondary"}>{p.published ? t("published") : t("draft")}</Badge>
+                        </span>
+                        <small className="text-xs text-muted-foreground">
+                          {t("courseCount", { count: p.courses.length })} · {t("tierCount", { count: p.tiers.length })}
+                        </small>
+                      </span>
+                      <ChevronRight size={18} aria-hidden className="text-muted-foreground transition-transform group-hover:translate-x-0.5" />
+                    </Link>
+                  </CardRow>
+                );
+              })}
+            </ul>
+          ) : (
+            <p className="text-sm text-muted-foreground">{t("noPrograms")}</p>
+          )}
+        </TabsContent>
 
-      <section className="adminCard">
-        <h2>{t("inbox.messages")}</h2>
-        {messages.length ? (
-          <ul className="adminList inbox">
-            {messages.map((m) => (
-              <li key={m.id}>
-                <span>
-                  <b>{m.name}</b> <a href={`mailto:${m.email}`}>{m.email}</a>
-                </span>
-                <small>
-                  {date(m.createdAt)} · {m.locale.toUpperCase()}
-                </small>
-                <p className="inboxMessage">{m.message}</p>
-                <ActionForm
-                  action={deleteContactMessage}
-                  submitLabel={t("inbox.delete")}
-                  confirm={t("confirmDelete")}
-                  danger
-                  hidden={{ id: m.id }}
-                />
-              </li>
-            ))}
-          </ul>
-        ) : (
-          <p className="fine">{t("inbox.noMessages")}</p>
-        )}
-      </section>
-
-      <section className="adminCard">
-        <h2>{t("inbox.subscribers")}</h2>
-        {subscribers.length ? (
-          <>
-            <p className="fine">{t("inbox.subscriberCount", { count: subscribers.length })}</p>
-            <ul className="adminList">
-              {subscribers.map((s) => (
-                <li key={s.email}>
-                  <span>{s.email}</span>
-                  <small>
-                    {date(s.createdAt)} · {s.locale.toUpperCase()}
-                  </small>
-                  <ActionForm
-                    action={removeSubscriber}
-                    submitLabel={t("inbox.remove")}
-                    confirm={t("confirmDelete")}
-                    danger
-                    hidden={{ email: s.email }}
-                  />
-                </li>
+        <TabsContent value="messages" className="mt-6">
+          <SectionHeader title={t("inbox.messages")} />
+          {messages.length ? (
+            <ul className="m-0 grid list-none gap-3 p-0">
+              {messages.map((m) => (
+                <CardRow key={m.id} className="items-start">
+                  <Mark>{m.name.charAt(0).toUpperCase()}</Mark>
+                  <div className="grid min-w-0 flex-1 gap-1.5">
+                    <span className="flex flex-wrap items-baseline gap-x-3">
+                      <b>{m.name}</b>
+                      <a href={`mailto:${m.email}`} className="text-sm text-muted-foreground hover:text-foreground">
+                        {m.email}
+                      </a>
+                      <small className="text-xs text-muted-foreground">
+                        {date(m.createdAt)} · {m.locale.toUpperCase()}
+                      </small>
+                    </span>
+                    <p className="m-0 text-sm whitespace-pre-wrap text-foreground/85">{m.message}</p>
+                  </div>
+                  <ItemActions id={m.id} title={m.name} deleteLabel={t("inbox.delete")} deleteAction={deleteContactMessage} />
+                </CardRow>
               ))}
             </ul>
-          </>
-        ) : (
-          <p className="fine">{t("inbox.noSubscribers")}</p>
-        )}
-      </section>
+          ) : (
+            <p className="text-sm text-muted-foreground">{t("inbox.noMessages")}</p>
+          )}
+        </TabsContent>
+
+        <TabsContent value="subscribers" className="mt-6">
+          <SectionHeader title={t("inbox.subscribers")} hint={subscribers.length ? t("inbox.subscriberCount", { count: subscribers.length }) : undefined} />
+          {subscribers.length ? (
+            <ul className="m-0 grid list-none gap-3 p-0">
+              {subscribers.map((s) => (
+                <CardRow key={s.email}>
+                  <Mark>{s.email.charAt(0).toUpperCase()}</Mark>
+                  <span className="grid min-w-0 flex-1 gap-0.5">
+                    <span className="truncate">{s.email}</span>
+                    <small className="text-xs text-muted-foreground">
+                      {date(s.createdAt)} · {s.locale.toUpperCase()}
+                    </small>
+                  </span>
+                  <ItemActions id={s.email} idField="email" title={s.email} deleteLabel={t("inbox.remove")} deleteAction={removeSubscriber} />
+                </CardRow>
+              ))}
+            </ul>
+          ) : (
+            <p className="text-sm text-muted-foreground">{t("inbox.noSubscribers")}</p>
+          )}
+        </TabsContent>
+      </Tabs>
     </main>
   );
 }
@@ -133,7 +157,7 @@ async function PaymentsWarning() {
   if (!missing.length) return null;
   const t = await getTranslations("admin");
   return (
-    <p className="legalDraft" role="status">
+    <p role="status" className="mt-5 mb-0 rounded-xl border border-primary/50 bg-primary/10 px-4 py-3 text-sm">
       {t("paymentsOff", { names: missing.join(", ") })}
     </p>
   );

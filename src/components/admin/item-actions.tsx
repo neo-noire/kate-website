@@ -10,6 +10,8 @@ import type { FormState } from "@/lib/catalog/form-state";
 
 type ItemActionsProps = {
   id: string;
+  /** Name of the form field the delete action reads the id from. */
+  idField?: string;
   /** Names the item in the dialogs. */
   title: string;
   /** Menu labels, e.g. "Edit course" / "Delete course". */
@@ -24,7 +26,7 @@ type ItemActionsProps = {
 type OpenDialog = "edit" | "add" | "delete" | null;
 
 /** The ⋯ menu on a card. Each item opens its dialog, which lives outside the menu so it survives the menu closing. */
-export function ItemActions({ id, title, editLabel, deleteLabel, editForm, add, deleteAction }: ItemActionsProps) {
+export function ItemActions({ id, idField, title, editLabel, deleteLabel, editForm, add, deleteAction }: ItemActionsProps) {
   const t = useTranslations("admin");
   const [dialog, setDialog] = useState<OpenDialog>(null);
   const close = (open: boolean) => !open && setDialog(null);
@@ -65,7 +67,7 @@ export function ItemActions({ id, title, editLabel, deleteLabel, editForm, add, 
           {add.form}
         </FormDialog>
       )}
-      <ConfirmDelete action={deleteAction} id={id} title={title} open={dialog === "delete"} onOpenChange={close} />
+      <ConfirmDelete action={deleteAction} id={id} idField={idField} title={title} open={dialog === "delete"} onOpenChange={close} />
     </>
   );
 }
