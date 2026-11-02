@@ -9,6 +9,7 @@ import { Link } from "@/i18n/navigation";
 import type { CatalogProgram } from "@/lib/catalog/queries";
 import { localize } from "@/lib/localized";
 import { formatPrice, withHst } from "@/lib/money";
+import { Button } from "@/components/ui/button";
 
 const COLLAPSED_COUNT = 3;
 
@@ -98,10 +99,10 @@ export function ProgramCatalog({ programs }: { programs: CatalogProgram[] }) {
       </div>
       {filter === null && programs.length > COLLAPSED_COUNT && (
         <div style={{ textAlign: "center", marginTop: 26 }}>
-          <button className="btn ghost" onClick={() => setExpanded((value) => !value)}>
+          <Button variant="outline" size="lg" onClick={() => setExpanded((value) => !value)}>
             {expanded ? t("catalog.showLess") : t("catalog.showMore")}
-            {expanded ? <ChevronUp size={16} aria-hidden /> : <ChevronDown size={16} aria-hidden />}
-          </button>
+            {expanded ? <ChevronUp aria-hidden /> : <ChevronDown aria-hidden />}
+          </Button>
         </div>
       )}
     </>

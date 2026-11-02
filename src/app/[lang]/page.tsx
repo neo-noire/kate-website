@@ -11,6 +11,7 @@ import { localeAlternates } from "@/i18n/metadata";
 import heroPhoto from "@/assets/hero.jpg";
 import { getCatalog, getFeaturedPreview } from "@/lib/catalog/queries";
 import { localize } from "@/lib/localized";
+import { Button } from "@/components/ui/button";
 
 const tickerDances = ["CHA-CHA-CHA", "SAMBA", "RUMBA", "PASO DOBLE", "JIVE"];
 
@@ -54,9 +55,11 @@ export default async function HomePage() {
             {t("hero.lead2")}
           </p>
           <div className="heroActions">
-            <a href="#courses" className="btn">
-              {t("hero.choosePrograms")} <ArrowUpRight size={18} aria-hidden />
-            </a>
+            <Button asChild size="lg">
+              <a href="#courses">
+                {t("hero.choosePrograms")} <ArrowUpRight aria-hidden />
+              </a>
+            </Button>
             {preview && (
               <PreviewLessonButton
                 videoId={preview.videoId}

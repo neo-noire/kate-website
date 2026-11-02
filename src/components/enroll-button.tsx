@@ -6,6 +6,7 @@ import { useActionState } from "react";
 import { useFormStatus } from "react-dom";
 import { startCheckout } from "@/lib/checkout-actions";
 import { Modal, useDialogState } from "./modal";
+import { Button } from "@/components/ui/button";
 
 type EnrollButtonProps = {
   programTitle: string;
@@ -47,9 +48,9 @@ export function EnrollButton({
 
   return (
     <>
-      <button className={className ?? `btn${featured ? "" : " ghost"}`} onClick={dialog.show}>
-        {t("packages.choose", { name: tierName })} <ArrowUpRight size={16} aria-hidden />
-      </button>
+      <Button variant={featured ? "default" : "outline"} size="lg" className={className} onClick={dialog.show}>
+        {t("packages.choose", { name: tierName })} <ArrowUpRight aria-hidden />
+      </Button>
       <Modal open={dialog.open} onClose={dialog.close} label={t("enroll.dialogLabel")} size="sm">
         <div className="eyebrow">{t("enroll.eyebrow")}</div>
         <h2>
@@ -93,8 +94,8 @@ export function EnrollButton({
 function PayButton({ label }: { label: string }) {
   const { pending } = useFormStatus();
   return (
-    <button className="btn" type="submit" disabled={pending} aria-busy={pending}>
-      <Lock size={16} aria-hidden /> {label}
-    </button>
+    <Button type="submit" size="lg" className="w-full" disabled={pending} aria-busy={pending}>
+      <Lock aria-hidden /> {label}
+    </Button>
   );
 }

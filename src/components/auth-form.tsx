@@ -2,7 +2,10 @@
 
 import { ArrowUpRight } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
-import { useState, useSyncExternalStore, type FormEvent } from "react";
+import { useId, useState, useSyncExternalStore, type FormEvent } from "react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { VerifyEmailStep } from "@/components/verify-email-step";
 import { getPathname, Link } from "@/i18n/navigation";
 import { authClient } from "@/lib/auth/client";
@@ -46,6 +49,7 @@ export function AuthForm({ mode, google, emailVerification }: { mode: Mode; goog
   const locale = useLocale();
   const query = useQuery();
   const nextPath = safeNextPath(query.get("next"));
+  const ids = { name: useId(), email: useId(), password: useId() };
   const [pending, setPending] = useState(false);
   const [submitError, setError] = useState<ErrorKey | null>(null);
   const [emailToVerify, setEmailToVerify] = useState<string | null>(null);
@@ -109,28 +113,29 @@ export function AuthForm({ mode, google, emailVerification }: { mode: Mode; goog
     <>
       {google && (
         <>
-          <button className="btn ghost googleButton" type="button" onClick={continueWithGoogle} disabled={pending}>
+          <Button type="button" variant="outline" className="h-11 w-full rounded-xl" onClick={continueWithGoogle} disabled={pending}>
             <GoogleMark /> {t("google")}
-          </button>
+          </Button>
           <p className="authDivider">
             <span>{t("or")}</span>
           </p>
         </>
       )}
-      <form className="formStack" onSubmit={submit} {...validation}>
+      <form className="grid gap-4" onSubmit={submit} {...validation}>
         {mode === "signUp" && (
-          <label>
-            {t("name")}
-            <input name="name" autoComplete="name" maxLength={60} placeholder={t("namePlaceholder")} required />
-          </label>
+          <div className="grid gap-1.5">
+            <Label htmlFor={ids.name}>{t("name")}</Label>
+            <Input id={ids.name} name="name" autoComplete="name" maxLength={60} placeholder={t("namePlaceholder")} required className="h-11" />
+          </div>
         )}
-        <label>
-          {t("email")}
-          <input name="email" type="email" autoComplete="email" required />
-        </label>
-        <label>
-          {t("password")}
-          <input
+        <div className="grid gap-1.5">
+          <Label htmlFor={ids.email}>{t("email")}</Label>
+          <Input id={ids.email} name="email" type="email" autoComplete="email" required className="h-11" />
+        </div>
+        <div className="grid gap-1.5">
+          <Label htmlFor={ids.password}>{t("password")}</Label>
+          <Input
+            id={ids.password}
             name="password"
             type="password"
             autoComplete={mode === "signUp" ? "new-password" : "current-password"}
@@ -138,13 +143,14 @@ export function AuthForm({ mode, google, emailVerification }: { mode: Mode; goog
             maxLength={128}
             required
             aria-describedby={mode === "signUp" ? "password-hint" : undefined}
+            className="h-11"
           />
           {mode === "signUp" && (
-            <small id="password-hint" className="fieldHint">
+            <small id="password-hint" className="text-xs text-muted-foreground">
               {t("passwordHint")}
             </small>
           )}
-        </label>
+        </div>
         <p className="formError" role="alert">
           {error ? t(`errors.${error}`) : ""}
         </p>
@@ -156,10 +162,10 @@ export function AuthForm({ mode, google, emailVerification }: { mode: Mode; goog
             })}
           </p>
         )}
-        <button className="btn" type="submit" disabled={pending}>
+        <Button type="submit" className="h-11 w-full rounded-xl" disabled={pending}>
           {pending ? t(mode === "signUp" ? "signingUp" : "signingIn") : t(mode)}
-          {!pending && <ArrowUpRight size={16} aria-hidden />}
-        </button>
+          {!pending && <ArrowUpRight aria-hidden />}
+        </Button>
       </form>
       <p className="authSwitch">
         {t(mode === "signIn" ? "noAccount" : "haveAccount")}{" "}

@@ -121,36 +121,6 @@ header nav a:hover {
     display: flex;
     gap: 10px;
 }
-.btn {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 10px;
-    padding: 14px 22px;
-    min-height: 48px;
-    border-radius: 4px;
-    font-weight: bold;
-    font-size: 13px;
-    background: var(--red);
-    color: white;
-    transition: 0.2s;
-}
-.btn:hover {
-    background: #c92b25;
-    transform: translateY(-1px);
-}
-.btn.ghost {
-    border: 1px solid var(--line);
-    background: transparent;
-}
-.btn.ghost:hover {
-    border-color: #555;
-    background: var(--panel);
-}
-.btn.quiet {
-    background: transparent;
-    padding: 10px;
-}
 .eyebrow {
     color: var(--red);
     font-size: 11px;
@@ -475,10 +445,6 @@ header nav a:hover {
     background: #fff;
     color: #111;
     border: none;
-}
-.inputRow .btn {
-    background: #111;
-    white-space: nowrap;
 }
 .newsletter small {
     display: block;
@@ -1057,11 +1023,6 @@ footer a {
     .brand {
         font-size: 25px;
     }
-    .navRight .btn {
-        padding: 10px 12px;
-        font-size: 11px;
-        min-height: 40px;
-    }
     .menuBtn {
         display: grid;
     }
@@ -1113,10 +1074,6 @@ footer a {
     .heroActions {
         gap: 8px;
         margin: 23px 0 30px;
-    }
-    .heroActions .btn {
-        padding: 13px 15px;
-        font-size: 11px;
     }
     .heroBottom {
         font-size: 9px;
@@ -1304,10 +1261,6 @@ footer a {
         width: 16px;
         height: 22px;
     }
-    .navRight .btn {
-        padding: 8px 9px;
-        gap: 0;
-    }
     .languagePicker {
         width: 60px;
         padding: 5px;
@@ -1365,17 +1318,25 @@ textarea,
     gap: 10px;
 }
 .authPage {
-    max-width: 520px;
-    min-height: 60vh;
+    width: min(460px, calc(100% - 36px));
+    margin: 56px auto;
+    padding: 36px;
+    border: 1px solid var(--line);
+    border-radius: 20px;
+    background: var(--panel);
 }
 .authPage h1 {
-    font-size: 42px;
-    letter-spacing: -1.7px;
-    margin: 12px 0 12px;
+    font-size: 34px;
+    letter-spacing: -1.2px;
+    margin: 12px 0 10px;
 }
 .authPage .sub {
     color: var(--muted);
-    margin-bottom: 28px;
+    margin-bottom: 26px;
+}
+.authPage .formStack {
+    max-width: none;
+    margin: 0;
 }
 .fieldHint {
     display: block;
@@ -1416,15 +1377,10 @@ textarea,
     background: none;
     font: inherit;
 }
-.googleButton {
-    width: 100%;
-    max-width: 480px;
-}
 .authDivider {
     display: flex;
     align-items: center;
     gap: 14px;
-    max-width: 480px;
     margin: 20px 0;
     color: var(--muted);
     font-size: 12px;
@@ -1635,9 +1591,6 @@ textarea,
 .fieldError {
     color: #ff7b71;
     font-size: 12px;
-}
-.btn.danger {
-    color: #ff7b71;
 }
 .adminItem {
     border-top: 1px solid var(--line);

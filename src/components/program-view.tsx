@@ -13,6 +13,7 @@ import { isStripeConfigured } from "@/lib/stripe/server";
 import { cn } from "@/lib/utils";
 import { EnrollButton } from "./enroll-button";
 import { Expandable } from "./expandable";
+import { Button } from "@/components/ui/button";
 
 type Course = ProgramPage["courses"][number];
 
@@ -146,8 +147,6 @@ function withBoldNumber(text: string) {
   );
 }
 
-const CARD_BUTTON = "inline-flex h-12 w-full items-center justify-center gap-2.5 rounded-xl text-[13px] font-bold transition-colors";
-
 async function PricingCards({ page, course, programTitle }: { page: ProgramPage; course: Course; programTitle: string }) {
   const [t, locale] = await Promise.all([getTranslations("packages"), getLocale()]);
   if (!page.tiers.length) return <p className="fine">{t("noTiers")}</p>;
@@ -235,10 +234,7 @@ async function PricingCards({ page, course, programTitle }: { page: ProgramPage;
                 </details>
               )}
               <EnrollButton
-                className={cn(
-                  CARD_BUTTON,
-                  tier.featured ? "bg-primary text-white hover:bg-primary/90" : "border border-border hover:border-muted-foreground/50 hover:bg-accent",
-                )}
+                className="h-12 w-full"
                 programTitle={programTitle}
                 courseTitle={courseTitle}
                 tierName={name}
@@ -277,9 +273,11 @@ async function CourseAccess({ courseId }: { courseId: string }) {
             : t("ownedNoTier")
           : t("adminAccess")}
       </span>
-      <Link className="btn" href={{ pathname: "/dashboard", query: { course: courseId } }}>
-        {t("openDashboard")} <ArrowUpRight size={16} aria-hidden />
-      </Link>
+      <Button asChild>
+        <Link href={{ pathname: "/dashboard", query: { course: courseId } }}>
+          {t("openDashboard")} <ArrowUpRight aria-hidden />
+        </Link>
+      </Button>
     </div>
   );
 }

@@ -4,6 +4,7 @@ import { Play } from "lucide-react";
 import type { ReactNode } from "react";
 import { Modal, useDialogState } from "./modal";
 import { YouTubePlayer } from "./youtube-player";
+import { Button } from "@/components/ui/button";
 
 type PreviewLessonButtonProps = {
   videoId: string;
@@ -15,13 +16,13 @@ type PreviewLessonButtonProps = {
 };
 
 /** Plays a free preview lesson in a dialog. */
-export function PreviewLessonButton({ videoId, title, className = "btn ghost", children }: PreviewLessonButtonProps) {
+export function PreviewLessonButton({ videoId, title, className, children }: PreviewLessonButtonProps) {
   const dialog = useDialogState();
   return (
     <>
-      <button className={className} onClick={dialog.show} aria-label={children ? undefined : title}>
-        {children ?? <Play size={16} aria-hidden />}
-      </button>
+      <Button variant="outline" size="lg" className={className} onClick={dialog.show} aria-label={children ? undefined : title}>
+        {children ?? <Play aria-hidden />}
+      </Button>
       <Modal open={dialog.open} onClose={dialog.close} label={title}>
         <h2 className="previewTitle">{title}</h2>
         <YouTubePlayer videoId={videoId} title={title} />
