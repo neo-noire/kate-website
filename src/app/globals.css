@@ -140,11 +140,12 @@ header nav a:hover {
     transform: translateY(-1px);
 }
 .btn.outline {
-    border: 1px solid #555;
+    border: 1px solid var(--line);
     background: transparent;
 }
 .btn.outline:hover {
-    background: #292929;
+    border-color: #555;
+    background: var(--panel);
 }
 .btn.quiet {
     background: transparent;
