@@ -1,5 +1,5 @@
 {
-  "id": "4434fc1e-4b2f-4737-ab97-881547eabd69",
+  "id": "93a46f46-335c-4e4b-8574-ad0da404bfd2",
   "prevId": "b8d68b10-cb9b-405f-a42e-627f4f5343af",
   "version": "7",
   "dialect": "postgresql",
@@ -1025,14 +1025,14 @@
           "notNull": true,
           "default": 50
         },
-        "features": {
-          "name": "features",
-          "type": "jsonb",
+        "key": {
+          "name": "key",
+          "type": "text",
           "primaryKey": false,
           "notNull": false
         },
-        "excluded_features": {
-          "name": "excluded_features",
+        "features": {
+          "name": "features",
           "type": "jsonb",
           "primaryKey": false,
           "notNull": false

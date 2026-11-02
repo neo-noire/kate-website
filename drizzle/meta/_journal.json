@@ -61,15 +61,8 @@
     {
       "idx": 8,
       "version": "7",
-      "when": 1793581549538,
-      "tag": "0008_tier_excluded_features",
-      "breakpoints": true
-    },
-    {
-      "idx": 9,
-      "version": "7",
-      "when": 1793582380307,
-      "tag": "0009_tier_card_text",
+      "when": 1793582780373,
+      "tag": "0008_tier_key",
       "breakpoints": true
     }
   ]

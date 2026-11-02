@@ -395,15 +395,6 @@
       "currency": "Currency",
       "privateLessons": "Private lessons",
       "privateLessonMinutes": "Minutes per private lesson",
-      "features": "Included benefits",
-      "tagline": "Short label",
-      "taglineHint": "Small text above the name on the pricing card, e.g. + 1 private session.",
-      "tierDescriptionHint": "A paragraph on who this format is for.",
-      "howItWorks": "How it works",
-      "howItWorksHint": "Shown in a \"How it works\" toggle on the card, e.g. how private sessions are scheduled.",
-      "featuresHint": "One per line. Shown with a ✓ on the pricing panel, after the video and private lessons.",
-      "excludedFeatures": "Not included",
-      "excludedFeaturesHint": "One per line. Shown crossed out with a ✕, so students can compare what each format lacks.",
       "featured": "Highlight as recommended",
       "video": "YouTube link",
       "videoHint": "Use an unlisted video. Anyone who has its link can watch it.",
@@ -414,7 +405,10 @@
       "tier": "Tier",
       "noTier": "No tier",
       "priceHint": "What Kate receives, before tax. Students pay this plus 13% HST.",
-      "priceSummary": "{price} + HST = {total}"
+      "priceSummary": "{price} + HST = {total}",
+      "tierKey": "Key",
+      "tierKeyHint": "Links this format to its text in src/content, e.g. self, guided or vip. Lowercase, no spaces.",
+      "courseDescriptionHint": "A short summary. The long text on the program page lives in src/content."
     },
     "errors": {
       "required": "Please fill in the English version of this field.",

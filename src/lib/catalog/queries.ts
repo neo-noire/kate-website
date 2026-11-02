@@ -15,11 +15,7 @@ const tierColumns = {
   currency: true,
   privateLessons: true,
   privateLessonMinutes: true,
-  tagline: true,
-  description: true,
-  howItWorks: true,
-  features: true,
-  excludedFeatures: true,
+  key: true,
   featured: true,
 } as const;
 

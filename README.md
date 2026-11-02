@@ -97,6 +97,10 @@ Admins (the `ADMIN_EMAILS` accounts) manage it at `/en/admin`, linked from their
 
 `/terms`, `/privacy` and `/refunds` (in every language) are linked from the footer, and sign-up links to the first two. The texts live in `src/content/legal/` (`en.ts`, `uk.ts`; a language without a translation shows English). The terms follow Ontario law; the legal business name and contact email in `src/content/legal/business.ts` are placeholders until Kate confirms them. Each page shows a draft notice until `reviewed` is set to `true` there, after the texts have been checked by someone qualified. Bump `lastUpdated` whenever a text changes.
 
+## Where the words live
+
+The database holds what the app needs to run: prices, ids, order, titles and lessons. Longer copy lives in code, in `src/content/programs/<program-slug>.ts`: each course's description (matched by course slug) and each pricing tier's tagline, description, "How it works" and included / not-included lists (matched by the tier's **Key** field in the admin, e.g. `self`, `guided`, `vip`). To add a program's copy, create its file there and register it in `src/content/programs/index.ts`. Missing copy never breaks a page; the card falls back to what the database has.
+
 ## The original prototype
 
 [`prototype/ritmo.html`](./prototype/ritmo.html) is the original single-file prototype, kept for reference. Open it directly in a browser; it needs no build or network. The app above reproduces it, with these deliberate differences:

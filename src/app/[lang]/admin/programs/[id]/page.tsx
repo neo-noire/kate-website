@@ -158,17 +158,7 @@ async function TiersSection({ program }: { program: AdminProgram }) {
             defaultValue={item?.privateLessonMinutes ?? 50}
           />
         </div>
-        <LocalizedField name="tagline" label={t("fields.tagline")} hint={t("fields.taglineHint")} defaultValue={item?.tagline} />
-        <LocalizedField name="description" label={t("fields.description")} hint={t("fields.tierDescriptionHint")} defaultValue={item?.description} multiline />
-        <LocalizedField name="features" label={t("fields.features")} hint={t("fields.featuresHint")} defaultValue={item?.features} multiline />
-        <LocalizedField
-          name="excludedFeatures"
-          label={t("fields.excludedFeatures")}
-          hint={t("fields.excludedFeaturesHint")}
-          defaultValue={item?.excludedFeatures}
-          multiline
-        />
-        <LocalizedField name="howItWorks" label={t("fields.howItWorks")} hint={t("fields.howItWorksHint")} defaultValue={item?.howItWorks} multiline />
+        <TextField name="key" label={t("fields.tierKey")} hint={t("fields.tierKeyHint")} defaultValue={item?.key} />
         <div className="adminRow">
           <TextField name="sortOrder" label={t("fields.sortOrder")} hint={t("fields.sortOrderHint.tier")} type="number" defaultValue={item?.sortOrder ?? program.tiers.length} />
           <CheckboxField name="featured" label={t("fields.featured")} defaultChecked={item?.featured} />
@@ -237,7 +227,7 @@ async function CoursesSection({ program }: { program: AdminProgram }) {
           <TextField name="slug" label={t("fields.slug")} hint={t("fields.slugHint")} defaultValue={item?.slug} required />
           <TextField name="sortOrder" label={t("fields.sortOrder")} hint={t("fields.sortOrderHint.course")} type="number" defaultValue={item?.sortOrder ?? program.courses.length} />
         </div>
-        <LocalizedField name="description" label={t("fields.description")} defaultValue={item?.description} multiline markdown />
+        <LocalizedField name="description" label={t("fields.description")} hint={t("fields.courseDescriptionHint")} defaultValue={item?.description} multiline />
       </>
     );
   }

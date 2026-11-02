@@ -4,8 +4,10 @@ import { Suspense } from "react";
 import { Markdown } from "@/components/markdown";
 import { Link } from "@/i18n/navigation";
 import { getSession, isAdmin } from "@/lib/auth/session";
+import { getCourseCopy, getTierCopy } from "@/content/programs";
+import type { Locale } from "@/i18n/routing";
 import { getPurchase, type ProgramPage } from "@/lib/catalog/queries";
-import { localize, localizeLines } from "@/lib/localized";
+import { localize } from "@/lib/localized";
 import { formatPrice, HST_RATE, withHst } from "@/lib/money";
 import { isStripeConfigured } from "@/lib/stripe/server";
 import { cn } from "@/lib/utils";
@@ -63,7 +65,7 @@ export async function ProgramView({ page, course }: { page: ProgramPage; course:
 
 async function CourseIntro({ page, course }: { page: ProgramPage; course: Course }) {
   const [t, locale] = await Promise.all([getTranslations("packages"), getLocale()]);
-  const description = localize(course.description, locale);
+  const description = getCourseCopy(page.slug, course.slug, locale as Locale)?.about ?? localize(course.description, locale);
   const totalMinutes = course.lessons.reduce((sum, lesson) => sum + (lesson.durationMinutes ?? 0), 0);
   const cheapest = page.tiers.length ? page.tiers.reduce((a, b) => (a.priceCents <= b.priceCents ? a : b)) : undefined;
 
@@ -158,14 +160,17 @@ async function PricingCards({ page, course, programTitle }: { page: ProgramPage;
             hst: formatPrice(hst, tier.currency, locale),
             beforeTax: formatPrice(beforeTax, tier.currency, locale),
           };
-          const included = [
-            t("videoLessons", { count: course.lessons.length }),
-            ...(tier.privateLessons ? [t("privateLessons", { count: tier.privateLessons, minutes: tier.privateLessonMinutes })] : []),
-            ...localizeLines(tier.features, locale),
-          ];
-          const excluded = localizeLines(tier.excludedFeatures, locale);
-          const description = localize(tier.description, locale);
-          const howItWorks = localize(tier.howItWorks, locale);
+          const copy = getTierCopy(page.slug, tier.key, locale as Locale);
+          // Without copy in src/content, fall back to what the database knows.
+          const included = copy
+            ? copy.included
+            : [
+                t("videoLessons", { count: course.lessons.length }),
+                ...(tier.privateLessons ? [t("privateLessons", { count: tier.privateLessons, minutes: tier.privateLessonMinutes })] : []),
+              ];
+          const excluded = copy?.notIncluded ?? [];
+          const description = copy?.description;
+          const howItWorks = copy?.howItWorks;
           return (
             <article
               key={tier.id}
@@ -181,7 +186,7 @@ async function PricingCards({ page, course, programTitle }: { page: ProgramPage;
               )}
               <div>
                 <div className="text-[11px] font-bold tracking-[0.14em] text-muted-foreground uppercase">
-                  {localize(tier.tagline, locale) ?? t("format", { number: i + 1 })}
+                  {copy?.tagline ?? t("format", { number: i + 1 })}
                 </div>
                 <h3 className="mt-0.5 text-[22px] leading-tight font-bold">{name}</h3>
               </div>

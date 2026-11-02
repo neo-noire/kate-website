@@ -1,1 +1,0 @@
-ALTER TABLE "tier" ADD COLUMN "excluded_features" jsonb;
