@@ -24,27 +24,41 @@ type FormDialogProps = {
   title: string;
   /** "add" shows a plus button with the title as its label; "edit" shows a compact pencil button. */
   mode: "add" | "edit";
+  /** Show only the pencil icon for "edit". */
+  iconOnly?: boolean;
   children: ReactNode;
+  /** Control the dialog from outside (e.g. a menu item). No trigger button is rendered. */
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
 };
 
 /** A button that opens a dialog around a form. Radix unmounts the form on close, so it starts fresh next time. */
-export function FormDialog({ title, mode, children }: FormDialogProps) {
+export function FormDialog({ title, mode, iconOnly, children, open: controlledOpen, onOpenChange }: FormDialogProps) {
   const t = useTranslations("admin");
-  const [open, setOpen] = useState(false);
+  const [ownOpen, setOwnOpen] = useState(false);
+  const controlled = controlledOpen !== undefined;
+  const open = controlled ? controlledOpen : ownOpen;
+  const setOpen = controlled ? (onOpenChange ?? (() => {})) : setOwnOpen;
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        {mode === "add" ? (
-          <Button variant="outline" size="sm">
-            <Plus aria-hidden /> {title}
-          </Button>
-        ) : (
-          <Button variant="ghost" size="sm">
-            <Pencil aria-hidden /> {t("edit")}
-          </Button>
-        )}
-      </DialogTrigger>
+      {!controlled && (
+        <DialogTrigger asChild>
+          {mode === "add" ? (
+            <Button variant="outline" size="sm">
+              <Plus aria-hidden /> {title}
+            </Button>
+          ) : iconOnly ? (
+            <Button variant="ghost" size="icon-sm" className="text-muted-foreground" aria-label={t("edit")}>
+              <Pencil aria-hidden />
+            </Button>
+          ) : (
+            <Button variant="ghost" size="sm">
+              <Pencil aria-hidden /> {t("edit")}
+            </Button>
+          )}
+        </DialogTrigger>
+      )}
       <DialogContent className="max-h-[90vh] overflow-y-auto rounded-none bg-[var(--panel)] sm:max-w-2xl">
         <DialogHeader>
           <DialogTitle>{title}</DialogTitle>
@@ -63,10 +77,13 @@ type ConfirmDeleteProps = {
   label?: string;
   /** Dialog heading, e.g. the name of the thing being deleted. */
   title: string;
+  /** Control the dialog from outside (e.g. a menu item). No trigger button is rendered. */
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
 };
 
 /** A delete button that asks in a dialog first. Replaces the browser's window.confirm. */
-export function ConfirmDelete({ action, id, label, title }: ConfirmDeleteProps) {
+export function ConfirmDelete({ action, id, label, title, open, onOpenChange }: ConfirmDeleteProps) {
   const t = useTranslations("admin");
   const locale = useLocale();
   const [state, formAction, pending] = useActionState(action, initialFormState);
@@ -79,12 +96,14 @@ export function ConfirmDelete({ action, id, label, title }: ConfirmDeleteProps) 
   }
 
   return (
-    <AlertDialog>
-      <AlertDialogTrigger asChild>
-        <Button variant="ghost" size={label ? "sm" : "icon-sm"} className="text-destructive" aria-label={label ?? t("delete")}>
-          <Trash2 aria-hidden /> {label}
-        </Button>
-      </AlertDialogTrigger>
+    <AlertDialog open={open} onOpenChange={onOpenChange}>
+      {open === undefined && (
+        <AlertDialogTrigger asChild>
+          <Button variant="ghost" size={label ? "sm" : "icon-sm"} className="text-destructive" aria-label={label ?? t("delete")}>
+            <Trash2 aria-hidden /> {label}
+          </Button>
+        </AlertDialogTrigger>
+      )}
       <AlertDialogContent className="rounded-none bg-[var(--panel)]">
         <AlertDialogHeader>
           <AlertDialogTitle>{title}</AlertDialogTitle>

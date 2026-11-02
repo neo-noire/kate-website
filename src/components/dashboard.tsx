@@ -3,6 +3,7 @@
 import { Check, LogOut, Plus, Settings } from "lucide-react";
 import { useFormatter, useLocale, useTranslations } from "next-intl";
 import { useState, useTransition } from "react";
+import { Markdown } from "@/components/markdown";
 import { getPathname, Link } from "@/i18n/navigation";
 import { authClient } from "@/lib/auth/client";
 import type { Library } from "@/lib/catalog/queries";
@@ -216,7 +217,7 @@ function Studio({ admin, library, initialCourseId }: Omit<DashboardProps, "userN
               {tab === "about" && (
                 <>
                   <h3>{t("dashboard.aboutTitle", { lesson: localize(lesson.title, locale) })}</h3>
-                  {localize(lesson.description, locale) && <p>{localize(lesson.description, locale)}</p>}
+                  {localize(lesson.description, locale) && <Markdown>{localize(lesson.description, locale)!}</Markdown>}
                   <p style={{ marginTop: 10 }}>{t("dashboard.aboutFine")}</p>
                 </>
               )}

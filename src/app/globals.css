@@ -1776,3 +1776,99 @@ textarea,
         grid-template-columns: 30px 1fr auto;
     }
 }
+
+/* Rendered markdown (lesson and course descriptions). Soft line breaks are kept, as admins type them. */
+.markdown > :first-child {
+    margin-top: 0;
+}
+.markdown > :last-child {
+    margin-bottom: 0;
+}
+.markdown h1,
+.markdown h2,
+.markdown h3,
+.markdown h4 {
+    margin: 1.2em 0 0.4em;
+    line-height: 1.25;
+    font-weight: 800;
+}
+.markdown h1 {
+    font-size: 1.4em;
+}
+.markdown h2 {
+    font-size: 1.2em;
+}
+.markdown h3,
+.markdown h4 {
+    font-size: 1em;
+    color: var(--red);
+}
+.markdown p {
+    margin: 0.6em 0;
+    white-space: pre-line;
+}
+.markdown ul,
+.markdown ol {
+    margin: 0.6em 0;
+    padding-left: 1.4em;
+}
+.markdown ul {
+    list-style: disc;
+}
+.markdown ol {
+    list-style: decimal;
+}
+.markdown li::marker {
+    color: var(--red);
+}
+.markdown li > p {
+    margin: 0.2em 0;
+}
+.markdown ul ul,
+.markdown ol ul,
+.markdown ul ol,
+.markdown ol ol {
+    margin: 0.2em 0;
+}
+.markdown blockquote {
+    margin: 0.8em 0;
+    padding: 0 1em;
+    border-left: 3px solid var(--red);
+    color: var(--muted);
+}
+.markdown code {
+    padding: 1px 6px;
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    background: var(--panel);
+    font-size: 0.9em;
+}
+.markdown pre {
+    overflow-x: auto;
+    padding: 12px 14px;
+    border: 1px solid var(--line);
+    background: var(--panel);
+}
+.markdown pre code {
+    padding: 0;
+    border: 0;
+    background: none;
+}
+.markdown a {
+    color: var(--red);
+    text-decoration: underline;
+}
+.markdown hr {
+    margin: 1.2em 0;
+    border: 0;
+    border-top: 1px solid var(--line);
+}
+.markdown table {
+    border-collapse: collapse;
+    margin: 0.8em 0;
+}
+.markdown th,
+.markdown td {
+    padding: 4px 10px;
+    border: 1px solid var(--line);
+}

@@ -1,6 +1,7 @@
 import { ArrowLeft, ArrowUpRight, Check, Play } from "lucide-react";
 import { getLocale, getTranslations } from "next-intl/server";
 import { Suspense } from "react";
+import { Markdown } from "@/components/markdown";
 import { Link } from "@/i18n/navigation";
 import { getSession, isAdmin } from "@/lib/auth/session";
 import { getPurchase, type ProgramPage } from "@/lib/catalog/queries";
@@ -49,7 +50,7 @@ export async function ProgramView({ page, course }: { page: ProgramPage; course:
               {t("perDance", { count: course.lessons.length })}
             </span>
           </h2>
-          {localize(course.description, locale) && <p className="sub">{localize(course.description, locale)}</p>}
+          {localize(course.description, locale) && <Markdown className="sub">{localize(course.description, locale)!}</Markdown>}
           <Suspense fallback={null}>
             <CourseAccess courseId={course.id} />
           </Suspense>
@@ -139,7 +140,7 @@ async function Lessons({ course }: { course: Course }) {
               <b>{String(i + 1).padStart(2, "0")}</b>
               <div>
                 <h3>{title}</h3>
-                {localize(lesson.description, locale) && <p>{localize(lesson.description, locale)}</p>}
+                {localize(lesson.description, locale) && <Markdown>{localize(lesson.description, locale)!}</Markdown>}
                 <small>
                   {lesson.durationMinutes ? t("minutes", { minutes: lesson.durationMinutes }) : null}
                   {lesson.durationMinutes && lesson.isPreview ? " · " : null}

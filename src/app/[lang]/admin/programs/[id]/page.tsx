@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import { getFormatter, getLocale, getTranslations } from "next-intl/server";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
+import { CourseActions } from "@/components/admin/course-actions";
 import { ConfirmDelete, FormDialog } from "@/components/admin/dialogs";
 import { ActionForm, CheckboxField, LocalizedField, SelectField, TextField } from "@/components/admin/forms";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
@@ -196,7 +197,7 @@ async function CoursesSection({ program }: { program: AdminProgram }) {
           <TextField name="slug" label={t("fields.slug")} hint={t("fields.slugHint")} defaultValue={item?.slug} required />
           <TextField name="sortOrder" label={t("fields.sortOrder")} type="number" defaultValue={item?.sortOrder ?? program.courses.length} />
         </div>
-        <LocalizedField name="description" label={t("fields.description")} defaultValue={item?.description} multiline />
+        <LocalizedField name="description" label={t("fields.description")} defaultValue={item?.description} multiline markdown />
       </>
     );
   }
@@ -212,7 +213,7 @@ async function CoursesSection({ program }: { program: AdminProgram }) {
           defaultValue={item?.videoId ? youTubeWatchUrl(item.videoId) : ""}
           type="url"
         />
-        <LocalizedField name="description" label={t("fields.description")} defaultValue={item?.description} multiline />
+        <LocalizedField name="description" label={t("fields.description")} defaultValue={item?.description} multiline markdown />
         <div className="adminRow">
           <TextField name="durationMinutes" label={t("fields.duration")} type="number" defaultValue={item?.durationMinutes} />
           <TextField name="sortOrder" label={t("fields.sortOrder")} type="number" defaultValue={item?.sortOrder ?? course.lessons.length} />
@@ -231,51 +232,72 @@ async function CoursesSection({ program }: { program: AdminProgram }) {
           </ActionForm>
         </FormDialog>
       </SectionHeader>
-      <Accordion type="multiple">
-        {program.courses.map((course) => (
-          <AccordionItem key={course.id} value={course.id}>
-            <AccordionTrigger>
-              <span className="flex flex-wrap items-center gap-3">
-                {localize(course.title, locale)}
-                <Badge variant="secondary">{t("lessonCount", { count: course.lessons.length })}</Badge>
-              </span>
-            </AccordionTrigger>
-            <AccordionContent>
-              <div className="flex flex-wrap items-center gap-1 pb-2">
-                <FormDialog mode="edit" title={localize(course.title, locale)}>
-                  <ActionForm action={updateCourse} submitLabel={t("save")} hidden={{ id: course.id }}>
-                    {courseFields(course)}
-                  </ActionForm>
-                </FormDialog>
-                <FormDialog mode="add" title={t("newLesson")}>
+      <Accordion type="multiple" className="grid gap-3.5">
+        {program.courses.map((course) => {
+          const courseTitle = localize(course.title, locale);
+          const withVideo = course.lessons.filter((lesson) => lesson.videoId).length;
+          const videoShare = course.lessons.length ? (withVideo / course.lessons.length) * 100 : 0;
+          return (
+            <AccordionItem key={course.id} value={course.id} className="rounded-xl border bg-[var(--panel)] last:border-b">
+              <div className="flex items-center gap-2 py-3 pr-3 pl-4">
+                <AccordionTrigger headerClassName="min-w-0 flex-1" className="min-w-0 items-center py-1 hover:no-underline">
+                  <span className="grid size-10 shrink-0 place-items-center rounded-[10px] border border-border bg-secondary text-base font-black text-primary">
+                    {courseTitle.charAt(0)}
+                  </span>
+                  <span className="grid min-w-0 flex-1 gap-0.5">
+                    <span className="truncate text-base font-bold">{courseTitle}</span>
+                    <span className="flex items-center gap-2.5 text-xs font-normal text-muted-foreground">
+                      {t("lessonCount", { count: course.lessons.length })}
+                      <span className="h-1 w-16 overflow-hidden rounded-full bg-border" aria-hidden>
+                        <span className="block h-full bg-primary" style={{ width: `${videoShare}%` }} />
+                      </span>
+                      {t("videoProgress", { withVideo, total: course.lessons.length })}
+                    </span>
+                  </span>
+                </AccordionTrigger>
+                <CourseActions
+                  courseId={course.id}
+                  courseTitle={courseTitle}
+                  deleteAction={deleteCourse}
+                  editForm={
+                    <ActionForm action={updateCourse} submitLabel={t("save")} hidden={{ id: course.id }}>
+                      {courseFields(course)}
+                    </ActionForm>
+                  }
+                  newLessonForm={
+                    <ActionForm action={createLesson} submitLabel={t("add")} resetOnSuccess hidden={{ courseId: course.id }}>
+                      {lessonFields(course)}
+                    </ActionForm>
+                  }
+                />
+              </div>
+              <AccordionContent className="px-4 pb-2">
+                <ul className="m-0 list-none p-0">
+                  {course.lessons.map((lesson, i) => (
+                    <li key={lesson.id} className="group flex items-center gap-3.5 border-t border-border py-1.5 pl-1.5">
+                      <span className="w-7 text-muted-foreground tabular-nums">{String(i + 1).padStart(2, "0")}</span>
+                      <span className="min-w-0 flex-1 truncate">{localize(lesson.title, locale)}</span>
+                      <Badge variant={lesson.videoId ? "default" : "secondary"}>{lesson.videoId ? t("hasVideo") : t("noVideo")}</Badge>
+                      <span className="flex items-center opacity-100 transition-opacity [@media(hover:hover)]:opacity-0 group-focus-within:opacity-100 group-hover:opacity-100">
+                        <FormDialog mode="edit" iconOnly title={localize(lesson.title, locale)}>
+                          <ActionForm action={updateLesson} submitLabel={t("save")} hidden={{ id: lesson.id }}>
+                            {lessonFields(course, lesson)}
+                          </ActionForm>
+                        </FormDialog>
+                        <ConfirmDelete action={deleteLesson} id={lesson.id} title={localize(lesson.title, locale)} />
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+                <FormDialog mode="add" title={course.lessons.length ? t("addLesson") : t("noLessons")}>
                   <ActionForm action={createLesson} submitLabel={t("add")} resetOnSuccess hidden={{ courseId: course.id }}>
                     {lessonFields(course)}
                   </ActionForm>
                 </FormDialog>
-                <span className="ml-auto">
-                  <ConfirmDelete action={deleteCourse} id={course.id} label={t("delete")} title={localize(course.title, locale)} />
-                </span>
-              </div>
-              <ul className="m-0 list-none p-0">
-                {course.lessons.map((lesson, i) => (
-                  <li key={lesson.id} className="flex flex-wrap items-center gap-x-3 gap-y-2 border-t border-border py-2">
-                    <span className="text-muted-foreground tabular-nums">{String(i + 1).padStart(2, "0")}</span>
-                    <span>{localize(lesson.title, locale)}</span>
-                    <Badge variant={lesson.videoId ? "default" : "secondary"}>{lesson.videoId ? t("hasVideo") : t("noVideo")}</Badge>
-                    <span className="ml-auto flex items-center gap-1">
-                      <FormDialog mode="edit" title={localize(lesson.title, locale)}>
-                        <ActionForm action={updateLesson} submitLabel={t("save")} hidden={{ id: lesson.id }}>
-                          {lessonFields(course, lesson)}
-                        </ActionForm>
-                      </FormDialog>
-                      <ConfirmDelete action={deleteLesson} id={lesson.id} title={localize(lesson.title, locale)} />
-                    </span>
-                  </li>
-                ))}
-              </ul>
-            </AccordionContent>
-          </AccordionItem>
-        ))}
+              </AccordionContent>
+            </AccordionItem>
+          );
+        })}
       </Accordion>
     </>
   );

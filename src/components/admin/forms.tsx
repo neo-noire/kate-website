@@ -3,6 +3,7 @@
 import { useLocale, useTranslations } from "next-intl";
 import { createContext, use, useActionState, useEffect, useId, useRef, startTransition, type ReactNode } from "react";
 import { useCloseDialog } from "./dialogs";
+import { MarkdownEditor } from "./markdown-editor";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
@@ -94,10 +95,12 @@ type TextFieldProps = {
   type?: "text" | "number" | "email" | "url";
   required?: boolean;
   multiline?: boolean;
+  /** Multi-line text written as markdown: shows a toolbar and a preview. */
+  markdown?: boolean;
   inputMode?: "decimal" | "numeric";
 };
 
-export function TextField({ name, label, defaultValue, hint, type = "text", required, multiline, inputMode }: TextFieldProps) {
+export function TextField({ name, label, defaultValue, hint, type = "text", required, multiline, markdown, inputMode }: TextFieldProps) {
   const value = defaultValue ?? "";
   const id = useId();
   return (
@@ -105,7 +108,9 @@ export function TextField({ name, label, defaultValue, hint, type = "text", requ
       <Label htmlFor={id} className="text-xs text-muted-foreground">
         {label}
       </Label>
-      {multiline ? (
+      {markdown ? (
+        <MarkdownEditor id={id} name={name} defaultValue={String(value)} required={required} />
+      ) : multiline ? (
         <Textarea id={id} name={name} defaultValue={value} required={required} rows={3} className="min-h-0" />
       ) : (
         <Input id={id} name={name} type={type} defaultValue={value} required={required} inputMode={inputMode} />
@@ -124,11 +129,12 @@ export function LocalizedField({
   hint,
   required,
   multiline,
+  markdown,
 }: Omit<TextFieldProps, "defaultValue" | "type" | "inputMode"> & { defaultValue?: Localized | null }) {
   return (
     <fieldset className="m-0 grid gap-2 border-0 p-0">
       <legend className="mb-1 text-sm">{label}</legend>
-      <div className="grid gap-3 sm:grid-cols-2">
+      <div className={cn("grid gap-3", !markdown && "sm:grid-cols-2")}>
         {routing.locales.map((locale) => (
           <TextField
             key={locale}
@@ -137,6 +143,7 @@ export function LocalizedField({
             defaultValue={defaultValue?.[locale]}
             required={required && locale === routing.defaultLocale}
             multiline={multiline}
+            markdown={markdown}
           />
         ))}
       </div>
