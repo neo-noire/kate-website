@@ -216,7 +216,6 @@ function Studio({ admin, library, initialCourseId }: Omit<DashboardProps, "userN
             <div id="lesson-panel" role="tabpanel" aria-labelledby={`tab-${tab}`} className="lessonText">
               {tab === "about" && (
                 <>
-                  <h3>{t("dashboard.aboutTitle", { lesson: localize(lesson.title, locale) })}</h3>
                   {localize(lesson.description, locale) && <Markdown>{localize(lesson.description, locale)!}</Markdown>}
                   <p style={{ marginTop: 10 }}>{t("dashboard.aboutFine")}</p>
                 </>
