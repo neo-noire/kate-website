@@ -655,6 +655,16 @@ footer a {
     position: relative;
     box-shadow: 0 30px 100px #0008;
 }
+.modal.modalSm {
+    width: 440px;
+}
+.modalSm h2 {
+    font-size: 26px;
+    letter-spacing: -0.5px;
+}
+.modalSm .priceBreakdown {
+    max-width: none;
+}
 .modalBody {
     --pad-x: 34px;
     --pad-y: 34px;

@@ -22,10 +22,12 @@ type ModalProps = {
   onClose: () => void;
   /** Accessible name for the dialog. */
   label: string;
+  /** "sm" is a narrow fixed-width dialog for short confirmations such as checkout. */
+  size?: "sm";
   children: ReactNode;
 };
 
-export function Modal({ open, onClose, label, children }: ModalProps) {
+export function Modal({ open, onClose, label, size, children }: ModalProps) {
   const t = useTranslations("common");
   const dialog = useRef<HTMLElement>(null);
   const onCloseRef = useRef(onClose);
@@ -73,7 +75,7 @@ export function Modal({ open, onClose, label, children }: ModalProps) {
         if (event.target === event.currentTarget) onClose();
       }}
     >
-      <section className="modal" role="dialog" aria-modal="true" aria-label={label} ref={dialog}>
+      <section className={size === "sm" ? "modal modalSm" : "modal"} role="dialog" aria-modal="true" aria-label={label} ref={dialog}>
         <button className="close" aria-label={t("close")} onClick={onClose}>
           <X size={20} aria-hidden />
         </button>

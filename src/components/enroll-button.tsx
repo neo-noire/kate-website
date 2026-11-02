@@ -50,7 +50,7 @@ export function EnrollButton({
       <button className={className ?? `btn${featured ? "" : " outline"}`} onClick={dialog.show}>
         {t("packages.choose", { name: tierName })} <ArrowUpRight size={16} aria-hidden />
       </button>
-      <Modal open={dialog.open} onClose={dialog.close} label={t("enroll.dialogLabel")}>
+      <Modal open={dialog.open} onClose={dialog.close} label={t("enroll.dialogLabel")} size="sm">
         <div className="eyebrow">{t("enroll.eyebrow")}</div>
         <h2>
           {courseTitle} · {tierName}
