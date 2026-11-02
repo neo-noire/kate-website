@@ -4,7 +4,7 @@ A personal website for a ballroom dance coach, combining a compact marketing lan
 
 **Live site:** https://katematus-website.vercel.app/en
 
-**Current status:** a bilingual Next.js App Router + TypeScript site on Neon Postgres with real accounts (email and password, Google once its keys are added), a database course catalog with an admin editor, YouTube lessons, legal pages, and a contact form and newsletter sign-up stored in the database. Stripe Checkout is built and switches on once its keys are added in Vercel; email sending (Resend) is not connected yet. `RITMO` is a placeholder brand; the coach’s final branding, biography, photography, course content and prices still need to be supplied.
+**Current status:** a bilingual Next.js App Router + TypeScript site on Neon Postgres with real accounts (email and password, Google once its keys are added), a database course catalog with an admin editor, YouTube lessons, legal pages, and a contact form and newsletter sign-up stored in the database. Stripe Checkout is built and switches on once its keys are added in Vercel; email sending (Resend) is not connected yet. `LatinKate` is the brand; the coach’s final branding, biography, photography, course content and prices still need to be supplied.
 
 ## Run the app
 
@@ -195,4 +195,4 @@ These checks describe the design baseline. They are not a production test suite;
 
 - Embedded ballroom photograph: [Unsplash source](https://unsplash.com/photos/POoF2Wv6ACU). Replace with the coach’s own approved imagery when available.
 - Design research: [Kayla Itsines](https://kaylaitsines.com/about) for a personal coach presentation and [Alo Moves](https://www.alomoves.com/) for a course-library experience.
-- The RITMO name, lesson descriptions and course artwork are prototype material. Final identity and copy need approval.
+- The lesson descriptions and course artwork are prototype material. Final identity and copy need approval.

@@ -4,7 +4,7 @@
  */
 export const business = {
   /** The name customers see. */
-  brand: "RITMO",
+  brand: "LatinKate",
   /** The legal name of the person or company that sells the courses. */
   legalName: "[legal business name]",
   /** Province whose laws govern the terms, as written in each language. */
