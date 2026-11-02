@@ -527,6 +527,18 @@ details p {
     font-size: 13px;
     padding-top: 15px;
 }
+/* FAQ answers are markdown: the wrapper carries the padding, so paragraphs inside don't add their own. */
+.faq .markdown {
+    padding-top: 15px;
+    color: var(--muted);
+    font-size: 13px;
+}
+.faq .markdown p {
+    padding-top: 0;
+}
+.faq .markdown strong {
+    color: var(--white);
+}
 footer {
     border-top: 1px solid var(--line);
     padding: 28px 0;

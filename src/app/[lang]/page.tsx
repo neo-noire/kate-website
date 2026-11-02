@@ -1,5 +1,6 @@
 import Image from "next/image";
 import { ArrowUpRight, Asterisk, Play } from "lucide-react";
+import { Markdown } from "@/components/markdown";
 import { ContactButton } from "@/components/contact-button";
 import { NewsletterForm } from "@/components/newsletter-form";
 import { PreviewLessonButton } from "@/components/preview-lesson-button";
@@ -15,13 +16,7 @@ const tickerDances = ["CHA-CHA-CHA", "SAMBA", "RUMBA", "PASO DOBLE", "JIVE"];
 
 const heroStats = ["lessons", "formats", "pace"] as const;
 const approachSteps = ["understand", "format", "complete"] as const;
-const faqItems = [
-  "startFrom",
-  "levelSelection",
-  "classes",
-  "structure",
-  "partner",
-] as const;
+const faqItems = ["startFrom", "progression", "levelSelection", "classes", "structure"] as const;
 
 export async function generateMetadata(): Promise<Metadata> {
   return { alternates: localeAlternates(await getLocale()) };
@@ -162,7 +157,7 @@ export default async function HomePage() {
           {faqItems.map((key) => (
             <details key={key}>
               <summary>{t(`faq.${key}.question`)}</summary>
-              <p>{t(`faq.${key}.answer`)}</p>
+              <Markdown>{t(`faq.${key}.answer`)}</Markdown>
             </details>
           ))}
         </div>
