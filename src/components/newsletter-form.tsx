@@ -34,8 +34,8 @@ export function NewsletterForm() {
     <form onSubmit={submit} {...validation}>
       <label htmlFor="subEmail">{t("newsletter.emailLabel")}</label>
       <div className="inputRow">
-        <input id="subEmail" name="email" type="email" placeholder={t("common.emailPlaceholder")} required />
-        <Button type="submit" size="lg" className="bg-[#111] whitespace-nowrap text-white hover:bg-black" disabled={pending}>
+        <input id="subEmail" name="email" type="email" className="h-11" placeholder={t("common.emailPlaceholder")} required />
+        <Button type="submit" className="h-11 bg-[#111] whitespace-nowrap text-white hover:bg-black" disabled={pending}>
           {t("newsletter.subscribe")} <ArrowUpRight aria-hidden />
         </Button>
       </div>
