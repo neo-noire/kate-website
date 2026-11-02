@@ -19,16 +19,16 @@ const tierColumns = {
   featured: true,
 } as const;
 
-/** Published programs for the home page catalog. */
+/** Published and coming-soon programs for the home page catalog. */
 export async function getCatalog() {
   "use cache";
   cacheLife("max");
   cacheTag(CATALOG_TAG);
 
   const rows = await db.query.program.findMany({
-    where: eq(program.published, true),
+    where: inArray(program.status, ["published", "coming_soon"]),
     orderBy: [asc(program.sortOrder), asc(program.createdAt)],
-    columns: { id: true, slug: true, title: true, description: true, tag: true, category: true },
+    columns: { id: true, slug: true, title: true, description: true, tag: true, category: true, status: true },
     with: {
       courses: { columns: { id: true }, with: { lessons: { columns: { id: true, durationMinutes: true } } } },
       tiers: { columns: { priceCents: true, currency: true } },
@@ -62,7 +62,7 @@ export async function getProgramPage(slug: string) {
   cacheTag(CATALOG_TAG);
 
   const row = await db.query.program.findFirst({
-    where: and(eq(program.slug, slug), eq(program.published, true)),
+    where: and(eq(program.slug, slug), eq(program.status, "published")),
     columns: { id: true, slug: true, title: true, description: true },
     with: {
       courses: {
@@ -102,7 +102,7 @@ export async function getFeaturedPreview() {
     .from(lesson)
     .innerJoin(course, eq(lesson.courseId, course.id))
     .innerJoin(program, eq(course.programId, program.id))
-    .where(and(eq(lesson.isPreview, true), isNotNull(lesson.videoId), eq(program.published, true)))
+    .where(and(eq(lesson.isPreview, true), isNotNull(lesson.videoId), eq(program.status, "published")))
     .orderBy(asc(program.sortOrder), asc(course.sortOrder), asc(lesson.sortOrder))
     .limit(1);
   return row?.videoId ? { ...row, videoId: row.videoId } : null;
