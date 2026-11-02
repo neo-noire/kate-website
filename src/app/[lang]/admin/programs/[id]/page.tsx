@@ -158,6 +158,8 @@ async function TiersSection({ program }: { program: AdminProgram }) {
             defaultValue={item?.privateLessonMinutes ?? 50}
           />
         </div>
+        <LocalizedField name="tagline" label={t("fields.tagline")} hint={t("fields.taglineHint")} defaultValue={item?.tagline} />
+        <LocalizedField name="description" label={t("fields.description")} hint={t("fields.tierDescriptionHint")} defaultValue={item?.description} multiline />
         <LocalizedField name="features" label={t("fields.features")} hint={t("fields.featuresHint")} defaultValue={item?.features} multiline />
         <LocalizedField
           name="excludedFeatures"
@@ -166,6 +168,7 @@ async function TiersSection({ program }: { program: AdminProgram }) {
           defaultValue={item?.excludedFeatures}
           multiline
         />
+        <LocalizedField name="howItWorks" label={t("fields.howItWorks")} hint={t("fields.howItWorksHint")} defaultValue={item?.howItWorks} multiline />
         <div className="adminRow">
           <TextField name="sortOrder" label={t("fields.sortOrder")} hint={t("fields.sortOrderHint.tier")} type="number" defaultValue={item?.sortOrder ?? program.tiers.length} />
           <CheckboxField name="featured" label={t("fields.featured")} defaultChecked={item?.featured} />

@@ -1,9 +1,7 @@
-import { ArrowLeft, ArrowUpRight, Clock, Play, Video } from "lucide-react";
+import { ArrowLeft, ArrowUpRight, Check, ChevronDown, Clock, Video, X } from "lucide-react";
 import { getLocale, getTranslations } from "next-intl/server";
 import { Suspense } from "react";
 import { Markdown } from "@/components/markdown";
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
-import { Badge } from "@/components/ui/badge";
 import { Link } from "@/i18n/navigation";
 import { getSession, isAdmin } from "@/lib/auth/session";
 import { getPurchase, type ProgramPage } from "@/lib/catalog/queries";
@@ -11,13 +9,12 @@ import { localize, localizeLines } from "@/lib/localized";
 import { formatPrice, HST_RATE, withHst } from "@/lib/money";
 import { isStripeConfigured } from "@/lib/stripe/server";
 import { cn } from "@/lib/utils";
-import { BuyPanel, type BuyPanelTier } from "./buy-panel";
+import { EnrollButton } from "./enroll-button";
 import { Expandable } from "./expandable";
-import { PreviewLessonButton } from "./preview-lesson-button";
 
 type Course = ProgramPage["courses"][number];
 
-/** A program's dance switcher, then the selected dance's description, lesson outline and a buy panel. */
+/** A program's dance switcher, then the selected dance's description, pricing cards and fine print. */
 export async function ProgramView({ page, course }: { page: ProgramPage; course: Course | undefined }) {
   const [t, locale] = await Promise.all([getTranslations("packages"), getLocale()]);
   const programTitle = localize(page.title, locale);
@@ -52,13 +49,10 @@ export async function ProgramView({ page, course }: { page: ProgramPage; course:
       )}
 
       {course ? (
-        <div className={cn("grid items-start gap-8 lg:grid-cols-[minmax(0,1fr)_380px] lg:gap-12", page.courses.length <= 1 && "mt-8")}>
-          <div className="min-w-0">
-            <CourseIntro course={course} />
-            <Lessons course={course} />
-            <p className="fine mt-10">{t("fine")}</p>
-          </div>
-          <Tiers page={page} course={course} programTitle={programTitle} />
+        <div className={cn(page.courses.length <= 1 && "mt-8")}>
+          <CourseIntro page={page} course={course} />
+          <PricingCards page={page} course={course} programTitle={programTitle} />
+          <p className="fine mt-6 text-center">{t("fine")}</p>
         </div>
       ) : (
         <p className="fine">{t("noLessons")}</p>
@@ -67,10 +61,11 @@ export async function ProgramView({ page, course }: { page: ProgramPage; course:
   );
 }
 
-async function CourseIntro({ course }: { course: Course }) {
+async function CourseIntro({ page, course }: { page: ProgramPage; course: Course }) {
   const [t, locale] = await Promise.all([getTranslations("packages"), getLocale()]);
   const description = localize(course.description, locale);
   const totalMinutes = course.lessons.reduce((sum, lesson) => sum + (lesson.durationMinutes ?? 0), 0);
+  const cheapest = page.tiers.length ? page.tiers.reduce((a, b) => (a.priceCents <= b.priceCents ? a : b)) : undefined;
 
   return (
     <>
@@ -89,116 +84,159 @@ async function CourseIntro({ course }: { course: Course }) {
           )}
         </p>
       </div>
-      <div className="mt-5">
-        <Suspense fallback={null}>
-          <CourseAccess courseId={course.id} />
-        </Suspense>
-      </div>
-      {description && (
-        <div className="mt-5">
-          <Expandable>
-            <Markdown>{description}</Markdown>
-          </Expandable>
+      <div className="mt-6 grid items-start gap-6 lg:grid-cols-[minmax(0,1fr)_340px] lg:gap-12">
+        <div className="min-w-0">
+          <Suspense fallback={null}>
+            <CourseAccess courseId={course.id} />
+          </Suspense>
+          {description && (
+            <Expandable>
+              <Markdown>{description}</Markdown>
+            </Expandable>
+          )}
         </div>
-      )}
+        <aside className="grid gap-3.5 rounded-2xl border border-border bg-[var(--panel)] p-5 text-sm">
+          <h3 className="m-0 text-xs font-bold tracking-[0.14em] text-muted-foreground uppercase">{t("glance")}</h3>
+          <dl className="m-0 grid gap-2.5">
+            <GlanceRow label={t("glanceLessons")} value={t("videoLessons", { count: course.lessons.length })} />
+            {totalMinutes > 0 && <GlanceRow label={t("glanceLength")} value={t("minutes", { minutes: totalMinutes })} />}
+            <GlanceRow label={t("glanceAccess")} value={t("glanceAccessValue")} />
+            {cheapest && (
+              <GlanceRow
+                label={t("glanceFrom")}
+                value={formatPrice(withHst(cheapest.priceCents).total, cheapest.currency, locale)}
+              />
+            )}
+          </dl>
+          {page.tiers.length > 0 && (
+            <a
+              href="#pricing"
+              className="mt-1 inline-flex h-11 items-center justify-center gap-2 rounded-xl border border-border font-bold transition-colors hover:border-muted-foreground/50 hover:bg-accent"
+            >
+              {t("compareFormats")} <ChevronDown size={14} aria-hidden />
+            </a>
+          )}
+        </aside>
+      </div>
     </>
   );
 }
 
-async function Tiers({ page, course, programTitle }: { page: ProgramPage; course: Course; programTitle: string }) {
-  const [t, locale] = await Promise.all([getTranslations("packages"), getLocale()]);
-  if (!page.tiers.length) return <p className="fine">{t("noTiers")}</p>;
-
-  const tiers: BuyPanelTier[] = page.tiers.map((tier) => {
-    const { beforeTax, hst, total } = withHst(tier.priceCents);
-    return {
-      id: tier.id,
-      name: localize(tier.name, locale),
-      featured: tier.featured,
-      price: formatPrice(total, tier.currency, locale),
-      breakdown: {
-        rate: HST_RATE * 100,
-        hst: formatPrice(hst, tier.currency, locale),
-        beforeTax: formatPrice(beforeTax, tier.currency, locale),
-      },
-      privateLessons: tier.privateLessons,
-      items: [
-        t("videoLessons", { count: course.lessons.length }),
-        ...(tier.privateLessons ? [t("privateLessons", { count: tier.privateLessons, minutes: tier.privateLessonMinutes })] : []),
-        ...localizeLines(tier.features, locale),
-      ]
-        .map((text) => ({ text, included: true }))
-        .concat(localizeLines(tier.excludedFeatures, locale).map((text) => ({ text, included: false }))),
-    };
-  });
-
+function GlanceRow({ label, value }: { label: string; value: string }) {
   return (
-    <BuyPanel
-      tiers={tiers}
-      programTitle={programTitle}
-      courseTitle={localize(course.title, locale)}
-      courseId={course.id}
-      lessonCount={course.lessons.length}
-      paymentsEnabled={isStripeConfigured()}
-    />
+    <div className="flex justify-between gap-3">
+      <dt className="text-muted-foreground">{label}</dt>
+      <dd className="m-0 text-right font-bold">{value}</dd>
+    </div>
   );
 }
 
-async function Lessons({ course }: { course: Course }) {
+const CARD_BUTTON = "inline-flex h-12 w-full items-center justify-center gap-2.5 rounded-xl text-[13px] font-bold transition-colors";
+
+async function PricingCards({ page, course, programTitle }: { page: ProgramPage; course: Course; programTitle: string }) {
   const [t, locale] = await Promise.all([getTranslations("packages"), getLocale()]);
-  if (!course.lessons.length) return null;
+  if (!page.tiers.length) return <p className="fine">{t("noTiers")}</p>;
+  const courseTitle = localize(course.title, locale);
+  const paymentsEnabled = isStripeConfigured();
 
   return (
-    <section className="mt-10">
-      <h2 className="mb-2 text-[13px] font-bold tracking-[0.16em] text-muted-foreground uppercase">{t("inside")}</h2>
-      <Accordion type="multiple" className="grid gap-2">
-        {course.lessons.map((lesson, i) => {
-          const title = localize(lesson.title, locale);
-          const description = localize(lesson.description, locale);
-          const summary = (
-            <>
-              <b className="w-6 text-[13px] text-primary tabular-nums">{String(i + 1).padStart(2, "0")}</b>
-              <span className="min-w-0 flex-1 font-bold">{title}</span>
-              {lesson.isPreview && (
-                <Badge variant="outline" className="border-primary/50 text-red-300">
-                  {t("preview")}
-                </Badge>
-              )}
-              {lesson.durationMinutes ? (
-                <span className="text-[12.5px] font-normal whitespace-nowrap text-muted-foreground tabular-nums">
-                  {t("minutes", { minutes: lesson.durationMinutes })}
-                </span>
-              ) : null}
-            </>
-          );
-
-          if (!description && !lesson.previewVideoId) {
-            return (
-              <div key={lesson.id} className="flex items-center gap-4 rounded-xl border border-border bg-[var(--panel)] px-4 py-3.5 text-sm">
-                {summary}
-                <span className="size-4 shrink-0" aria-hidden />
-              </div>
-            );
-          }
+    <section id="pricing" className="mt-14 scroll-mt-6">
+      <div className="mb-6 flex flex-wrap items-end justify-between gap-x-4 gap-y-1">
+        <div>
+          <div className="eyebrow">{t("eyebrow")}</div>
+          <h2 className="mt-1 text-[28px] font-black tracking-tight">{t("pickFormat", { course: courseTitle })}</h2>
+        </div>
+        <p className="m-0 text-[13px] text-muted-foreground">{t("pricesNote")}</p>
+      </div>
+      <div className="grid items-stretch gap-4 lg:grid-cols-3">
+        {page.tiers.map((tier, i) => {
+          const name = localize(tier.name, locale);
+          const { beforeTax, hst, total } = withHst(tier.priceCents);
+          const price = formatPrice(total, tier.currency, locale);
+          const breakdown = {
+            rate: HST_RATE * 100,
+            hst: formatPrice(hst, tier.currency, locale),
+            beforeTax: formatPrice(beforeTax, tier.currency, locale),
+          };
+          const included = [
+            t("videoLessons", { count: course.lessons.length }),
+            ...(tier.privateLessons ? [t("privateLessons", { count: tier.privateLessons, minutes: tier.privateLessonMinutes })] : []),
+            ...localizeLines(tier.features, locale),
+          ];
+          const excluded = localizeLines(tier.excludedFeatures, locale);
+          const description = localize(tier.description, locale);
+          const howItWorks = localize(tier.howItWorks, locale);
           return (
-            <AccordionItem key={lesson.id} value={lesson.id} className="rounded-xl border border-border bg-[var(--panel)] last:border-b hover:border-muted-foreground/50">
-              <AccordionTrigger className="items-center gap-4 px-4 py-3.5 hover:no-underline [&>svg]:translate-y-0">{summary}</AccordionTrigger>
-              <AccordionContent className="px-4 pb-4 pl-[3.25rem]">
-                {description && <Markdown className="text-muted-foreground">{description}</Markdown>}
-                {lesson.previewVideoId && (
-                  <PreviewLessonButton
-                    videoId={lesson.previewVideoId}
-                    title={title}
-                    className="mt-3 inline-flex h-9 items-center gap-2 rounded-lg border border-border px-3.5 text-[13px] font-bold hover:border-foreground"
-                  >
-                    <Play size={14} aria-hidden /> {t("watchPreviewShort")}
-                  </PreviewLessonButton>
+            <article
+              key={tier.id}
+              className={cn(
+                "relative flex flex-col gap-4 rounded-2xl border p-6 transition-colors",
+                tier.featured ? "border-primary bg-[#1d1716]" : "border-border bg-[var(--panel)] hover:border-muted-foreground/40",
+              )}
+            >
+              {tier.featured && (
+                <span className="absolute -top-2.5 left-6 rounded-full bg-primary px-2.5 text-[9px] font-bold tracking-wider text-white uppercase">
+                  {t("featured")}
+                </span>
+              )}
+              <div>
+                <div className="text-[11px] font-bold tracking-[0.14em] text-muted-foreground uppercase">
+                  {localize(tier.tagline, locale) ?? t("format", { number: i + 1 })}
+                </div>
+                <h3 className="mt-0.5 text-[22px] leading-tight font-bold">{name}</h3>
+              </div>
+              {description && <p className="m-0 text-sm text-foreground/85 lg:min-h-[5.5rem]">{description}</p>}
+              <div className="flex items-baseline gap-2 border-t border-border pt-4">
+                <span className="text-[44px] leading-none font-black tracking-tight">{price}</span>
+                <small className="text-[12.5px] text-muted-foreground">{t("perCourse")}</small>
+              </div>
+              <p className="-mt-2 mb-0 text-xs text-muted-foreground">{t("taxIncluded", breakdown)}</p>
+              <ul className="m-0 grid list-none gap-2.5 p-0 text-sm">
+                {included.map((item) => (
+                  <li key={item} className="flex items-start gap-2.5">
+                    <Check size={14} aria-hidden className="mt-1 shrink-0 text-primary" />
+                    {item}
+                  </li>
+                ))}
+                {excluded.map((item) => (
+                  <li key={item} className="flex items-start gap-2.5 text-muted-foreground">
+                    <X size={14} aria-hidden className="mt-1 shrink-0" />
+                    <span className="line-through decoration-muted-foreground/60">{item}</span>
+                    <span className="sr-only">{t("notIncluded")}</span>
+                  </li>
+                ))}
+              </ul>
+              <div className="flex-1" />
+              {howItWorks && (
+                <details className="group border-t border-border pt-3 text-[13px] text-muted-foreground">
+                  <summary className="flex cursor-pointer list-none items-center justify-between font-bold text-foreground [&::-webkit-details-marker]:hidden">
+                    {t("howItWorks")}
+                    <ChevronDown size={14} aria-hidden className="transition-transform group-open:rotate-180" />
+                  </summary>
+                  <p className="mt-2 mb-0">{howItWorks}</p>
+                </details>
+              )}
+              <EnrollButton
+                className={cn(
+                  CARD_BUTTON,
+                  tier.featured ? "bg-primary text-white hover:bg-primary/90" : "border border-border hover:border-muted-foreground/50 hover:bg-accent",
                 )}
-              </AccordionContent>
-            </AccordionItem>
+                programTitle={programTitle}
+                courseTitle={courseTitle}
+                tierName={name}
+                price={price}
+                breakdown={breakdown}
+                tierId={tier.id}
+                courseId={course.id}
+                paymentsEnabled={paymentsEnabled}
+                lessonCount={course.lessons.length}
+                privateLessons={tier.privateLessons}
+                featured={tier.featured}
+              />
+            </article>
           );
         })}
-      </Accordion>
+      </div>
     </section>
   );
 }

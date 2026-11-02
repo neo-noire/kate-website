@@ -131,6 +131,12 @@ export const tier = pgTable(
     currency: text("currency").notNull().default("CAD"),
     privateLessons: integer("private_lessons").notNull().default(0),
     privateLessonMinutes: integer("private_lesson_minutes").notNull().default(50),
+    /** Short label above the name, e.g. "+ 1 private session". */
+    tagline: localized("tagline"),
+    /** A paragraph describing who the tier is for. */
+    description: localized("description"),
+    /** How the tier's private sessions are arranged. Shown under "How it works". */
+    howItWorks: localized("how_it_works"),
     /** Extra benefits this tier includes, one per line. */
     features: localized("features"),
     /** Benefits other tiers have that this one does not, one per line. Shown crossed out. */
