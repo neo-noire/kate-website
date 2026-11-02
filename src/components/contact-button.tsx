@@ -10,7 +10,7 @@ export function ContactButton() {
   const dialog = useDialogState();
   return (
     <>
-      <button className="btn outline" style={{ marginTop: 24 }} onClick={dialog.show}>
+      <button className="btn ghost" style={{ marginTop: 24 }} onClick={dialog.show}>
         {t("cta")} <ArrowUpRight size={16} aria-hidden />
       </button>
       <ContactDialog open={dialog.open} onClose={dialog.close} />

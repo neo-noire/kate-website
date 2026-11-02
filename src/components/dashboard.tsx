@@ -43,11 +43,11 @@ export function Dashboard({ userName, admin, library, initialCourseId, checkout 
           </div>
           <div className="studioActions">
             {admin && (
-              <Link className="btn outline" href="/admin">
+              <Link className="btn ghost" href="/admin">
                 <Settings size={16} aria-hidden /> {t("dashboard.manage")}
               </Link>
             )}
-            <Link className="btn outline" href="/#courses">
+            <Link className="btn ghost" href="/#courses">
               <Plus size={16} aria-hidden /> {t("dashboard.addCourse")}
             </Link>
             <button
@@ -281,7 +281,7 @@ function LessonNotes({ lessonId, saved, onSaved }: { lessonId: string; saved: st
       <label htmlFor="notes">{t("notesLabel")}</label>
       <textarea id="notes" placeholder={t("notesPlaceholder")} value={draft} onChange={(event) => setDraft(event.target.value)} />
       <button
-        className="btn outline"
+        className="btn ghost"
         style={{ marginTop: 10 }}
         disabled={pending}
         onClick={() =>

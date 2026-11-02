@@ -109,7 +109,7 @@ export function AuthForm({ mode, google, emailVerification }: { mode: Mode; goog
     <>
       {google && (
         <>
-          <button className="btn outline googleButton" type="button" onClick={continueWithGoogle} disabled={pending}>
+          <button className="btn ghost googleButton" type="button" onClick={continueWithGoogle} disabled={pending}>
             <GoogleMark /> {t("google")}
           </button>
           <p className="authDivider">

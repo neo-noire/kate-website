@@ -139,11 +139,11 @@ header nav a:hover {
     background: #c92b25;
     transform: translateY(-1px);
 }
-.btn.outline {
+.btn.ghost {
     border: 1px solid var(--line);
     background: transparent;
 }
-.btn.outline:hover {
+.btn.ghost:hover {
     border-color: #555;
     background: var(--panel);
 }

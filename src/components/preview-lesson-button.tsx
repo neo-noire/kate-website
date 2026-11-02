@@ -15,7 +15,7 @@ type PreviewLessonButtonProps = {
 };
 
 /** Plays a free preview lesson in a dialog. */
-export function PreviewLessonButton({ videoId, title, className = "btn outline", children }: PreviewLessonButtonProps) {
+export function PreviewLessonButton({ videoId, title, className = "btn ghost", children }: PreviewLessonButtonProps) {
   const dialog = useDialogState();
   return (
     <>

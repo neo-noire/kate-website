@@ -47,7 +47,7 @@ export function EnrollButton({
 
   return (
     <>
-      <button className={className ?? `btn${featured ? "" : " outline"}`} onClick={dialog.show}>
+      <button className={className ?? `btn${featured ? "" : " ghost"}`} onClick={dialog.show}>
         {t("packages.choose", { name: tierName })} <ArrowUpRight size={16} aria-hidden />
       </button>
       <Modal open={dialog.open} onClose={dialog.close} label={t("enroll.dialogLabel")} size="sm">

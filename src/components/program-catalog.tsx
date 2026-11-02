@@ -98,7 +98,7 @@ export function ProgramCatalog({ programs }: { programs: CatalogProgram[] }) {
       </div>
       {filter === null && programs.length > COLLAPSED_COUNT && (
         <div style={{ textAlign: "center", marginTop: 26 }}>
-          <button className="btn outline" onClick={() => setExpanded((value) => !value)}>
+          <button className="btn ghost" onClick={() => setExpanded((value) => !value)}>
             {expanded ? t("catalog.showLess") : t("catalog.showMore")}
             {expanded ? <ChevronUp size={16} aria-hidden /> : <ChevronDown size={16} aria-hidden />}
           </button>
