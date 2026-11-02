@@ -372,6 +372,12 @@
       "category": "Category",
       "categoryHint": "Programs with the same category share a filter on the home page.",
       "sortOrder": "Order",
+      "sortOrderHint": {
+        "program": "Position in the catalog on the home page. Lower numbers come first.",
+        "tier": "Position among this program's pricing tiers. Lower numbers come first.",
+        "course": "Position among the program's dances. Lower numbers come first.",
+        "lesson": "Lesson number within the course. Lower numbers come first."
+      },
       "published": "Published (visible on the site)",
       "name": "Name",
       "price": "Price",

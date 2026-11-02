@@ -97,7 +97,7 @@ async function ProgramEditor({ params }: Pick<PageProps<"/[lang]/admin/programs/
               <div className="grid gap-4">
                 <FormSection title={t("details.publishing")} hint={t("details.publishingHint")}>
                   <CheckboxField name="published" label={t("fields.published")} defaultChecked={program.published} />
-                  <TextField name="sortOrder" label={t("fields.sortOrder")} type="number" defaultValue={program.sortOrder} />
+                  <TextField name="sortOrder" label={t("fields.sortOrder")} hint={t("fields.sortOrderHint.program")} type="number" defaultValue={program.sortOrder} />
                 </FormSection>
                 <FormSection title={t("details.listing")} hint={t("details.listingHint")}>
                   <LocalizedField name="tag" label={t("fields.tag")} hint={t("fields.tagHint")} defaultValue={program.tag} />
@@ -160,7 +160,7 @@ async function TiersSection({ program }: { program: AdminProgram }) {
         </div>
         <LocalizedField name="features" label={t("fields.features")} defaultValue={item?.features} multiline />
         <div className="adminRow">
-          <TextField name="sortOrder" label={t("fields.sortOrder")} type="number" defaultValue={item?.sortOrder ?? program.tiers.length} />
+          <TextField name="sortOrder" label={t("fields.sortOrder")} hint={t("fields.sortOrderHint.tier")} type="number" defaultValue={item?.sortOrder ?? program.tiers.length} />
           <CheckboxField name="featured" label={t("fields.featured")} defaultChecked={item?.featured} />
         </div>
       </>
@@ -225,7 +225,7 @@ async function CoursesSection({ program }: { program: AdminProgram }) {
         <LocalizedField name="title" label={t("fields.title")} defaultValue={item?.title} required />
         <div className="adminRow">
           <TextField name="slug" label={t("fields.slug")} hint={t("fields.slugHint")} defaultValue={item?.slug} required />
-          <TextField name="sortOrder" label={t("fields.sortOrder")} type="number" defaultValue={item?.sortOrder ?? program.courses.length} />
+          <TextField name="sortOrder" label={t("fields.sortOrder")} hint={t("fields.sortOrderHint.course")} type="number" defaultValue={item?.sortOrder ?? program.courses.length} />
         </div>
         <LocalizedField name="description" label={t("fields.description")} defaultValue={item?.description} multiline markdown />
       </>
@@ -246,7 +246,7 @@ async function CoursesSection({ program }: { program: AdminProgram }) {
         <LocalizedField name="description" label={t("fields.description")} defaultValue={item?.description} multiline markdown />
         <div className="adminRow">
           <TextField name="durationMinutes" label={t("fields.duration")} type="number" defaultValue={item?.durationMinutes} />
-          <TextField name="sortOrder" label={t("fields.sortOrder")} type="number" defaultValue={item?.sortOrder ?? course.lessons.length} />
+          <TextField name="sortOrder" label={t("fields.sortOrder")} hint={t("fields.sortOrderHint.lesson")} type="number" defaultValue={item?.sortOrder ?? course.lessons.length} />
         </div>
         <CheckboxField name="isPreview" label={t("fields.isPreview")} defaultChecked={item?.isPreview} />
       </>
