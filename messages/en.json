@@ -318,6 +318,17 @@
     "videoProgress": "{withVideo}/{total} with video",
     "editCourse": "Edit course",
     "deleteCourse": "Delete course",
+    "details": {
+      "basics": "Basics",
+      "basicsHint": "The name, address and short description shown at the top of the program page.",
+      "publishing": "Publishing",
+      "publishingHint": "Draft programs are only visible to admins.",
+      "listing": "Catalog card",
+      "listingHint": "How the program appears on the home page.",
+      "danger": "Delete this program",
+      "dangerHint": "Removes its courses, lessons, pricing tiers and student access. This can't be undone.",
+      "deleteProgram": "Delete program"
+    },
     "editTier": "Edit tier",
     "deleteTier": "Delete tier",
     "options": "Options",

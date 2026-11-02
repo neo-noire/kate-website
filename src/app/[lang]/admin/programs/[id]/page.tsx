@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 import { getFormatter, getLocale, getTranslations } from "next-intl/server";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
-import { CardRow, Mark, SectionHeader } from "@/components/admin/card-row";
+import { CardRow, FormSection, Mark, SectionHeader } from "@/components/admin/card-row";
 import { ItemActions } from "@/components/admin/item-actions";
 import { ConfirmDelete, FormDialog } from "@/components/admin/dialogs";
 import { ActionForm, CheckboxField, LocalizedField, SelectField, TextField } from "@/components/admin/forms";
@@ -58,17 +58,16 @@ async function ProgramEditor({ params }: Pick<PageProps<"/[lang]/admin/programs/
       <Link className="backLink" href="/admin">
         <ArrowLeft size={14} aria-hidden /> {t("back")}
       </Link>
-      <div className="eyebrow">
-        {t("eyebrow")} · <span className={`badge${program.published ? " live" : ""}`}>{program.published ? t("published") : t("draft")}</span>
-      </div>
-      <h1>{title}</h1>
-      {program.published && (
-        <p>
-          <Link className="btn quiet" href={`/programs/${program.slug}`}>
+      <div className="eyebrow">{t("eyebrow")}</div>
+      <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-3">
+        <h1 className="m-0!">{title}</h1>
+        <Badge variant={program.published ? "default" : "secondary"}>{program.published ? t("published") : t("draft")}</Badge>
+        {program.published && (
+          <Link className="btn outline ml-auto" href={`/programs/${program.slug}`}>
             {t("view")} <ArrowUpRight size={14} aria-hidden />
           </Link>
-        </p>
-      )}
+        )}
+      </div>
 
       <Tabs defaultValue="details" className="mt-6">
         <TabsList>
@@ -84,19 +83,34 @@ async function ProgramEditor({ params }: Pick<PageProps<"/[lang]/admin/programs/
           </TabsTrigger>
         </TabsList>
 
-        <TabsContent value="details" className="adminCard">
+        <TabsContent value="details" className="mt-6 grid gap-6">
           <ActionForm action={updateProgram} submitLabel={t("save")} hidden={{ id: program.id }}>
-            <LocalizedField name="title" label={t("fields.title")} defaultValue={program.title} required />
-            <TextField name="slug" label={t("fields.slug")} hint={t("fields.slugHint")} defaultValue={program.slug} required />
-            <LocalizedField name="description" label={t("fields.description")} defaultValue={program.description} multiline />
-            <LocalizedField name="tag" label={t("fields.tag")} hint={t("fields.tagHint")} defaultValue={program.tag} />
-            <LocalizedField name="category" label={t("fields.category")} hint={t("fields.categoryHint")} defaultValue={program.category} />
-            <TextField name="sortOrder" label={t("fields.sortOrder")} type="number" defaultValue={program.sortOrder} />
-            <CheckboxField name="published" label={t("fields.published")} defaultChecked={program.published} />
+            <div className="grid items-start gap-4 lg:grid-cols-[minmax(0,1fr)_320px]">
+              <FormSection title={t("details.basics")} hint={t("details.basicsHint")}>
+                <LocalizedField name="title" label={t("fields.title")} defaultValue={program.title} required />
+                <TextField name="slug" label={t("fields.slug")} hint={t("fields.slugHint")} defaultValue={program.slug} required />
+                <LocalizedField name="description" label={t("fields.description")} defaultValue={program.description} multiline />
+              </FormSection>
+              <div className="grid gap-4">
+                <FormSection title={t("details.publishing")} hint={t("details.publishingHint")}>
+                  <CheckboxField name="published" label={t("fields.published")} defaultChecked={program.published} />
+                  <TextField name="sortOrder" label={t("fields.sortOrder")} type="number" defaultValue={program.sortOrder} />
+                </FormSection>
+                <FormSection title={t("details.listing")} hint={t("details.listingHint")}>
+                  <LocalizedField name="tag" label={t("fields.tag")} hint={t("fields.tagHint")} defaultValue={program.tag} />
+                  <LocalizedField name="category" label={t("fields.category")} hint={t("fields.categoryHint")} defaultValue={program.category} />
+                </FormSection>
+              </div>
+            </div>
           </ActionForm>
-          <div className="mt-8 border-t border-border pt-4">
-            <ConfirmDelete action={deleteProgram} id={program.id} label={`${t("delete")} · ${title}`} title={title} />
-          </div>
+
+          <section className="flex flex-wrap items-center justify-between gap-4 rounded-xl border border-destructive/40 bg-destructive/5 p-5">
+            <div>
+              <h3 className="m-0 text-base font-bold">{t("details.danger")}</h3>
+              <p className="m-0 text-[13px] text-muted-foreground">{t("details.dangerHint")}</p>
+            </div>
+            <ConfirmDelete action={deleteProgram} id={program.id} label={t("details.deleteProgram")} title={title} />
+          </section>
         </TabsContent>
 
         <TabsContent value="tiers" className="mt-6">
