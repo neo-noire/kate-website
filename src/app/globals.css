@@ -1689,10 +1689,8 @@ textarea,
     margin-bottom: 0;
 }
 .markdown h1,
-.markdown h2,
-.markdown h3,
-.markdown h4 {
-    margin: 1.2em 0 0.4em;
+.markdown h2 {
+    margin: 1.4em 0 0.5em;
     line-height: 1.25;
     font-weight: 800;
 }
@@ -1702,37 +1700,71 @@ textarea,
 .markdown h2 {
     font-size: 1.2em;
 }
+/* Section labels inside a description ("What's included"): small red caps, as in the design. */
 .markdown h3,
 .markdown h4 {
-    font-size: 1em;
+    margin: 1.6em 0 0.6em;
     color: var(--red);
+    font-size: 0.8em;
+    font-weight: 800;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
 }
 .markdown p {
-    margin: 0.6em 0;
+    margin: 0.7em 0;
     white-space: pre-line;
 }
 .markdown ul,
 .markdown ol {
     margin: 0.6em 0;
-    padding-left: 1.4em;
+    padding: 0;
+    list-style: none;
 }
-.markdown ul {
-    list-style: disc;
-}
-.markdown ol {
-    list-style: decimal;
-}
-.markdown li::marker {
-    color: var(--red);
+.markdown li {
+    position: relative;
+    margin: 0.4em 0;
+    padding-left: 1.5em;
 }
 .markdown li > p {
     margin: 0.2em 0;
 }
-.markdown ul ul,
-.markdown ol ul,
-.markdown ul ol,
-.markdown ol ol {
-    margin: 0.2em 0;
+/* Red diamond bullets and red numbers. Nested lists indent one step further. */
+.markdown ul > li::before {
+    content: "";
+    position: absolute;
+    left: 0.15em;
+    top: 0.62em;
+    width: 0.45em;
+    height: 0.45em;
+    border-radius: 2px;
+    background: var(--red);
+    transform: rotate(45deg);
+}
+.markdown ol {
+    counter-reset: item;
+}
+.markdown ol > li {
+    counter-increment: item;
+}
+.markdown ol > li::before {
+    content: counter(item) ".";
+    position: absolute;
+    left: 0;
+    color: var(--red);
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+}
+.markdown li > ul,
+.markdown li > ol {
+    margin: 0.25em 0 0.25em 0.3em;
+}
+.markdown li > ul > li::before {
+    width: 0.3em;
+    height: 0.3em;
+    top: 0.7em;
+    border-radius: 50%;
+    transform: none;
+    background: var(--muted);
 }
 .markdown blockquote {
     margin: 0.8em 0;
