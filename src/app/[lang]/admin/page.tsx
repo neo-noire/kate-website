@@ -10,9 +10,18 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Link } from "@/i18n/navigation";
 import { requireAdminPage } from "@/lib/auth/admin-page";
-import { createProgram, deleteContactMessage, removeSubscriber } from "@/lib/catalog/admin-actions";
-import { getAdminPrograms, getContactMessages, getNewsletterSubscribers } from "@/lib/catalog/admin-queries";
+import {
+  createProgram,
+  createPromoCode,
+  deleteContactMessage,
+  deletePromoCode,
+  removeSubscriber,
+  updatePromoCode,
+} from "@/lib/catalog/admin-actions";
+import { PromoFields } from "@/components/admin/promo-fields";
+import { type AdminPromoCode, getAdminPrograms, getAdminPromoCodes, getContactMessages, getNewsletterSubscribers } from "@/lib/catalog/admin-queries";
 import { localize } from "@/lib/localized";
+import { formatPrice } from "@/lib/money";
 import { missingStripeEnv } from "@/lib/stripe/server";
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -30,11 +39,12 @@ export default function AdminPage() {
 
 async function AdminHome() {
   await requireAdminPage("/admin");
-  const [t, locale, format, programs, messages, subscribers] = await Promise.all([
+  const [t, locale, format, programs, promoCodes, messages, subscribers] = await Promise.all([
     getTranslations("admin"),
     getLocale(),
     getFormatter(),
     getAdminPrograms(),
+    getAdminPromoCodes(),
     getContactMessages(),
     getNewsletterSubscribers(),
   ]);
@@ -51,6 +61,9 @@ async function AdminHome() {
         <TabsList>
           <TabsTrigger value="programs">
             {t("programs")} <Badge variant="secondary">{programs.length}</Badge>
+          </TabsTrigger>
+          <TabsTrigger value="promo">
+            {t("promo.tab")} <Badge variant="secondary">{promoCodes.length}</Badge>
           </TabsTrigger>
           <TabsTrigger value="messages">
             {t("inbox.messages")} <Badge variant="secondary">{messages.length}</Badge>
@@ -95,6 +108,10 @@ async function AdminHome() {
           ) : (
             <p className="text-sm text-muted-foreground">{t("noPrograms")}</p>
           )}
+        </TabsContent>
+
+        <TabsContent value="promo" className="mt-6">
+          <PromoCodes programs={programs.map((p) => ({ id: p.id, title: localize(p.title, locale) }))} codes={promoCodes} />
         </TabsContent>
 
         <TabsContent value="messages" className="mt-6">
@@ -148,6 +165,78 @@ async function AdminHome() {
         </TabsContent>
       </Tabs>
     </main>
+  );
+}
+
+async function PromoCodes({ programs, codes }: { programs: { id: string; title: string }[]; codes: AdminPromoCode[] }) {
+  const [t, format, locale] = await Promise.all([getTranslations("admin.promo"), getFormatter(), getLocale()]);
+  const day = (value: Date) => format.dateTime(value, { dateStyle: "medium" });
+  const now = new Date();
+  const programTitle = new Map(programs.map((p) => [p.id, p.title]));
+
+  function state(code: AdminPromoCode) {
+    if (!code.active) return "off";
+    if (code.startsAt && code.startsAt > now) return "scheduled";
+    if (code.expiresAt && code.expiresAt <= now) return "expired";
+    if (code.maxRedemptions != null && code.used >= code.maxRedemptions) return "usedUp";
+    return "active";
+  }
+
+  return (
+    <>
+      <SectionHeader title={t("title")} hint={t("hint")}>
+        <FormDialog mode="add" variant="default" title={t("new")}>
+          <ActionForm action={createPromoCode} submitLabel={t("new")} resetOnSuccess>
+            <PromoFields programs={programs} />
+          </ActionForm>
+        </FormDialog>
+      </SectionHeader>
+      {codes.length ? (
+        <ul className="m-0 grid list-none gap-3 p-0">
+          {codes.map((code) => {
+            const current = state(code);
+            const discount =
+              code.percentOff != null
+                ? t("off", { percent: code.percentOff })
+                : t("fixedOff", { amount: formatPrice(code.amountOffCents ?? 0, code.currency ?? "CAD", locale) });
+            const scope = code.allPrograms ? t("everywhere") : code.programIds.map((id) => programTitle.get(id)).filter(Boolean).join(", ");
+            const details = [
+              discount,
+              scope,
+              code.maxRedemptions != null ? t("usage", { used: code.used, max: code.maxRedemptions }) : t("usageOpen", { used: code.used }),
+              code.startsAt && t("from", { date: day(code.startsAt) }),
+              code.expiresAt && t("until", { date: day(code.expiresAt) }),
+            ].filter(Boolean);
+            return (
+              <CardRow key={code.id} className={current === "active" ? undefined : "opacity-80"}>
+                <Mark>%</Mark>
+                <div className="grid min-w-0 flex-1 gap-0.5">
+                  <span className="flex flex-wrap items-center gap-2 font-bold">
+                    <span className="font-mono tracking-wide">{code.code}</span>
+                    <Badge variant={current === "active" ? "default" : "secondary"}>{t(`state.${current}`)}</Badge>
+                  </span>
+                  <small className="text-xs text-muted-foreground">{details.join(" · ")}</small>
+                </div>
+                <ItemActions
+                  id={code.id}
+                  title={code.code}
+                  editLabel={t("edit")}
+                  deleteLabel={t("delete")}
+                  deleteAction={deletePromoCode}
+                  editForm={
+                    <ActionForm action={updatePromoCode} submitLabel={t("edit")} hidden={{ id: code.id }}>
+                      <PromoFields programs={programs} item={code} />
+                    </ActionForm>
+                  }
+                />
+              </CardRow>
+            );
+          })}
+        </ul>
+      ) : (
+        <p className="text-sm text-muted-foreground">{t("noCodes")}</p>
+      )}
+    </>
   );
 }
 

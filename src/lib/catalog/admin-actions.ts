@@ -3,7 +3,19 @@
 import { count, eq } from "drizzle-orm";
 import { updateTag } from "next/cache";
 import { db } from "@/db";
-import { contactMessage, course, lesson, newsletterSubscriber, program, purchase, tier, user, type Localized } from "@/db/schema";
+import {
+  contactMessage,
+  course,
+  lesson,
+  newsletterSubscriber,
+  program,
+  promoCode,
+  promoCodeProgram,
+  purchase,
+  tier,
+  user,
+  type Localized,
+} from "@/db/schema";
 import { redirect } from "@/i18n/navigation";
 import { routing, type Locale } from "@/i18n/routing";
 import { NotAuthorizedError, requireAdmin } from "@/lib/auth/session";
@@ -249,4 +261,92 @@ export async function deleteContactMessage(_: FormState, form: FormData): Promis
 
 export async function removeSubscriber(_: FormState, form: FormData): Promise<FormState> {
   return run(() => db.delete(newsletterSubscriber).where(eq(newsletterSubscriber.email, readId(form, "email"))));
+}
+
+// Promo codes
+
+const PROMO_CODE = /^[A-Z0-9_-]{3,32}$/;
+
+/** A date input ("2026-12-31") as the start or the very end of that day. */
+function readDate(form: FormData, name: string, endOfDay: boolean) {
+  const value = readText(form, name);
+  if (!value) return null;
+  const date = new Date(`${value}T${endOfDay ? "23:59:59" : "00:00:00"}Z`);
+  if (Number.isNaN(date.getTime())) throw new FieldError("number", name);
+  return date;
+}
+
+function promoValues(form: FormData) {
+  const code = readText(form, "code", { required: true, max: 32 }).toUpperCase();
+  if (!PROMO_CODE.test(code)) throw new FieldError("promoCode", "code");
+
+  const isPercent = readText(form, "type") !== "fixed";
+  let discount: { percentOff: number | null; amountOffCents: number | null; currency: string | null };
+  if (isPercent) {
+    const percent = readInt(form, "percentOff", { max: 100 })!;
+    if (percent < 1) throw new FieldError("percent", "percentOff");
+    discount = { percentOff: percent, amountOffCents: null, currency: null };
+  } else {
+    const cents = parsePriceToCents(readText(form, "amount"));
+    if (!cents) throw new FieldError("price", "amount");
+    const currency = readText(form, "currency");
+    discount = {
+      percentOff: null,
+      amountOffCents: cents,
+      currency: CURRENCIES.find((c) => c === currency) ?? CURRENCIES[0],
+    };
+  }
+
+  const startsAt = readDate(form, "startsAt", false);
+  const expiresAt = readDate(form, "expiresAt", true);
+  if (startsAt && expiresAt && expiresAt <= startsAt) throw new FieldError("dateOrder", "expiresAt");
+
+  const allPrograms = readBool(form, "allPrograms");
+  const programIds = form.getAll("programId").map(String).filter(Boolean);
+  if (!allPrograms && !programIds.length) throw new FieldError("noPrograms", "programId");
+
+  return {
+    values: {
+      code,
+      ...discount,
+      startsAt,
+      expiresAt,
+      maxRedemptions: readInt(form, "maxRedemptions", { min: 1, max: 1_000_000, optional: true }),
+      perUserLimit: readInt(form, "perUserLimit", { min: 1, max: 100 })!,
+      allPrograms,
+      active: readBool(form, "active"),
+    },
+    programIds: allPrograms ? [] : programIds,
+  };
+}
+
+export async function createPromoCode(_: FormState, form: FormData): Promise<FormState> {
+  return run(async () => {
+    const { values, programIds } = promoValues(form);
+    const [existing] = await db.select({ id: promoCode.id }).from(promoCode).where(eq(promoCode.code, values.code));
+    if (existing) throw new FieldError("codeTaken", "code");
+    const id = newId();
+    await db.transaction(async (tx) => {
+      await tx.insert(promoCode).values({ id, ...values });
+      if (programIds.length) await tx.insert(promoCodeProgram).values(programIds.map((programId) => ({ promoCodeId: id, programId })));
+    });
+  });
+}
+
+export async function updatePromoCode(_: FormState, form: FormData): Promise<FormState> {
+  return run(async () => {
+    const id = readId(form);
+    const { values, programIds } = promoValues(form);
+    const [existing] = await db.select({ id: promoCode.id }).from(promoCode).where(eq(promoCode.code, values.code));
+    if (existing && existing.id !== id) throw new FieldError("codeTaken", "code");
+    await db.transaction(async (tx) => {
+      await tx.update(promoCode).set({ ...values, updatedAt: new Date() }).where(eq(promoCode.id, id));
+      await tx.delete(promoCodeProgram).where(eq(promoCodeProgram.promoCodeId, id));
+      if (programIds.length) await tx.insert(promoCodeProgram).values(programIds.map((programId) => ({ promoCodeId: id, programId })));
+    });
+  });
+}
+
+export async function deletePromoCode(_: FormState, form: FormData): Promise<FormState> {
+  return run(() => db.delete(promoCode).where(eq(promoCode.id, readId(form))));
 }
