@@ -43,7 +43,7 @@ a {
 button {
     color: inherit;
 }
-button:focus-visible,
+button:not([data-slot]):focus-visible,
 a:focus-visible,
 input:not([data-slot]):focus-visible,
 select:not([data-slot]):focus-visible,

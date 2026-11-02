@@ -318,7 +318,9 @@
     "videoProgress": "{withVideo}/{total} with video",
     "editCourse": "Edit course",
     "deleteCourse": "Delete course",
-    "courseOptions": "Course options",
+    "editTier": "Edit tier",
+    "deleteTier": "Delete tier",
+    "options": "Options",
     "addLesson": "Add lesson",
     "noLessons": "No lessons yet. Add the first one.",
     "markdown": {

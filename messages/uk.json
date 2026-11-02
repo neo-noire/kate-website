@@ -318,7 +318,9 @@
     "videoProgress": "{withVideo}/{total} з відео",
     "editCourse": "Редагувати курс",
     "deleteCourse": "Видалити курс",
-    "courseOptions": "Дії з курсом",
+    "editTier": "Редагувати тариф",
+    "deleteTier": "Видалити тариф",
+    "options": "Дії",
     "addLesson": "Додати урок",
     "noLessons": "Уроків ще немає. Додайте перший.",
     "markdown": {

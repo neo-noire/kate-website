@@ -24,6 +24,8 @@ type FormDialogProps = {
   title: string;
   /** "add" shows a plus button with the title as its label; "edit" shows a compact pencil button. */
   mode: "add" | "edit";
+  /** Style of the "add" button. */
+  variant?: "default" | "outline";
   /** Show only the pencil icon for "edit". */
   iconOnly?: boolean;
   children: ReactNode;
@@ -33,7 +35,7 @@ type FormDialogProps = {
 };
 
 /** A button that opens a dialog around a form. Radix unmounts the form on close, so it starts fresh next time. */
-export function FormDialog({ title, mode, iconOnly, children, open: controlledOpen, onOpenChange }: FormDialogProps) {
+export function FormDialog({ title, mode, variant = "outline", iconOnly, children, open: controlledOpen, onOpenChange }: FormDialogProps) {
   const t = useTranslations("admin");
   const [ownOpen, setOwnOpen] = useState(false);
   const controlled = controlledOpen !== undefined;
@@ -45,7 +47,7 @@ export function FormDialog({ title, mode, iconOnly, children, open: controlledOp
       {!controlled && (
         <DialogTrigger asChild>
           {mode === "add" ? (
-            <Button variant="outline" size="sm">
+            <Button variant={variant} size="sm">
               <Plus aria-hidden /> {title}
             </Button>
           ) : iconOnly ? (
