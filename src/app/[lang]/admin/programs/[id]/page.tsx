@@ -9,6 +9,7 @@ import { ConfirmDelete, FormDialog } from "@/components/admin/dialogs";
 import { ActionForm, CheckboxField, LocalizedField, SelectField, TextField } from "@/components/admin/forms";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Link } from "@/i18n/navigation";
 import { requireAdminPage } from "@/lib/auth/admin-page";
@@ -63,9 +64,11 @@ async function ProgramEditor({ params }: Pick<PageProps<"/[lang]/admin/programs/
         <h1 className="m-0!">{title}</h1>
         <Badge variant={program.published ? "default" : "secondary"}>{program.published ? t("published") : t("draft")}</Badge>
         {program.published && (
-          <Link className="btn outline ml-auto" href={`/programs/${program.slug}`}>
-            {t("view")} <ArrowUpRight size={14} aria-hidden />
-          </Link>
+          <Button asChild variant="outline" className="ml-auto">
+            <Link href={`/programs/${program.slug}`}>
+              {t("view")} <ArrowUpRight aria-hidden />
+            </Link>
+          </Button>
         )}
       </div>
 
