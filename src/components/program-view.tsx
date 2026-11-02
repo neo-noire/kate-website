@@ -179,7 +179,7 @@ async function Lessons({ course }: { course: Course }) {
             );
           }
           return (
-            <AccordionItem key={lesson.id} value={lesson.id} className="rounded-xl border bg-[var(--panel)] last:border-b hover:border-white/25">
+            <AccordionItem key={lesson.id} value={lesson.id} className="rounded-xl border border-border bg-[var(--panel)] last:border-b hover:border-muted-foreground/50">
               <AccordionTrigger className="items-center gap-4 px-4 py-3.5 hover:no-underline [&>svg]:translate-y-0">{summary}</AccordionTrigger>
               <AccordionContent className="px-4 pb-4 pl-[3.25rem]">
                 {description && <Markdown className="text-muted-foreground">{description}</Markdown>}

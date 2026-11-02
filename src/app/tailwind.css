@@ -24,6 +24,15 @@
   --color-popover-foreground: var(--white);
 }
 
+/* Tailwind's `border` utility sets only a width, so without a default color it falls back to white. */
+@layer base {
+  *,
+  ::before,
+  ::after {
+    border-color: var(--line);
+  }
+}
+
 @theme {
   --animate-caret-blink: caret-blink 1.25s ease-out infinite;
   @keyframes caret-blink {
