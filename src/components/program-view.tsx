@@ -148,7 +148,7 @@ async function Lessons({ course }: { course: Course }) {
 
   return (
     <section className="mt-10">
-      <h2 className="mb-3.5 text-[13px] font-bold tracking-[0.16em] text-muted-foreground uppercase">{t("inside")}</h2>
+      <h2 className="mb-2 text-[13px] font-bold tracking-[0.16em] text-muted-foreground uppercase">{t("inside")}</h2>
       <Accordion type="multiple" defaultValue={[course.lessons[0].id]} className="grid gap-2">
         {course.lessons.map((lesson, i) => {
           const title = localize(lesson.title, locale);
