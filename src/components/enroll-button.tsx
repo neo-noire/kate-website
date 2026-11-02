@@ -21,6 +21,8 @@ type EnrollButtonProps = {
   lessonCount: number;
   privateLessons: number;
   featured: boolean;
+  /** Overrides the default button style. */
+  className?: string;
 };
 
 /** Chooses a tier and goes on to Stripe Checkout. */
@@ -36,6 +38,7 @@ export function EnrollButton({
   lessonCount,
   privateLessons,
   featured,
+  className,
 }: EnrollButtonProps) {
   const t = useTranslations();
   const locale = useLocale();
@@ -44,7 +47,7 @@ export function EnrollButton({
 
   return (
     <>
-      <button className={`btn${featured ? "" : " outline"}`} onClick={dialog.show}>
+      <button className={className ?? `btn${featured ? "" : " outline"}`} onClick={dialog.show}>
         {t("packages.choose", { name: tierName })} <ArrowUpRight size={16} aria-hidden />
       </button>
       <Modal open={dialog.open} onClose={dialog.close} label={t("enroll.dialogLabel")}>

@@ -140,6 +140,10 @@
   },
   "packages": {
     "back": "Усі програми",
+    "readMore": "Читати далі",
+    "showLess": "Згорнути",
+    "videoLength": "{length} відео",
+    "watchPreviewShort": "Дивитись прев'ю",
     "eyebrow": "Обери свій формат",
     "summary": "{count, plural, one {# танець у програмі.} few {# танці в програмі.} many {# танців у програмі.} other {# танцю в програмі.}} Кожен танець — окремий курс, і пакет діє тільки на обраний танець.",
     "perDance": "/ {count, plural, one {# урок} few {# уроки} many {# уроків} other {# уроку}}",

@@ -140,6 +140,10 @@
   },
   "packages": {
     "back": "All programs",
+    "readMore": "Read more",
+    "showLess": "Show less",
+    "videoLength": "{length} of video",
+    "watchPreviewShort": "Watch preview",
     "eyebrow": "Choose your format",
     "summary": "{count, plural, one {One dance in this program.} other {# dances in this program.}} Each dance is its own course, and your package covers the selected dance.",
     "perDance": "/ {count, plural, one {# lesson} other {# lessons}}",
