@@ -18,7 +18,7 @@ const vercelHosts = [
 ].filter((host): host is string => Boolean(host));
 
 export const auth = betterAuth({
-  appName: "RITMO",
+  appName: "LatinKate",
   database: drizzleAdapter(db, { provider: "pg", schema }),
   // The site answers on several Vercel hostnames (production domain, aliases and previews), so
   // the base URL follows the request host, limited to this project's hosts. Vercel sets the
@@ -77,10 +77,10 @@ export const auth = betterAuth({
             sendVerificationOTP: ({ email, otp }) =>
               sendEmail({
                 to: email,
-                subject: `${otp} is your RITMO code`,
+                subject: `${otp} is your LatinKate code`,
                 text: [
-                  `Your RITMO code is ${otp}. It expires in ${CODE_LIFETIME_MINUTES} minutes.`,
-                  `Ваш код RITMO: ${otp}. Він дійсний ${CODE_LIFETIME_MINUTES} хвилин.`,
+                  `Your LatinKate code is ${otp}. It expires in ${CODE_LIFETIME_MINUTES} minutes.`,
+                  `Ваш код LatinKate: ${otp}. Він дійсний ${CODE_LIFETIME_MINUTES} хвилин.`,
                   "If you didn't ask for this, you can ignore this email. / Якщо це були не ви, просто проігноруйте цей лист.",
                 ].join("\n\n"),
               }),

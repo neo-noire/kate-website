@@ -3,6 +3,7 @@
 import { Check, LogOut, Plus, Settings } from "lucide-react";
 import { useFormatter, useLocale, useTranslations } from "next-intl";
 import { useState, useTransition } from "react";
+import { Markdown } from "@/components/markdown";
 import { getPathname, Link } from "@/i18n/navigation";
 import { authClient } from "@/lib/auth/client";
 import type { Library } from "@/lib/catalog/queries";
@@ -10,6 +11,7 @@ import { saveLessonNote, setLessonCompleted } from "@/lib/catalog/student-action
 import { localize } from "@/lib/localized";
 import { useToast } from "./toast";
 import { LessonVideo } from "./lesson-video";
+import { Button } from "@/components/ui/button";
 
 type Tab = "about" | "notes";
 type Course = Library["courses"][number];
@@ -42,23 +44,27 @@ export function Dashboard({ userName, admin, library, initialCourseId, checkout 
           </div>
           <div className="studioActions">
             {admin && (
-              <Link className="btn outline" href="/admin">
-                <Settings size={16} aria-hidden /> {t("dashboard.manage")}
-              </Link>
+              <Button asChild variant="outline">
+                <Link href="/admin">
+                  <Settings aria-hidden /> {t("dashboard.manage")}
+                </Link>
+              </Button>
             )}
-            <Link className="btn outline" href="/#courses">
-              <Plus size={16} aria-hidden /> {t("dashboard.addCourse")}
-            </Link>
-            <button
-              className="btn quiet"
+            <Button asChild variant="outline">
+              <Link href="/#courses">
+                <Plus aria-hidden /> {t("dashboard.addCourse")}
+              </Link>
+            </Button>
+            <Button
+              variant="ghost"
               onClick={async () => {
                 await authClient.signOut();
                 // A full page load clears anything the router cached while signed in.
                 window.location.assign(getPathname({ href: "/", locale }));
               }}
             >
-              <LogOut size={16} aria-hidden /> {t("auth.signOut")}
-            </button>
+              <LogOut aria-hidden /> {t("auth.signOut")}
+            </Button>
           </div>
         </div>
 
@@ -74,9 +80,9 @@ export function Dashboard({ userName, admin, library, initialCourseId, checkout 
           <div className="emptyLibrary">
             <h2>{t("dashboard.emptyTitle")}</h2>
             <p>{t("dashboard.emptyBody")}</p>
-            <Link className="btn" href="/#courses">
-              {t("dashboard.browse")}
-            </Link>
+            <Button asChild>
+              <Link href="/#courses">{t("dashboard.browse")}</Link>
+            </Button>
           </div>
         )}
       </div>
@@ -192,9 +198,9 @@ function Studio({ admin, library, initialCourseId }: Omit<DashboardProps, "userN
                   {lesson.durationMinutes ? ` · ${t("dashboard.lessonMinutes", { minutes: lesson.durationMinutes })}` : ""}
                 </p>
               </div>
-              <button className="btn" onClick={toggleComplete}>
-                {completed.has(lesson.id) ? t("dashboard.completed") : t("dashboard.markCompleted")} <Check size={16} aria-hidden />
-              </button>
+              <Button onClick={toggleComplete}>
+                {completed.has(lesson.id) ? t("dashboard.completed") : t("dashboard.markCompleted")} <Check aria-hidden />
+              </Button>
             </div>
 
             <div className="contentTabs" role="tablist">
@@ -215,8 +221,7 @@ function Studio({ admin, library, initialCourseId }: Omit<DashboardProps, "userN
             <div id="lesson-panel" role="tabpanel" aria-labelledby={`tab-${tab}`} className="lessonText">
               {tab === "about" && (
                 <>
-                  <h3>{t("dashboard.aboutTitle", { lesson: localize(lesson.title, locale) })}</h3>
-                  {localize(lesson.description, locale) && <p>{localize(lesson.description, locale)}</p>}
+                  {localize(lesson.description, locale) && <Markdown>{localize(lesson.description, locale)!}</Markdown>}
                   <p style={{ marginTop: 10 }}>{t("dashboard.aboutFine")}</p>
                 </>
               )}
@@ -280,9 +285,9 @@ function LessonNotes({ lessonId, saved, onSaved }: { lessonId: string; saved: st
     <>
       <label htmlFor="notes">{t("notesLabel")}</label>
       <textarea id="notes" placeholder={t("notesPlaceholder")} value={draft} onChange={(event) => setDraft(event.target.value)} />
-      <button
-        className="btn outline"
-        style={{ marginTop: 10 }}
+      <Button
+        variant="outline"
+        className="mt-2.5"
         disabled={pending}
         onClick={() =>
           startTransition(async () => {
@@ -296,7 +301,7 @@ function LessonNotes({ lessonId, saved, onSaved }: { lessonId: string; saved: st
         }
       >
         {t("saveNote")}
-      </button>
+      </Button>
     </>
   );
 }

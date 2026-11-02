@@ -24,29 +24,45 @@ type FormDialogProps = {
   title: string;
   /** "add" shows a plus button with the title as its label; "edit" shows a compact pencil button. */
   mode: "add" | "edit";
+  /** Style of the "add" button. */
+  variant?: "default" | "outline";
+  /** Show only the pencil icon for "edit". */
+  iconOnly?: boolean;
   children: ReactNode;
+  /** Control the dialog from outside (e.g. a menu item). No trigger button is rendered. */
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
 };
 
 /** A button that opens a dialog around a form. Radix unmounts the form on close, so it starts fresh next time. */
-export function FormDialog({ title, mode, children }: FormDialogProps) {
+export function FormDialog({ title, mode, variant = "outline", iconOnly, children, open: controlledOpen, onOpenChange }: FormDialogProps) {
   const t = useTranslations("admin");
-  const [open, setOpen] = useState(false);
+  const [ownOpen, setOwnOpen] = useState(false);
+  const controlled = controlledOpen !== undefined;
+  const open = controlled ? controlledOpen : ownOpen;
+  const setOpen = controlled ? (onOpenChange ?? (() => {})) : setOwnOpen;
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        {mode === "add" ? (
-          <Button variant="outline" size="sm">
-            <Plus aria-hidden /> {title}
-          </Button>
-        ) : (
-          <Button variant="ghost" size="sm">
-            <Pencil aria-hidden /> {t("edit")}
-          </Button>
-        )}
-      </DialogTrigger>
-      <DialogContent className="max-h-[90vh] overflow-y-auto rounded-none bg-[var(--panel)] sm:max-w-2xl">
-        <DialogHeader>
+      {!controlled && (
+        <DialogTrigger asChild>
+          {mode === "add" ? (
+            <Button variant={variant} size="sm">
+              <Plus aria-hidden /> {title}
+            </Button>
+          ) : iconOnly ? (
+            <Button variant="ghost" size="icon-sm" className="text-muted-foreground" aria-label={t("edit")}>
+              <Pencil aria-hidden />
+            </Button>
+          ) : (
+            <Button variant="ghost" size="sm">
+              <Pencil aria-hidden /> {t("edit")}
+            </Button>
+          )}
+        </DialogTrigger>
+      )}
+      <DialogContent className="max-h-[90vh] flex-col gap-0 overflow-hidden rounded-none bg-[var(--panel)] p-0 data-[state=open]:flex sm:max-w-2xl">
+        <DialogHeader className="px-6 pt-6 pr-12 pb-4">
           <DialogTitle>{title}</DialogTitle>
           <DialogDescription className="sr-only">{title}</DialogDescription>
         </DialogHeader>
@@ -59,32 +75,39 @@ export function FormDialog({ title, mode, children }: FormDialogProps) {
 type ConfirmDeleteProps = {
   action: (state: FormState, form: FormData) => Promise<FormState>;
   id: string;
+  /** Name of the form field the action reads the id from. */
+  idField?: string;
   /** Text of the button that opens the confirmation. Omit for an icon-only button. */
   label?: string;
   /** Dialog heading, e.g. the name of the thing being deleted. */
   title: string;
+  /** Control the dialog from outside (e.g. a menu item). No trigger button is rendered. */
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
 };
 
 /** A delete button that asks in a dialog first. Replaces the browser's window.confirm. */
-export function ConfirmDelete({ action, id, label, title }: ConfirmDeleteProps) {
+export function ConfirmDelete({ action, id, idField = "id", label, title, open, onOpenChange }: ConfirmDeleteProps) {
   const t = useTranslations("admin");
   const locale = useLocale();
   const [state, formAction, pending] = useActionState(action, initialFormState);
 
   function remove() {
     const data = new FormData();
-    data.set("id", id);
+    data.set(idField, id);
     data.set("locale", locale);
     startTransition(() => formAction(data));
   }
 
   return (
-    <AlertDialog>
-      <AlertDialogTrigger asChild>
-        <Button variant="ghost" size={label ? "sm" : "icon-sm"} className="text-destructive" aria-label={label ?? t("delete")}>
-          <Trash2 aria-hidden /> {label}
-        </Button>
-      </AlertDialogTrigger>
+    <AlertDialog open={open} onOpenChange={onOpenChange}>
+      {open === undefined && (
+        <AlertDialogTrigger asChild>
+          <Button variant="ghost" size={label ? "sm" : "icon-sm"} className="text-destructive" aria-label={label ?? t("delete")}>
+            <Trash2 aria-hidden /> {label}
+          </Button>
+        </AlertDialogTrigger>
+      )}
       <AlertDialogContent className="rounded-none bg-[var(--panel)]">
         <AlertDialogHeader>
           <AlertDialogTitle>{title}</AlertDialogTitle>

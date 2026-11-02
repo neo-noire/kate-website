@@ -3,6 +3,7 @@
 import { REGEXP_ONLY_DIGITS } from "input-otp";
 import { useLocale, useTranslations } from "next-intl";
 import { useState, type FormEvent } from "react";
+import { Button } from "@/components/ui/button";
 import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp";
 import { getPathname } from "@/i18n/navigation";
 import { authClient } from "@/lib/auth/client";
@@ -95,9 +96,9 @@ export function VerifyEmailStep({ email, nextPath, onChangeEmail }: { email: str
           {t("verify.resent")}
         </p>
       )}
-      <button className="btn" type="submit" disabled={pending || code.length < CODE_LENGTH}>
+      <Button type="submit" className="h-11 w-full rounded-xl" disabled={pending || code.length < CODE_LENGTH}>
         {pending ? t("verify.verifying") : t("verify.submit")}
-      </button>
+      </Button>
       <p className="authSwitch">
         <button className="textButton" type="button" onClick={resend} disabled={pending}>
           {t("verify.resend")}

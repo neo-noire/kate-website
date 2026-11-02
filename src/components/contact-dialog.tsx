@@ -9,6 +9,7 @@ import { useLocalizedValidation } from "@/lib/validation";
 import { Honeypot } from "./honeypot";
 import { Modal } from "./modal";
 import { useToast } from "./toast";
+import { Button } from "@/components/ui/button";
 
 /** A message to the coach. Private sessions themselves are booked on a separate platform. */
 export function ContactDialog({ open, onClose }: { open: boolean; onClose: () => void }) {
@@ -51,10 +52,12 @@ export function ContactDialog({ open, onClose }: { open: boolean; onClose: () =>
           <textarea name="message" maxLength={5000} placeholder={t("contact.messagePlaceholder")} required />
         </label>
         <Honeypot />
-        <button className="btn" disabled={pending}>
-          {t("contact.submit")} <ArrowUpRight size={16} aria-hidden />
-        </button>
-        <p className="fine">{t("contact.fine")}</p>
+        <div className="modalFooter">
+          <Button size="lg" className="w-full" disabled={pending}>
+            {t("contact.submit")} <ArrowUpRight aria-hidden />
+          </Button>
+          <p className="fine">{t("contact.fine")}</p>
+        </div>
       </form>
     </Modal>
   );

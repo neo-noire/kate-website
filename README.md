@@ -4,7 +4,7 @@ A personal website for a ballroom dance coach, combining a compact marketing lan
 
 **Live site:** https://katematus-website.vercel.app/en
 
-**Current status:** a bilingual Next.js App Router + TypeScript site on Neon Postgres with real accounts (email and password, Google once its keys are added), a database course catalog with an admin editor, YouTube lessons, legal pages, and a contact form and newsletter sign-up stored in the database. Stripe Checkout is built and switches on once its keys are added in Vercel; email sending (Resend) is not connected yet. `RITMO` is a placeholder brand; the coach’s final branding, biography, photography, course content and prices still need to be supplied.
+**Current status:** a bilingual Next.js App Router + TypeScript site on Neon Postgres with real accounts (email and password, Google once its keys are added), a database course catalog with an admin editor, YouTube lessons, legal pages, and a contact form and newsletter sign-up stored in the database. Stripe Checkout is built and switches on once its keys are added in Vercel; email sending (Resend) is not connected yet. `LatinKate` is the brand; the coach’s final branding, biography, photography, course content and prices still need to be supplied.
 
 ## Run the app
 
@@ -96,6 +96,10 @@ Admins (the `ADMIN_EMAILS` accounts) manage it at `/en/admin`, linked from their
 ### Legal pages
 
 `/terms`, `/privacy` and `/refunds` (in every language) are linked from the footer, and sign-up links to the first two. The texts live in `src/content/legal/` (`en.ts`, `uk.ts`; a language without a translation shows English). The terms follow Ontario law; the legal business name and contact email in `src/content/legal/business.ts` are placeholders until Kate confirms them. Each page shows a draft notice until `reviewed` is set to `true` there, after the texts have been checked by someone qualified. Bump `lastUpdated` whenever a text changes.
+
+## Where the words live
+
+The database holds what the app needs to run: prices, ids, order, titles and lessons. Longer copy lives in code, in `src/content/programs/<program-slug>.ts`: each course's description (matched by course slug) and each pricing tier's tagline, description, "How it works" and included / not-included lists (matched by the tier's **Key** field in the admin, e.g. `self`, `guided`, `vip`). To add a program's copy, create its file there and register it in `src/content/programs/index.ts`. Missing copy never breaks a page; the card falls back to what the database has.
 
 ## The original prototype
 
@@ -195,4 +199,4 @@ These checks describe the design baseline. They are not a production test suite;
 
 - Embedded ballroom photograph: [Unsplash source](https://unsplash.com/photos/POoF2Wv6ACU). Replace with the coach’s own approved imagery when available.
 - Design research: [Kayla Itsines](https://kaylaitsines.com/about) for a personal coach presentation and [Alo Moves](https://www.alomoves.com/) for a course-library experience.
-- The RITMO name, lesson descriptions and course artwork are prototype material. Final identity and copy need approval.
+- The lesson descriptions and course artwork are prototype material. Final identity and copy need approval.

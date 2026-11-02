@@ -57,6 +57,13 @@
       "when": 1791937001501,
       "tag": "0007_stripe_checkout",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1793582780373,
+      "tag": "0008_tier_key",
+      "breakpoints": true
     }
   ]
 }

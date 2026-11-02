@@ -1,0 +1,1 @@
+ALTER TABLE "tier" ADD COLUMN "key" text;

@@ -6,6 +6,7 @@ import { useState, useTransition, type FormEvent } from "react";
 import { subscribeToNewsletter } from "@/lib/site-actions";
 import { useLocalizedValidation } from "@/lib/validation";
 import { Honeypot } from "./honeypot";
+import { Button } from "@/components/ui/button";
 
 export function NewsletterForm() {
   const t = useTranslations();
@@ -33,10 +34,10 @@ export function NewsletterForm() {
     <form onSubmit={submit} {...validation}>
       <label htmlFor="subEmail">{t("newsletter.emailLabel")}</label>
       <div className="inputRow">
-        <input id="subEmail" name="email" type="email" placeholder={t("common.emailPlaceholder")} required />
-        <button className="btn" type="submit" disabled={pending}>
-          {t("newsletter.subscribe")} <ArrowUpRight size={16} aria-hidden />
-        </button>
+        <input id="subEmail" name="email" type="email" className="h-11" placeholder={t("common.emailPlaceholder")} required />
+        <Button type="submit" className="h-11 bg-[#111] whitespace-nowrap text-white hover:bg-black" disabled={pending}>
+          {t("newsletter.subscribe")} <ArrowUpRight aria-hidden />
+        </Button>
       </div>
       <Honeypot />
       <label className="checkLabel">

@@ -145,7 +145,7 @@ function tierValues(form: FormData) {
     currency: CURRENCIES.find((c) => c === currency) ?? CURRENCIES[0],
     privateLessons: readInt(form, "privateLessons", { max: 100 })!,
     privateLessonMinutes: readInt(form, "privateLessonMinutes", { min: 1, max: 600 })!,
-    features: readLocalized(form, "features", { max: 2000 }),
+    key: readText(form, "key", { max: 40 }) || null,
     featured: readBool(form, "featured"),
     sortOrder: readInt(form, "sortOrder", { max: 9999 })!,
   };

@@ -131,7 +131,9 @@ export const tier = pgTable(
     currency: text("currency").notNull().default("CAD"),
     privateLessons: integer("private_lessons").notNull().default(0),
     privateLessonMinutes: integer("private_lesson_minutes").notNull().default(50),
-    /** Extra benefits, one per line. */
+    /** Stable name that links this tier to its copy in src/content, e.g. "guided". */
+    key: text("key"),
+    /** Unused: tier copy now lives in src/content. Kept so existing text isn't lost; drop it when no longer needed. */
     features: localized("features"),
     /** Highlighted as the recommended tier. */
     featured: boolean("featured").notNull().default(false),
