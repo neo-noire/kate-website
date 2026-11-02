@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 import { getFormatter, getLocale, getTranslations } from "next-intl/server";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
-import { CourseActions } from "@/components/admin/course-actions";
+import { ItemActions } from "@/components/admin/item-actions";
 import { ConfirmDelete, FormDialog } from "@/components/admin/dialogs";
 import { ActionForm, CheckboxField, LocalizedField, SelectField, TextField } from "@/components/admin/forms";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
@@ -29,6 +29,7 @@ import {
 import { getAdminProgram, type AdminProgram } from "@/lib/catalog/admin-queries";
 import { localize } from "@/lib/localized";
 import { CURRENCIES, formatPrice, withHst } from "@/lib/money";
+import { cn } from "@/lib/utils";
 import { youTubeWatchUrl } from "@/lib/youtube";
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -98,13 +99,13 @@ async function ProgramEditor({ params }: Pick<PageProps<"/[lang]/admin/programs/
           </div>
         </TabsContent>
 
-        <TabsContent value="tiers" className="adminCard">
+        <TabsContent value="tiers" className="mt-6">
           <TiersSection program={program} />
         </TabsContent>
-        <TabsContent value="courses" className="adminCard">
+        <TabsContent value="courses" className="mt-6">
           <CoursesSection program={program} />
         </TabsContent>
-        <TabsContent value="access" className="adminCard">
+        <TabsContent value="access" className="mt-6">
           <AccessSection program={program} />
         </TabsContent>
       </Tabs>
@@ -152,33 +153,45 @@ async function TiersSection({ program }: { program: AdminProgram }) {
   return (
     <>
       <SectionHeader title={t("sections.tiers")} hint={t("sections.tiersHint")}>
-        <FormDialog mode="add" title={t("newTier")}>
+        <FormDialog mode="add" variant="default" title={t("newTier")}>
           <ActionForm action={createTier} submitLabel={t("add")} resetOnSuccess hidden={{ programId: program.id }}>
             {fields()}
           </ActionForm>
         </FormDialog>
       </SectionHeader>
-      <ul className="m-0 list-none p-0">
-        {program.tiers.map((item) => (
-          <li key={item.id} className="flex flex-wrap items-center gap-x-4 gap-y-2 border-t border-border py-3">
-            <span className="font-medium">{localize(item.name, locale)}</span>
-            {item.featured && <Badge>{t("fields.featured")}</Badge>}
-            <small className="text-muted-foreground">
-              {t("fields.priceSummary", {
-                price: formatPrice(item.priceCents, item.currency, locale),
-                total: formatPrice(withHst(item.priceCents).total, item.currency, locale),
-              })}
-            </small>
-            <span className="ml-auto flex items-center gap-1">
-              <FormDialog mode="edit" title={localize(item.name, locale)}>
-                <ActionForm action={updateTier} submitLabel={t("save")} hidden={{ id: item.id }}>
-                  {fields(item)}
-                </ActionForm>
-              </FormDialog>
-              <ConfirmDelete action={deleteTier} id={item.id} title={localize(item.name, locale)} />
-            </span>
-          </li>
-        ))}
+      <ul className="m-0 grid list-none gap-3 p-0">
+        {program.tiers.map((item, i) => {
+          const name = localize(item.name, locale);
+          return (
+            <CardRow key={item.id}>
+              <Mark>{i + 1}</Mark>
+              <div className="grid min-w-0 flex-1 gap-0.5">
+                <span className="flex flex-wrap items-center gap-2 font-bold">
+                  {name}
+                  {item.featured && <Badge>{t("fields.featured")}</Badge>}
+                </span>
+                <small className="text-xs text-muted-foreground">
+                  {t("fields.priceSummary", {
+                    price: formatPrice(item.priceCents, item.currency, locale),
+                    total: formatPrice(withHst(item.priceCents).total, item.currency, locale),
+                  })}
+                </small>
+              </div>
+              <ItemActions
+                id={item.id}
+                title={name}
+                editLabel={t("editTier")}
+                deleteLabel={t("deleteTier")}
+                deleteAction={deleteTier}
+                editForm={
+                  <ActionForm action={updateTier} submitLabel={t("save")} hidden={{ id: item.id }}>
+                    {fields(item)}
+                  </ActionForm>
+                }
+              />
+            </CardRow>
+          );
+        })}
       </ul>
     </>
   );
@@ -226,7 +239,7 @@ async function CoursesSection({ program }: { program: AdminProgram }) {
   return (
     <>
       <SectionHeader title={t("sections.courses")} hint={t("sections.coursesHint")}>
-        <FormDialog mode="add" title={t("newCourse")}>
+        <FormDialog mode="add" variant="default" title={t("newCourse")}>
           <ActionForm action={createCourse} submitLabel={t("add")} resetOnSuccess hidden={{ programId: program.id }}>
             {courseFields()}
           </ActionForm>
@@ -238,7 +251,7 @@ async function CoursesSection({ program }: { program: AdminProgram }) {
           const withVideo = course.lessons.filter((lesson) => lesson.videoId).length;
           const videoShare = course.lessons.length ? (withVideo / course.lessons.length) * 100 : 0;
           return (
-            <AccordionItem key={course.id} value={course.id} className="rounded-xl border bg-[var(--panel)] last:border-b">
+            <AccordionItem key={course.id} value={course.id} className="rounded-xl border border-border bg-[var(--panel)] last:border-b">
               <div className="flex items-center gap-2 py-3 pr-3 pl-4">
                 <AccordionTrigger headerClassName="min-w-0 flex-1" className="min-w-0 items-center py-1 hover:no-underline">
                   <span className="grid size-10 shrink-0 place-items-center rounded-[10px] border border-border bg-secondary text-base font-black text-primary">
@@ -255,20 +268,25 @@ async function CoursesSection({ program }: { program: AdminProgram }) {
                     </span>
                   </span>
                 </AccordionTrigger>
-                <CourseActions
-                  courseId={course.id}
-                  courseTitle={courseTitle}
+                <ItemActions
+                  id={course.id}
+                  title={courseTitle}
+                  editLabel={t("editCourse")}
+                  deleteLabel={t("deleteCourse")}
                   deleteAction={deleteCourse}
                   editForm={
                     <ActionForm action={updateCourse} submitLabel={t("save")} hidden={{ id: course.id }}>
                       {courseFields(course)}
                     </ActionForm>
                   }
-                  newLessonForm={
-                    <ActionForm action={createLesson} submitLabel={t("add")} resetOnSuccess hidden={{ courseId: course.id }}>
-                      {lessonFields(course)}
-                    </ActionForm>
-                  }
+                  add={{
+                    label: t("newLesson"),
+                    form: (
+                      <ActionForm action={createLesson} submitLabel={t("add")} resetOnSuccess hidden={{ courseId: course.id }}>
+                        {lessonFields(course)}
+                      </ActionForm>
+                    ),
+                  }}
                 />
               </div>
               <AccordionContent className="px-4 pb-2">
@@ -313,7 +331,7 @@ async function AccessSection({ program }: { program: AdminProgram }) {
     <>
       <SectionHeader title={t("sections.access")} hint={t("sections.accessHint")}>
         {program.courses.length > 0 && (
-          <FormDialog mode="add" title={t("grant")}>
+          <FormDialog mode="add" variant="default" title={t("grant")}>
             <ActionForm action={grantAccess} submitLabel={t("grant")} resetOnSuccess>
               <TextField name="email" label={t("fields.email")} type="email" required />
               <div className="adminRow">
@@ -336,26 +354,28 @@ async function AccessSection({ program }: { program: AdminProgram }) {
         )}
       </SectionHeader>
       {program.purchases.length ? (
-        <ul className="adminList">
+        <ul className="m-0 grid list-none gap-3 p-0">
           {program.purchases.map((p) => (
-            <li key={p.id}>
-              <span>
-                <b>{p.user.name}</b> {p.user.email}
-              </span>
-              <small>
-                {courseTitle.get(p.courseId)}
-                {p.tier ? ` · ${localize(p.tier.name, locale)}` : ""} · {t(`source.${p.source === "stripe" ? "stripe" : "admin"}`)}
-              </small>
-              <small>
-                {p.expiresAt &&
-                  (p.expiresAt > now ? t("accessUntil", { date: date(p.expiresAt) }) : t("expired", { date: date(p.expiresAt) }))}
-                {p.expiresAt && " · "}
-                {p.firstWatchedAt ? t("firstWatched", { date: date(p.firstWatchedAt) }) : t("notWatched")}
-              </small>
-              <span className="ml-auto">
-                <ConfirmDelete action={revokeAccess} id={p.id} label={t("revoke")} title={p.user.email} />
-              </span>
-            </li>
+            <CardRow key={p.id}>
+              <Mark>{(p.user.name || p.user.email).charAt(0).toUpperCase()}</Mark>
+              <div className="grid min-w-0 flex-1 gap-0.5">
+                <span className="truncate">
+                  <b>{p.user.name}</b> <span className="text-muted-foreground">{p.user.email}</span>
+                </span>
+                <small className="text-xs text-muted-foreground">
+                  {[
+                    courseTitle.get(p.courseId),
+                    p.tier && localize(p.tier.name, locale),
+                    t(`source.${p.source === "stripe" ? "stripe" : "admin"}`),
+                    p.expiresAt && (p.expiresAt > now ? t("accessUntil", { date: date(p.expiresAt) }) : t("expired", { date: date(p.expiresAt) })),
+                    p.firstWatchedAt ? t("firstWatched", { date: date(p.firstWatchedAt) }) : t("notWatched"),
+                  ]
+                    .filter(Boolean)
+                    .join(" · ")}
+                </small>
+              </div>
+              <ItemActions id={p.id} title={p.user.email} deleteLabel={t("revoke")} deleteAction={revokeAccess} />
+            </CardRow>
           ))}
         </ul>
       ) : (
@@ -367,12 +387,25 @@ async function AccessSection({ program }: { program: AdminProgram }) {
 
 function SectionHeader({ title, hint, children }: { title: string; hint: string; children?: React.ReactNode }) {
   return (
-    <div className="mb-4 flex flex-wrap items-start justify-between gap-3">
+    <div className="mb-5 flex flex-wrap items-end justify-between gap-3">
       <div>
-        <h2>{title}</h2>
-        <p className="fine">{hint}</p>
+        <h2 className="m-0 text-2xl font-black tracking-tight">{title}</h2>
+        <p className="m-0 text-[13px] text-muted-foreground">{hint}</p>
       </div>
       {children}
     </div>
+  );
+}
+
+/** A rounded row on the panel background: the shared look of tier, course and access cards. */
+function CardRow({ children, className }: { children: React.ReactNode; className?: string }) {
+  return <li className={cn("flex items-center gap-3.5 rounded-xl border border-border bg-[var(--panel)] py-3 pr-3 pl-4", className)}>{children}</li>;
+}
+
+function Mark({ children }: { children: React.ReactNode }) {
+  return (
+    <span className="grid size-10 shrink-0 place-items-center rounded-[10px] border border-border bg-secondary text-base font-black text-primary">
+      {children}
+    </span>
   );
 }
