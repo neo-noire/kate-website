@@ -126,7 +126,9 @@ async function Tiers({ page, course, programTitle }: { page: ProgramPage; course
         t("videoLessons", { count: course.lessons.length }),
         ...(tier.privateLessons ? [t("privateLessons", { count: tier.privateLessons, minutes: tier.privateLessonMinutes })] : []),
         ...localizeLines(tier.features, locale),
-      ],
+      ]
+        .map((text) => ({ text, included: true }))
+        .concat(localizeLines(tier.excludedFeatures, locale).map((text) => ({ text, included: false }))),
     };
   });
 

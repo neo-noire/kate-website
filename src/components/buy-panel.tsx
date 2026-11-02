@@ -1,6 +1,6 @@
 "use client";
 
-import { Check } from "lucide-react";
+import { Check, X } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { EnrollButton } from "./enroll-button";
@@ -13,7 +13,8 @@ export type BuyPanelTier = {
   /** Total price with HST, already formatted. */
   price: string;
   breakdown: { rate: number; hst: string; beforeTax: string };
-  items: string[];
+  /** What the tier includes, then what it leaves out, both already localized. */
+  items: { text: string; included: boolean }[];
   privateLessons: number;
 };
 
@@ -66,9 +67,14 @@ export function BuyPanel({ tiers, programTitle, courseTitle, courseId, lessonCou
 
         <ul className="mt-5 grid list-none gap-2.5 p-0 text-sm">
           {tier.items.map((item) => (
-            <li key={item} className="flex items-start gap-2.5">
-              <Check size={14} aria-hidden className="mt-1 shrink-0 text-primary" />
-              {item}
+            <li key={item.text} className={cn("flex items-start gap-2.5", !item.included && "text-muted-foreground")}>
+              {item.included ? (
+                <Check size={14} aria-hidden className="mt-1 shrink-0 text-primary" />
+              ) : (
+                <X size={14} aria-hidden className="mt-1 shrink-0 text-muted-foreground" />
+              )}
+              <span className={cn(!item.included && "line-through decoration-muted-foreground/60")}>{item.text}</span>
+              {!item.included && <span className="sr-only">{t("notIncluded")}</span>}
             </li>
           ))}
         </ul>

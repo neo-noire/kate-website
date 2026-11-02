@@ -131,8 +131,10 @@ export const tier = pgTable(
     currency: text("currency").notNull().default("CAD"),
     privateLessons: integer("private_lessons").notNull().default(0),
     privateLessonMinutes: integer("private_lesson_minutes").notNull().default(50),
-    /** Extra benefits, one per line. */
+    /** Extra benefits this tier includes, one per line. */
     features: localized("features"),
+    /** Benefits other tiers have that this one does not, one per line. Shown crossed out. */
+    excludedFeatures: localized("excluded_features"),
     /** Highlighted as the recommended tier. */
     featured: boolean("featured").notNull().default(false),
     sortOrder: integer("sort_order").notNull().default(0),

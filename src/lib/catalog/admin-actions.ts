@@ -146,6 +146,7 @@ function tierValues(form: FormData) {
     privateLessons: readInt(form, "privateLessons", { max: 100 })!,
     privateLessonMinutes: readInt(form, "privateLessonMinutes", { min: 1, max: 600 })!,
     features: readLocalized(form, "features", { max: 2000 }),
+    excludedFeatures: readLocalized(form, "excludedFeatures", { max: 2000 }),
     featured: readBool(form, "featured"),
     sortOrder: readInt(form, "sortOrder", { max: 9999 })!,
   };
