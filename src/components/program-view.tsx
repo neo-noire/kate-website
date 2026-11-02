@@ -133,6 +133,19 @@ function GlanceRow({ label, value }: { label: string; value: string }) {
   );
 }
 
+/** Bolds a leading number ("4 private sessions") so the difference between plans reads at a glance. */
+function withBoldNumber(text: string) {
+  const [, number, rest] = text.match(/^(\d+)(.*)$/s) ?? [];
+  return number ? (
+    <>
+      <strong className="text-base text-foreground">{number}</strong>
+      {rest}
+    </>
+  ) : (
+    text
+  );
+}
+
 const CARD_BUTTON = "inline-flex h-12 w-full items-center justify-center gap-2.5 rounded-xl text-[13px] font-bold transition-colors";
 
 async function PricingCards({ page, course, programTitle }: { page: ProgramPage; course: Course; programTitle: string }) {
@@ -200,7 +213,7 @@ async function PricingCards({ page, course, programTitle }: { page: ProgramPage;
                 {included.map((item) => (
                   <li key={item} className="flex items-start gap-2.5">
                     <Check size={14} aria-hidden className="mt-1 shrink-0 text-primary" />
-                    {item}
+                    <span>{withBoldNumber(item)}</span>
                   </li>
                 ))}
                 {excluded.map((item) => (

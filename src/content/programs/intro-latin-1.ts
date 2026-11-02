@@ -74,7 +74,6 @@ Let’s bring a little more rhythm, femininity, and confidence into your life! �
         tagline: "Learn on your own",
         description:
           "Perfect for those who want to learn at their own pace and enjoy the flexibility of following the program independently.",
-        howItWorks: "No private sessions are included in this package.",
         included: [
           "Full access to the course materials",
           "Learn whenever and wherever it suits you",
@@ -86,7 +85,6 @@ Let’s bring a little more rhythm, femininity, and confidence into your life! �
         tagline: "Навчайся самостійно",
         description:
           "Ідеально для тих, хто хоче вчитися у власному темпі та цінує свободу проходити програму самостійно.",
-        howItWorks: "Приватні заняття в цей пакет не входять.",
         included: [
           "Повний доступ до матеріалів курсу",
           "Навчайся будь-коли й будь-де",
@@ -104,7 +102,7 @@ Let’s bring a little more rhythm, femininity, and confidence into your life! �
           "Your private session is scheduled individually after payment. To arrange it, reach out via Instagram DM or email. The date and time will be chosen based on your availability.",
         included: [
           "Full access to the course materials",
-          "One personalized 1-on-1 session (55 min)",
+          "1 private 1-on-1 session · 55 min",
           "Individual feedback and guidance",
         ],
         notIncluded: ["Dedicated support tailored to your goals"],
@@ -117,7 +115,7 @@ Let’s bring a little more rhythm, femininity, and confidence into your life! �
           "Приватне заняття плануємо індивідуально після оплати. Щоб домовитися, напиши мені в Instagram або на пошту. Дату й час оберемо під твій розклад.",
         included: [
           "Повний доступ до матеріалів курсу",
-          "Одне персональне індивідуальне заняття (55 хв)",
+          "1 приватне індивідуальне заняття · 55 хв",
           "Індивідуальний фідбек і підтримка",
         ],
         notIncluded: ["Персональний супровід під твої цілі"],
@@ -132,7 +130,7 @@ Let’s bring a little more rhythm, femininity, and confidence into your life! �
           "Your four private sessions are scheduled individually after payment. Contact us via Instagram DM or email to arrange them. Each date and time will be chosen personally to fit your availability.",
         included: [
           "Full access to the course materials",
-          "Four private 1-on-1 sessions (55 min each)",
+          "4 private 1-on-1 sessions · 55 min each",
           "Personalized feedback and guidance",
           "Dedicated support tailored to your goals and progress",
         ],
@@ -146,7 +144,7 @@ Let’s bring a little more rhythm, femininity, and confidence into your life! �
           "Чотири приватні заняття плануємо індивідуально після оплати. Напиши нам в Instagram або на пошту, щоб домовитися. Кожну дату й час оберемо персонально під твій розклад.",
         included: [
           "Повний доступ до матеріалів курсу",
-          "Чотири приватні індивідуальні заняття (по 55 хв)",
+          "4 приватні індивідуальні заняття · по 55 хв",
           "Персональний фідбек і підтримка",
           "Персональний супровід під твої цілі та прогрес",
         ],
