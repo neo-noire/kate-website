@@ -77,7 +77,7 @@ export function Modal({ open, onClose, label, children }: ModalProps) {
         <button className="close" aria-label={t("close")} onClick={onClose}>
           <X size={20} aria-hidden />
         </button>
-        {children}
+        <div className="modalBody">{children}</div>
       </section>
     </div>,
     document.body,

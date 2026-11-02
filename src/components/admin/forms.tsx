@@ -38,6 +38,7 @@ export function ActionForm({ action, submitLabel, children, resetOnSuccess, conf
   const [state, formAction, pending] = useActionState(action, initialFormState);
   const form = useRef<HTMLFormElement>(null);
   const closeDialog = useCloseDialog();
+  const inDialog = closeDialog !== null;
 
   useEffect(() => {
     if (!state.ok) return;
@@ -48,7 +49,7 @@ export function ActionForm({ action, submitLabel, children, resetOnSuccess, conf
   return (
     <form
       ref={form}
-      className={children ? "grid gap-4" : "inline-flex"}
+      className={children ? (inDialog ? "flex min-h-0 flex-1 flex-col" : "grid gap-4") : "inline-flex"}
       noValidate
       onSubmit={(event) => {
         // Submitting manually keeps typed values when the server rejects them; React would
@@ -63,8 +64,13 @@ export function ActionForm({ action, submitLabel, children, resetOnSuccess, conf
       {Object.entries(hidden ?? {}).map(([name, value]) => (
         <input key={name} type="hidden" name={name} value={value} />
       ))}
-      <FormStateContext value={state}>{children}</FormStateContext>
-      <div className="flex flex-wrap items-center gap-3 pt-1">
+      {children && (
+        // In a dialog only the fields scroll; the title, close button and footer stay on screen.
+        <div className={cn("grid gap-4", inDialog && "min-h-0 flex-1 overflow-y-auto px-6 pb-5")}>
+          <FormStateContext value={state}>{children}</FormStateContext>
+        </div>
+      )}
+      <div className={cn("flex flex-wrap items-center gap-3", children && (inDialog ? "border-t border-border bg-[var(--panel)] px-6 py-4" : "pt-1"))}>
         <Button variant={danger ? "destructive" : children ? "default" : "outline"} disabled={pending}>
           {submitLabel}
         </Button>

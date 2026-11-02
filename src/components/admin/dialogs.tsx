@@ -61,8 +61,8 @@ export function FormDialog({ title, mode, variant = "outline", iconOnly, childre
           )}
         </DialogTrigger>
       )}
-      <DialogContent className="max-h-[90vh] overflow-y-auto rounded-none bg-[var(--panel)] sm:max-w-2xl">
-        <DialogHeader>
+      <DialogContent className="max-h-[90vh] flex-col gap-0 overflow-hidden rounded-none bg-[var(--panel)] p-0 data-[state=open]:flex sm:max-w-2xl">
+        <DialogHeader className="px-6 pt-6 pr-12 pb-4">
           <DialogTitle>{title}</DialogTitle>
           <DialogDescription className="sr-only">{title}</DialogDescription>
         </DialogHeader>

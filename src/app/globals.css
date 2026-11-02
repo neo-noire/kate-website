@@ -636,13 +636,31 @@ footer a {
     width: 960px;
     max-width: 100%;
     max-height: 90dvh;
-    overflow: auto;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
     background: #181818;
     border: 1px solid #494949;
     border-radius: 9px;
-    padding: 34px;
     position: relative;
     box-shadow: 0 30px 100px #0008;
+}
+.modalBody {
+    --pad-x: 34px;
+    --pad-y: 34px;
+    min-height: 0;
+    overflow-y: auto;
+    padding: var(--pad-y) var(--pad-x);
+}
+/* The close button and any .modalFooter stay on screen while the rest of the dialog scrolls. */
+.modalFooter {
+    position: sticky;
+    bottom: calc(var(--pad-y) * -1);
+    margin-bottom: calc(var(--pad-y) * -1);
+    padding: 20px 0 var(--pad-y);
+    display: grid;
+    gap: 10px;
+    background: linear-gradient(transparent, #181818 16px);
 }
 .close {
     display: grid;
@@ -1143,8 +1161,11 @@ footer a {
         padding: 10px;
     }
     .modal {
-        padding: 25px 18px;
         max-height: 94dvh;
+    }
+    .modalBody {
+        --pad-x: 18px;
+        --pad-y: 25px;
     }
     .modal h2 {
         font-size: 28px;

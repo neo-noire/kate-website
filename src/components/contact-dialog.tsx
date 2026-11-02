@@ -51,10 +51,12 @@ export function ContactDialog({ open, onClose }: { open: boolean; onClose: () =>
           <textarea name="message" maxLength={5000} placeholder={t("contact.messagePlaceholder")} required />
         </label>
         <Honeypot />
-        <button className="btn" disabled={pending}>
-          {t("contact.submit")} <ArrowUpRight size={16} aria-hidden />
-        </button>
-        <p className="fine">{t("contact.fine")}</p>
+        <div className="modalFooter">
+          <button className="btn" disabled={pending}>
+            {t("contact.submit")} <ArrowUpRight size={16} aria-hidden />
+          </button>
+          <p className="fine">{t("contact.fine")}</p>
+        </div>
       </form>
     </Modal>
   );

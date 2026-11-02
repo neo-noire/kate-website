@@ -73,10 +73,12 @@ export function EnrollButton({
             <input type="hidden" name="tierId" value={tierId} />
             <input type="hidden" name="courseId" value={courseId} />
             <input type="hidden" name="locale" value={locale} />
-            <PayButton label={t("enroll.pay", { price })} />
-            <p className="fine" role={checkout.failed ? "alert" : undefined}>
-              {checkout.failed ? t("enroll.failed") : t("enroll.secure")}
-            </p>
+            <div className="modalFooter">
+              <PayButton label={t("enroll.pay", { price })} />
+              <p className="fine" role={checkout.failed ? "alert" : undefined}>
+                {checkout.failed ? t("enroll.failed") : t("enroll.secure")}
+              </p>
+            </div>
           </form>
         ) : (
           <p className="legalDraft" role="status">
