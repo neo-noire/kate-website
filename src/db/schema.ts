@@ -280,3 +280,69 @@ export const newsletterSubscriber = pgTable("newsletter_subscriber", {
   locale: text("locale").notNull(),
   createdAt: createdAt(),
 });
+
+/**
+ * A code students enter at checkout. Either percentOff, or amountOffCents in `currency`.
+ * It only works on the programs listed in promo_code_program, or on all of them when allPrograms is set.
+ */
+export const promoCode = pgTable("promo_code", {
+  id: text("id").primaryKey(),
+  /** Stored uppercase; matched without regard to case. */
+  code: text("code").notNull().unique(),
+  percentOff: integer("percent_off"),
+  amountOffCents: integer("amount_off_cents"),
+  /** Currency of amountOffCents. A fixed code only works on tiers priced in this currency. */
+  currency: text("currency"),
+  startsAt: timestamp("starts_at", { withTimezone: true }),
+  expiresAt: timestamp("expires_at", { withTimezone: true }),
+  /** How many times the code can be used in total; null is unlimited. */
+  maxRedemptions: integer("max_redemptions"),
+  /** How many times one student can use it. */
+  perUserLimit: integer("per_user_limit").notNull().default(1),
+  allPrograms: boolean("all_programs").notNull().default(false),
+  active: boolean("active").notNull().default(true),
+  createdAt: createdAt(),
+  updatedAt: updatedAt(),
+});
+
+export const promoCodeProgram = pgTable(
+  "promo_code_program",
+  {
+    promoCodeId: text("promo_code_id")
+      .notNull()
+      .references(() => promoCode.id, { onDelete: "cascade" }),
+    programId: text("program_id")
+      .notNull()
+      .references(() => program.id, { onDelete: "cascade" }),
+  },
+  (table) => [primaryKey({ columns: [table.promoCodeId, table.programId] })],
+);
+
+export const PROMO_REDEMPTION_STATUSES = ["reserved", "redeemed", "released"] as const;
+
+/**
+ * One use of a code. It is reserved when checkout starts (so the last use can't be taken twice),
+ * redeemed when the payment completes, and released when the checkout expires or fails.
+ */
+export const promoRedemption = pgTable(
+  "promo_redemption",
+  {
+    id: text("id").primaryKey(),
+    promoCodeId: text("promo_code_id")
+      .notNull()
+      .references(() => promoCode.id, { onDelete: "cascade" }),
+    userId: text("user_id")
+      .notNull()
+      .references(() => user.id, { onDelete: "cascade" }),
+    courseId: text("course_id")
+      .notNull()
+      .references(() => course.id, { onDelete: "cascade" }),
+    /** Set once the Stripe Checkout Session exists. */
+    checkoutSessionId: text("checkout_session_id").unique(),
+    status: text("status", { enum: PROMO_REDEMPTION_STATUSES }).notNull().default("reserved"),
+    /** What the code took off, in minor units. */
+    discountCents: integer("discount_cents").notNull(),
+    createdAt: createdAt(),
+  },
+  (table) => [index("promo_redemption_code_idx").on(table.promoCodeId), index("promo_redemption_user_idx").on(table.userId)],
+);

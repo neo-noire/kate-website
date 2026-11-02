@@ -242,6 +242,7 @@ async function PricingCards({ page, course, programTitle }: { page: ProgramPage;
                 breakdown={breakdown}
                 tierId={tier.id}
                 courseId={course.id}
+                currency={tier.currency}
                 paymentsEnabled={paymentsEnabled}
                 lessonCount={course.lessons.length}
                 privateLessons={tier.privateLessons}

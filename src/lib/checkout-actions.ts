@@ -11,10 +11,31 @@ import { routing } from "@/i18n/routing";
 import { getSession } from "@/lib/auth/session";
 import { getPurchase } from "@/lib/catalog/queries";
 import { localize } from "@/lib/localized";
+import { withHst } from "@/lib/money";
+import {
+  attachSessionToRedemption,
+  checkPromo,
+  normalizePromoCode,
+  releaseRedemption,
+  reservePromo,
+  type PromoProblem,
+} from "@/lib/promo";
 import { type CheckoutMetadata, getHstTaxRateId, getStripe, isStripeConfigured } from "@/lib/stripe/server";
 
-/** Set when Stripe couldn't start the payment, so the dialog can say so. */
-export type CheckoutState = { failed: boolean };
+/** Set when Stripe couldn't start the payment, or the promo code couldn't be used, so the dialog can say so. */
+export type CheckoutState = { failed: boolean; promoProblem?: PromoProblem };
+
+/** What the dialog shows after "Apply": the price with the code taken off, or why the code can't be used. */
+export type PromoPreview = {
+  code?: string;
+  problem?: PromoProblem;
+  currency?: string;
+  discountCents?: number;
+  beforeTaxCents?: number;
+  hstCents?: number;
+  totalCents?: number;
+  at?: number;
+};
 
 /** The site's own origin, from the request, for Stripe's return links. */
 async function origin() {
@@ -24,23 +45,20 @@ async function origin() {
   return `${proto}://${host}`;
 }
 
-/**
- * Sends the student to Stripe Checkout for one course at one tier. The price is the tier's price
- * before tax; Stripe adds 13% HST on top. Visitors who aren't signed in go to sign-in first,
- * and students who already own the course go to their dashboard.
- */
-export async function startCheckout(_: CheckoutState, form: FormData): Promise<CheckoutState> {
+function readLocale(form: FormData) {
   const lang = String(form.get("locale"));
-  const locale = hasLocale(routing.locales, lang) ? lang : routing.defaultLocale;
-  const tierId = String(form.get("tierId"));
-  const courseId = String(form.get("courseId"));
+  return hasLocale(routing.locales, lang) ? lang : routing.defaultLocale;
+}
 
-  const row = await db
+/** The tier and course being bought, if they belong to a published program. */
+async function loadPurchase(tierId: string, courseId: string) {
+  return db
     .select({
       tierId: tier.id,
       tierName: tier.name,
       priceCents: tier.priceCents,
       currency: tier.currency,
+      programId: program.id,
       programSlug: program.slug,
       programTitle: program.title,
       courseSlug: course.slug,
@@ -51,6 +69,53 @@ export async function startCheckout(_: CheckoutState, form: FormData): Promise<C
     .innerJoin(course, and(eq(course.programId, program.id), eq(course.id, courseId)))
     .where(and(eq(tier.id, tierId), eq(program.published, true)))
     .then((rows) => rows[0]);
+}
+
+/** Price after a promo code, with HST on what is left. */
+function discountedPrice(priceCents: number, discountCents: number) {
+  return withHst(priceCents - discountCents);
+}
+
+/** Checks a promo code for the dialog, so the student sees the new price before paying. Reserves nothing. */
+export async function previewPromo(_: PromoPreview, form: FormData): Promise<PromoPreview> {
+  const at = Date.now();
+  const row = await loadPurchase(String(form.get("tierId")), String(form.get("courseId")));
+  const code = normalizePromoCode(String(form.get("promo") ?? ""));
+  if (!code) return { at };
+  if (!row) return { problem: "invalid", at };
+
+  const session = await getSession();
+  const result = await checkPromo(code, {
+    programId: row.programId,
+    currency: row.currency,
+    priceCents: row.priceCents,
+    userId: session?.user.id,
+  });
+  if ("problem" in result) return { problem: result.problem, at };
+
+  const { beforeTax, hst, total } = discountedPrice(row.priceCents, result.discountCents);
+  return {
+    code,
+    currency: row.currency,
+    discountCents: result.discountCents,
+    beforeTaxCents: beforeTax,
+    hstCents: hst,
+    totalCents: total,
+    at,
+  };
+}
+
+/**
+ * Sends the student to Stripe Checkout for one course at one tier. The price is the tier's price
+ * before tax, less any promo code; Stripe adds 13% HST on what is left. Visitors who aren't signed in
+ * go to sign-in first, and students who already own the course go to their dashboard.
+ */
+export async function startCheckout(_: CheckoutState, form: FormData): Promise<CheckoutState> {
+  const locale = readLocale(form);
+  const courseId = String(form.get("courseId"));
+  const promoInput = normalizePromoCode(String(form.get("promo") ?? ""));
+
+  const row = await loadPurchase(String(form.get("tierId")), courseId);
   if (!row) return redirect({ href: "/", locale });
 
   const pagePath = `/programs/${row.programSlug}/${row.courseSlug}`;
@@ -62,16 +127,43 @@ export async function startCheckout(_: CheckoutState, form: FormData): Promise<C
     return redirect({ href: { pathname: "/dashboard", query: { course: courseId } }, locale });
   }
 
+  // Reserve the code first, so a paid checkout can't end up over the code's limit.
+  let promo: { code: string; discountCents: number; redemptionId: string } | null = null;
+  if (promoInput) {
+    const reserved = await reservePromo(promoInput, {
+      programId: row.programId,
+      currency: row.currency,
+      priceCents: row.priceCents,
+      userId: session.user.id,
+      courseId,
+    });
+    if ("problem" in reserved) return { failed: false, promoProblem: reserved.problem };
+    promo = { code: promoInput, discountCents: reserved.discountCents, redemptionId: reserved.redemptionId };
+  }
+
   const site = await origin();
   const metadata: CheckoutMetadata = { userId: session.user.id, courseId, tierId: row.tierId };
   let url: string | null;
   try {
-    const checkout = await getStripe().checkout.sessions.create({
+    const stripe = getStripe();
+    const coupon = promo
+      ? await stripe.coupons.create({
+          name: promo.code,
+          amount_off: promo.discountCents,
+          currency: row.currency.toLowerCase(),
+          duration: "once",
+          max_redemptions: 1,
+        })
+      : null;
+    const checkout = await stripe.checkout.sessions.create({
       mode: "payment",
       customer_email: session.user.email,
       client_reference_id: session.user.id,
-      metadata,
+      metadata: promo ? { ...metadata, promo: promo.code } : metadata,
       payment_intent_data: { metadata },
+      ...(coupon ? { discounts: [{ coupon: coupon.id }] } : {}),
+      // A reserved promo use is held until the session ends, so a promo checkout expires after the minimum 30 minutes.
+      ...(promo ? { expires_at: Math.floor(Date.now() / 1000) + 30 * 60 } : {}),
       line_items: [
         {
           quantity: 1,
@@ -91,10 +183,15 @@ export async function startCheckout(_: CheckoutState, form: FormData): Promise<C
       cancel_url: `${site}/${locale}${pagePath}`,
     });
     url = checkout.url;
+    if (promo) await attachSessionToRedemption(promo.redemptionId, checkout.id);
   } catch (error) {
     console.error("Stripe checkout failed", error);
+    if (promo) await releaseRedemption(promo.redemptionId);
     return { failed: true };
   }
-  if (!url) return { failed: true };
+  if (!url) {
+    if (promo) await releaseRedemption(promo.redemptionId);
+    return { failed: true };
+  }
   redirectExternal(url);
 }
