@@ -186,7 +186,21 @@
     "total": "Total",
     "pay": "Pay {price}",
     "secure": "You'll pay securely on Stripe and come straight back to your dashboard.",
-    "failed": "We couldn't start the payment. Please try again in a moment, or contact us if it keeps happening."
+    "failed": "We couldn't start the payment. Please try again in a moment, or contact us if it keeps happening.",
+    "promo": {
+      "label": "Promo code",
+      "apply": "Apply",
+      "applied": "Code {code} applied.",
+      "discount": "Promo code {code}",
+      "problems": {
+        "invalid": "That code isn't valid.",
+        "notStarted": "That code isn't active yet.",
+        "expired": "That code has expired.",
+        "usedUp": "That code has been used up.",
+        "alreadyUsed": "You've already used that code.",
+        "notForCourse": "That code doesn't apply to this course."
+      }
+    }
   },
   "dashboard": {
     "eyebrow": "Your space to move",
@@ -421,7 +435,12 @@
       "userNotFound": "No account uses this email. Ask the student to sign up first.",
       "notFound": "This item no longer exists. Reload the page.",
       "forbidden": "Only admins can do this.",
-      "generic": "Something went wrong. Please try again."
+      "generic": "Something went wrong. Please try again.",
+      "codeTaken": "That code already exists. Choose another.",
+      "promoCode": "Use 3 to 32 letters, numbers, dashes or underscores.",
+      "percent": "Enter a percentage from 1 to 100.",
+      "noPrograms": "Pick at least one program, or choose All programs.",
+      "dateOrder": "The end date must be after the start date."
     },
     "accessUntil": "Access until {date}",
     "expired": "Access ended {date}",
@@ -437,6 +456,51 @@
       "remove": "Remove"
     },
     "paymentsOff": "Online payment is off: students can't buy courses yet. Add {names} in Vercel (Settings, Environment Variables), then redeploy.",
+    "promo": {
+      "tab": "Promo codes",
+      "title": "Promo codes",
+      "hint": "Codes students enter at checkout. A code only works on the programs you choose.",
+      "new": "New code",
+      "edit": "Edit code",
+      "delete": "Delete code",
+      "noCodes": "No promo codes yet.",
+      "fields": {
+        "code": "Code",
+        "codeHint": "Letters, numbers, dashes. Students can type it in any case.",
+        "type": "Discount type",
+        "percent": "Percentage off",
+        "fixed": "Fixed amount off",
+        "percentOff": "Percent off",
+        "percentHint": "For a percentage code, 1 to 100. 100 makes the course free.",
+        "amount": "Amount off",
+        "amountHint": "For a fixed-amount code, before tax.",
+        "currency": "Currency",
+        "currencyHint": "A fixed code only works on formats priced in this currency.",
+        "startsAt": "Starts",
+        "expiresAt": "Ends",
+        "datesHint": "Leave blank for no start or end. The end date is included.",
+        "maxRedemptions": "Total uses",
+        "maxHint": "Leave blank for unlimited.",
+        "perUser": "Uses per student",
+        "programs": "Works on",
+        "allPrograms": "All programs",
+        "active": "Active"
+      },
+      "off": "{percent}% off",
+      "fixedOff": "{amount} off",
+      "everywhere": "All programs",
+      "usage": "{used} / {max} used",
+      "usageOpen": "{used} used",
+      "from": "from {date}",
+      "until": "until {date}",
+      "state": {
+        "active": "Active",
+        "off": "Off",
+        "scheduled": "Scheduled",
+        "expired": "Expired",
+        "usedUp": "Used up"
+      }
+    },
     "comingSoon": "Coming soon",
     "statusHint": {
       "draft": "Only admins can see it.",

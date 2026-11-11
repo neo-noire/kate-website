@@ -16,6 +16,11 @@ export type FormError =
   | "youtube"
   | "email"
   | "userNotFound"
+  | "codeTaken"
+  | "promoCode"
+  | "percent"
+  | "noPrograms"
+  | "dateOrder"
   | "notFound"
   | "forbidden"
   | "generic";

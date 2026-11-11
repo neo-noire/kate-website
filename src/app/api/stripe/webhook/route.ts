@@ -1,4 +1,5 @@
 import type Stripe from "stripe";
+import { releaseBySession } from "@/lib/promo";
 import { fulfillCheckoutSession, getStripe, revokeRefundedPayment } from "@/lib/stripe/server";
 
 /**
@@ -24,6 +25,10 @@ export async function POST(request: Request) {
     case "checkout.session.completed":
     case "checkout.session.async_payment_succeeded":
       await fulfillCheckoutSession(event.data.object);
+      break;
+    case "checkout.session.expired":
+    case "checkout.session.async_payment_failed":
+      await releaseBySession(event.data.object.id);
       break;
     case "charge.refunded": {
       const charge = event.data.object;

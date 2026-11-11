@@ -5,6 +5,7 @@ import { db } from "@/db";
 import { purchase } from "@/db/schema";
 import { accessExpiry } from "@/lib/catalog/access";
 import { HST_RATE } from "@/lib/money";
+import { markRedeemed } from "@/lib/promo";
 
 /** Settings Stripe needs, as named in Vercel. Checkout is off until all of them are set. */
 export const STRIPE_ENV = ["STRIPE_SECRET_KEY", "STRIPE_WEBHOOK_SECRET"] as const;
@@ -68,7 +69,9 @@ export type CheckoutMetadata = { userId: string; courseId: string; tierId: strin
  */
 export async function fulfillCheckoutSession(session: Stripe.Checkout.Session) {
   const { userId, courseId, tierId } = (session.metadata ?? {}) as Partial<CheckoutMetadata>;
-  if (session.payment_status !== "paid" || !userId || !courseId) return false;
+  // A checkout discounted to zero by a promo code has nothing to pay: Stripe reports it as no_payment_required.
+  const settled = session.payment_status === "paid" || session.payment_status === "no_payment_required";
+  if (!settled || !userId || !courseId) return false;
   const paymentIntentId =
     typeof session.payment_intent === "string" ? session.payment_intent : (session.payment_intent?.id ?? null);
   const paid = {
@@ -92,6 +95,7 @@ export async function fulfillCheckoutSession(session: Stripe.Checkout.Session) {
       // Already fulfilled for this session: keep the record (and any first play) as it is.
       setWhere: sql`${purchase.stripeCheckoutSessionId} is distinct from ${session.id}`,
     });
+  await markRedeemed(session.id);
   return true;
 }
 

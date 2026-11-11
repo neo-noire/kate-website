@@ -71,6 +71,13 @@
       "when": 1793585465999,
       "tag": "0009_program_status",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1794437984775,
+      "tag": "0010_promo_codes",
+      "breakpoints": true
     }
   ]
 }

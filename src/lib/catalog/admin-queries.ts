@@ -1,7 +1,18 @@
 import "server-only";
-import { asc, desc, eq, inArray } from "drizzle-orm";
+import { asc, count, desc, eq, inArray, ne } from "drizzle-orm";
 import { db } from "@/db";
-import { contactMessage, course, lesson, newsletterSubscriber, program, purchase, tier } from "@/db/schema";
+import {
+  contactMessage,
+  course,
+  lesson,
+  newsletterSubscriber,
+  program,
+  promoCode,
+  promoCodeProgram,
+  promoRedemption,
+  purchase,
+  tier,
+} from "@/db/schema";
 
 // Admin reads are not cached: they include drafts and must show edits immediately.
 
@@ -49,3 +60,24 @@ export async function getContactMessages(limit = 100) {
 export async function getNewsletterSubscribers() {
   return db.query.newsletterSubscriber.findMany({ orderBy: [desc(newsletterSubscriber.createdAt)] });
 }
+
+/** Every promo code with the programs it covers and how many times it has been used (or is being used). */
+export async function getAdminPromoCodes() {
+  const [codes, links, usage] = await Promise.all([
+    db.select().from(promoCode).orderBy(desc(promoCode.createdAt)),
+    db.select({ promoCodeId: promoCodeProgram.promoCodeId, programId: promoCodeProgram.programId }).from(promoCodeProgram),
+    db
+      .select({ promoCodeId: promoRedemption.promoCodeId, used: count() })
+      .from(promoRedemption)
+      .where(ne(promoRedemption.status, "released"))
+      .groupBy(promoRedemption.promoCodeId),
+  ]);
+  const used = new Map(usage.map((row) => [row.promoCodeId, row.used]));
+  return codes.map((code) => ({
+    ...code,
+    programIds: links.filter((link) => link.promoCodeId === code.id).map((link) => link.programId),
+    used: used.get(code.id) ?? 0,
+  }));
+}
+
+export type AdminPromoCode = Awaited<ReturnType<typeof getAdminPromoCodes>>[number];

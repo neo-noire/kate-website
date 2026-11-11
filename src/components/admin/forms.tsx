@@ -99,7 +99,7 @@ type TextFieldProps = {
   label: string;
   defaultValue?: string | number | null;
   hint?: string;
-  type?: "text" | "number" | "email" | "url";
+  type?: "text" | "number" | "email" | "url" | "date";
   required?: boolean;
   multiline?: boolean;
   /** Multi-line text written as markdown: shows a toolbar and a preview. */
@@ -159,11 +159,22 @@ export function LocalizedField({
   );
 }
 
-export function CheckboxField({ name, label, defaultChecked }: { name: string; label: string; defaultChecked?: boolean }) {
+export function CheckboxField({
+  name,
+  label,
+  defaultChecked,
+  value,
+}: {
+  name: string;
+  label: string;
+  defaultChecked?: boolean;
+  /** What is submitted when ticked; several boxes can share a name to submit a list. */
+  value?: string;
+}) {
   const id = useId();
   return (
     <div className="flex items-center gap-2 self-center">
-      <Checkbox id={id} name={name} defaultChecked={defaultChecked} />
+      <Checkbox id={id} name={name} value={value} defaultChecked={defaultChecked} />
       <Label htmlFor={id} className="text-sm">
         {label}
       </Label>
