@@ -64,7 +64,8 @@
     "fromPrice": "From {price} / dance, HST included",
     "open": "Open {name}",
     "all": "All programs",
-    "empty": "New programs are coming soon."
+    "empty": "New programs are coming soon.",
+    "comingSoon": "Coming soon"
   },
   "approach": {
     "eyebrow": "02 / A personal approach",
@@ -342,7 +343,7 @@
       "basics": "Basics",
       "basicsHint": "The name, address and short description shown at the top of the program page.",
       "publishing": "Publishing",
-      "publishingHint": "Draft programs are only visible to admins.",
+      "publishingHint": "Who can see this program.",
       "listing": "Catalog card",
       "listingHint": "How the program appears on the home page.",
       "danger": "Delete this program",
@@ -402,7 +403,6 @@
         "course": "Position among the program's dances. Lower numbers come first.",
         "lesson": "Lesson number within the course. Lower numbers come first."
       },
-      "published": "Published (visible on the site)",
       "name": "Name",
       "price": "Price",
       "currency": "Currency",
@@ -421,7 +421,8 @@
       "priceSummary": "{price} + HST = {total}",
       "tierKey": "Key",
       "tierKeyHint": "Links this format to its text in src/content, e.g. self, guided or vip. Lowercase, no spaces.",
-      "courseDescriptionHint": "A short summary. The long text on the program page lives in src/content."
+      "courseDescriptionHint": "A short summary. The long text on the program page lives in src/content.",
+      "status": "Status"
     },
     "errors": {
       "required": "Please fill in the English version of this field.",
@@ -499,6 +500,12 @@
         "expired": "Expired",
         "usedUp": "Used up"
       }
+    },
+    "comingSoon": "Coming soon",
+    "statusHint": {
+      "draft": "Only admins can see it.",
+      "comingSoon": "Shown on the home page, but not open yet.",
+      "published": "Visible to everyone and open for purchase."
     }
   }
 }

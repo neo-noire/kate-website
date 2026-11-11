@@ -67,7 +67,7 @@ async function loadPurchase(tierId: string, courseId: string) {
     .from(tier)
     .innerJoin(program, eq(program.id, tier.programId))
     .innerJoin(course, and(eq(course.programId, program.id), eq(course.id, courseId)))
-    .where(and(eq(tier.id, tierId), eq(program.published, true)))
+    .where(and(eq(tier.id, tierId), eq(program.status, "published")))
     .then((rows) => rows[0]);
 }
 

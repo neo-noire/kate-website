@@ -1782,3 +1782,10 @@ textarea,
     padding: 4px 10px;
     border: 1px solid var(--line);
 }
+
+/* A program that is announced but not open yet: dimmed and not clickable. */
+.program.comingSoon {
+    opacity: 0.55;
+    pointer-events: none;
+    user-select: none;
+}

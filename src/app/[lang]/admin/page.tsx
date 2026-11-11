@@ -22,6 +22,7 @@ import { PromoFields } from "@/components/admin/promo-fields";
 import { type AdminPromoCode, getAdminPrograms, getAdminPromoCodes, getContactMessages, getNewsletterSubscribers } from "@/lib/catalog/admin-queries";
 import { localize } from "@/lib/localized";
 import { formatPrice } from "@/lib/money";
+import { STATUS_LABEL } from "@/lib/catalog/status";
 import { missingStripeEnv } from "@/lib/stripe/server";
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -93,7 +94,7 @@ async function AdminHome() {
                       <span className="grid min-w-0 flex-1 gap-0.5">
                         <span className="flex flex-wrap items-center gap-2 font-bold">
                           {title}
-                          <Badge variant={p.published ? "default" : "secondary"}>{p.published ? t("published") : t("draft")}</Badge>
+                          <Badge variant={p.status === "published" ? "default" : "secondary"}>{t(STATUS_LABEL[p.status])}</Badge>
                         </span>
                         <small className="text-xs text-muted-foreground">
                           {t("courseCount", { count: p.courses.length })} · {t("tierCount", { count: p.tiers.length })}

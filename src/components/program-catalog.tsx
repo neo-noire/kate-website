@@ -5,6 +5,7 @@ import { ArrowUpRight, ChevronDown, ChevronUp } from "lucide-react";
 import heroPhoto from "@/assets/hero.jpg";
 import { useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
+import { Badge } from "@/components/ui/badge";
 import { Link } from "@/i18n/navigation";
 import type { CatalogProgram } from "@/lib/catalog/queries";
 import { localize } from "@/lib/localized";
@@ -60,12 +61,13 @@ export function ProgramCatalog({ programs }: { programs: CatalogProgram[] }) {
       )}
       <div className="programs">
         {visible.map((program) => {
+          const soon = program.status === "coming_soon";
           const title = localize(program.title, locale);
           const tag = localize(program.tag, locale);
           const sameCategory = programs.filter((p) => categoryKey(p) === categoryKey(program));
           const number = String(sameCategory.indexOf(program) + 1).padStart(2, "0");
           return (
-            <article className="program" key={program.id}>
+            <article className={`program${soon ? " comingSoon" : ""}`} key={program.id}>
               <div className="art">
                 <Image src={heroPhoto} alt="" fill sizes="(max-width: 640px) 100vw, (max-width: 900px) 50vw, 400px" />
                 {tag && <span className="pill">{tag}</span>}
@@ -74,23 +76,31 @@ export function ProgramCatalog({ programs }: { programs: CatalogProgram[] }) {
               <div className="programBody">
                 <h3>{title}</h3>
                 <p>{localize(program.description, locale)}</p>
-                <div className="meta">
-                  {program.courseCount > 1 && <span>{t("catalog.dances", { count: program.courseCount })}</span>}
-                  <span>{t("catalog.lessons", { count: program.lessonCount })}</span>
-                  {program.totalMinutes > 0 && <span>{formatDuration(program.totalMinutes)}</span>}
-                  <span>{t("catalog.online")}</span>
-                </div>
+                {!soon && (
+                  <div className="meta">
+                    {program.courseCount > 1 && <span>{t("catalog.dances", { count: program.courseCount })}</span>}
+                    <span>{t("catalog.lessons", { count: program.lessonCount })}</span>
+                    {program.totalMinutes > 0 && <span>{formatDuration(program.totalMinutes)}</span>}
+                    <span>{t("catalog.online")}</span>
+                  </div>
+                )}
                 <div className="cardBottom">
-                  <span>
-                    {program.fromPrice
-                      ? t("catalog.fromPrice", {
-                          price: formatPrice(withHst(program.fromPrice.priceCents).total, program.fromPrice.currency, locale),
-                        })
-                      : null}
-                  </span>
-                  <Link className="arrow" href={`/programs/${program.slug}`} aria-label={t("catalog.open", { name: title })}>
-                    <ArrowUpRight size={18} aria-hidden />
-                  </Link>
+                  {soon ? (
+                    <Badge variant="secondary">{t("catalog.comingSoon")}</Badge>
+                  ) : (
+                    <>
+                      <span>
+                        {program.fromPrice
+                          ? t("catalog.fromPrice", {
+                              price: formatPrice(withHst(program.fromPrice.priceCents).total, program.fromPrice.currency, locale),
+                            })
+                          : null}
+                      </span>
+                      <Link className="arrow" href={`/programs/${program.slug}`} aria-label={t("catalog.open", { name: title })}>
+                        <ArrowUpRight size={18} aria-hidden />
+                      </Link>
+                    </>
+                  )}
                 </div>
               </div>
             </article>

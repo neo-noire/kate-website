@@ -1,3 +1,4 @@
+import { PROGRAM_STATUSES } from "@/lib/catalog/status";
 import { relations } from "drizzle-orm";
 import { boolean, index, integer, jsonb, pgTable, primaryKey, text, timestamp, uniqueIndex } from "drizzle-orm/pg-core";
 
@@ -94,6 +95,9 @@ export const program = pgTable("program", {
   /** Catalog filter, e.g. "Beginner"; programs with the same English category share a filter. */
   category: localized("category"),
   sortOrder: integer("sort_order").notNull().default(0),
+  /** Who can see the program: see PROGRAM_STATUSES. */
+  status: text("status", { enum: PROGRAM_STATUSES }).notNull().default("draft"),
+  /** Deprecated: mirrors status === "published" so an older deployment keeps working. Drop it in a later migration. */
   published: boolean("published").notNull().default(false),
   createdAt: createdAt(),
   updatedAt: updatedAt(),

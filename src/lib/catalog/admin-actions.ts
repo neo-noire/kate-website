@@ -1,5 +1,6 @@
 "use server";
 
+import { PROGRAM_STATUSES } from "@/lib/catalog/status";
 import { count, eq } from "drizzle-orm";
 import { updateTag } from "next/cache";
 import { db } from "@/db";
@@ -66,6 +67,13 @@ function readInt(form: FormData, name: string, { min = 0, max = 100_000, optiona
   return value;
 }
 
+function readStatus(form: FormData) {
+  const value = readText(form, "status");
+  const status = PROGRAM_STATUSES.find((candidate) => candidate === value);
+  if (!status) throw new FieldError("required", "status");
+  return status;
+}
+
 const readBool = (form: FormData, name: string) => form.get(name) === "on";
 
 function readSlug(form: FormData, name = "slug") {
@@ -123,8 +131,9 @@ export async function createProgram(_: FormState, form: FormData): Promise<FormS
 }
 
 export async function updateProgram(_: FormState, form: FormData): Promise<FormState> {
-  return run(() =>
-    db
+  return run(() => {
+    const status = readStatus(form);
+    return db
       .update(program)
       .set({
         slug: readSlug(form),
@@ -133,10 +142,11 @@ export async function updateProgram(_: FormState, form: FormData): Promise<FormS
         tag: readLocalized(form, "tag", { max: 40 }),
         category: readLocalized(form, "category", { max: 40 }),
         sortOrder: readInt(form, "sortOrder", { max: 9999 })!,
-        published: readBool(form, "published"),
+        status,
+        published: status === "published",
       })
-      .where(eq(program.id, readId(form))),
-  );
+      .where(eq(program.id, readId(form)));
+  });
 }
 
 export async function deleteProgram(_: FormState, form: FormData): Promise<FormState> {
