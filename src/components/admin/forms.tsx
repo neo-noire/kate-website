@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
 import { initialFormState, type FormState } from "@/lib/catalog/form-state";
@@ -203,6 +204,44 @@ export function SelectField({
           </option>
         ))}
       </select>
+      <FieldError name={name} />
+    </div>
+  );
+}
+
+/** A group of radio options, each with a short explanation. Submitted under `name`. */
+export function RadioCardsField({
+  name,
+  label,
+  options,
+  defaultValue,
+}: {
+  name: string;
+  label: string;
+  options: { value: string; label: string; hint: string }[];
+  defaultValue: string;
+}) {
+  const id = useId();
+  return (
+    <div className="grid gap-2">
+      <span className="text-xs text-muted-foreground" id={`${id}-label`}>
+        {label}
+      </span>
+      <RadioGroup name={name} defaultValue={defaultValue} aria-labelledby={`${id}-label`} className="gap-2">
+        {options.map((option) => (
+          <Label
+            key={option.value}
+            htmlFor={`${id}-${option.value}`}
+            className="flex cursor-pointer items-start gap-3 rounded-lg border border-border p-3 font-normal has-[[data-state=checked]]:border-primary/60 has-[[data-state=checked]]:bg-primary/5"
+          >
+            <RadioGroupItem id={`${id}-${option.value}`} value={option.value} className="mt-0.5" />
+            <span className="grid gap-0.5">
+              <span className="text-sm font-bold">{option.label}</span>
+              <span className="text-xs text-muted-foreground">{option.hint}</span>
+            </span>
+          </Label>
+        ))}
+      </RadioGroup>
       <FieldError name={name} />
     </div>
   );

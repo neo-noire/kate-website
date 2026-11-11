@@ -8,7 +8,7 @@ import { contactMessage, course, lesson, newsletterSubscriber, program, purchase
 export async function getAdminPrograms() {
   return db.query.program.findMany({
     orderBy: [asc(program.sortOrder), asc(program.createdAt)],
-    columns: { id: true, slug: true, title: true, published: true },
+    columns: { id: true, slug: true, title: true, status: true },
     with: { courses: { columns: { id: true } }, tiers: { columns: { id: true } } },
   });
 }

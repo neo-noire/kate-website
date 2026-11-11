@@ -6,7 +6,7 @@ import { Suspense } from "react";
 import { CardRow, FormSection, Mark, SectionHeader } from "@/components/admin/card-row";
 import { ItemActions } from "@/components/admin/item-actions";
 import { ConfirmDelete, FormDialog } from "@/components/admin/dialogs";
-import { ActionForm, CheckboxField, LocalizedField, SelectField, TextField } from "@/components/admin/forms";
+import { ActionForm, CheckboxField, LocalizedField, RadioCardsField, SelectField, TextField } from "@/components/admin/forms";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -31,6 +31,7 @@ import {
 import { getAdminProgram, type AdminProgram } from "@/lib/catalog/admin-queries";
 import { localize } from "@/lib/localized";
 import { CURRENCIES, formatPrice, withHst } from "@/lib/money";
+import { STATUS_LABEL } from "@/lib/catalog/status";
 import { youTubeWatchUrl } from "@/lib/youtube";
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -62,8 +63,8 @@ async function ProgramEditor({ params }: Pick<PageProps<"/[lang]/admin/programs/
       <div className="eyebrow">{t("eyebrow")}</div>
       <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-3">
         <h1 className="m-0!">{title}</h1>
-        <Badge variant={program.published ? "default" : "secondary"}>{program.published ? t("published") : t("draft")}</Badge>
-        {program.published && (
+        <Badge variant={program.status === "published" ? "default" : "secondary"}>{t(STATUS_LABEL[program.status])}</Badge>
+        {program.status === "published" && (
           <Button asChild variant="outline" className="ml-auto">
             <Link href={`/programs/${program.slug}`}>
               {t("view")} <ArrowUpRight aria-hidden />
@@ -96,7 +97,16 @@ async function ProgramEditor({ params }: Pick<PageProps<"/[lang]/admin/programs/
               </FormSection>
               <div className="grid gap-4">
                 <FormSection title={t("details.publishing")} hint={t("details.publishingHint")}>
-                  <CheckboxField name="published" label={t("fields.published")} defaultChecked={program.published} />
+                  <RadioCardsField
+                    name="status"
+                    label={t("fields.status")}
+                    defaultValue={program.status}
+                    options={[
+                      { value: "draft", label: t("draft"), hint: t("statusHint.draft") },
+                      { value: "coming_soon", label: t("comingSoon"), hint: t("statusHint.comingSoon") },
+                      { value: "published", label: t("published"), hint: t("statusHint.published") },
+                    ]}
+                  />
                   <TextField name="sortOrder" label={t("fields.sortOrder")} hint={t("fields.sortOrderHint.program")} type="number" defaultValue={program.sortOrder} />
                 </FormSection>
                 <FormSection title={t("details.listing")} hint={t("details.listingHint")}>
