@@ -4,7 +4,7 @@ A personal website for a ballroom dance coach, combining a compact marketing lan
 
 **Live site:** https://katematus-website.vercel.app/en
 
-**Current status:** a bilingual Next.js App Router + TypeScript site on Neon Postgres with real accounts (email and password, Google once its keys are added), a database course catalog with an admin editor, YouTube lessons, legal pages, and a contact form and newsletter sign-up stored in the database. Stripe Checkout is built and switches on once its keys are added in Vercel; email sending (Resend) is not connected yet. `LatinKate` is the brand; the coach’s final branding, biography, photography, course content and prices still need to be supplied.
+**Current status:** a bilingual Next.js App Router + TypeScript site on Neon Postgres with real accounts (email and password, Google once its keys are added), a database course catalog with an admin editor, YouTube lessons, legal pages, and a contact form and newsletter sign-up stored in the database. Stripe Checkout is built and switches on once its keys are added in Vercel; email (verification codes, password reset, purchase confirmations) switches on once Resend is configured. `LatinKate` is the brand; the coach’s final branding, biography, photography, course content and prices still need to be supplied.
 
 ## Run the app
 
@@ -13,11 +13,12 @@ Requires Node.js 20.9 or later and a Postgres database for accounts.
 ```sh
 npm install
 cp .env.example .env.local   # then fill in DATABASE_URL and BETTER_AUTH_SECRET
-npm run db:migrate           # creates the auth tables
+npm run db:migrate           # creates the tables
 npm run dev        # http://localhost:3000 (redirects to /en or /uk)
 npm run lint
 npm run typecheck
-npm run build      # production build; public pages are prerendered for both locales
+npm test           # unit tests; with DATABASE_URL set (and migrated) also the access and webhook tests
+npm run build      # production build; needs DATABASE_URL, since the catalog pages are prerendered
 ```
 
 Routes:
@@ -26,7 +27,7 @@ Routes:
 | --- | --- |
 | `/en`, `/uk` | Landing page: hero, program catalog with filters, approach, newsletter, FAQ |
 | `/{lang}/programs/{program}` and `/{lang}/programs/{program}/{dance}` | Dance tabs and the pricing tiers for one dance (checkout is not connected yet) |
-| `/{lang}/sign-in`, `/{lang}/sign-up` | Account pages (email and password; a Google button appears once Google keys are configured) |
+| `/{lang}/sign-in`, `/{lang}/sign-up`, `/{lang}/forgot-password` | Account pages (email and password; a Google button appears once Google keys are configured; password reset by emailed code once Resend is configured) |
 | `/{lang}/dashboard` | Student dashboard: lessons, placeholder player, progress and notes. Signed-out visitors are redirected to sign in |
 | `/api/auth/*` | Better Auth endpoints |
 
@@ -39,7 +40,7 @@ Code layout:
 - `src/i18n/`: next-intl routing, request config and locale-aware `Link`/`useRouter`. `npm run typecheck` fails if a locale’s messages are missing or have extra keys compared with English, and message keys used in code are type-checked.
 - `src/app/[lang]/`: routes; the root layout sits under `[lang]` so `<html lang>`, metadata and `hreflang` links are per locale.
 - `src/lib/auth/`: [Better Auth](https://better-auth.com) server config, React client and the safe post-sign-in redirect. `src/proxy.ts` redirects signed-out visitors away from the dashboard; the dashboard page checks the session again on the server.
-- `src/db/`: Drizzle schema and client (`pg` driver). Migrations live in `drizzle/`; `npm run db:generate` creates one from schema changes and `npm run build` applies pending ones before building (on Vercel the build fails if the database is not connected).
+- `src/db/`: Drizzle schema and client (`pg` driver). Migrations live in `drizzle/`; `npm run db:generate` creates one from schema changes and `npm run build` applies pending ones before building. On Vercel only the **production** build migrates (preview builds skip it, so a branch can't change the live schema before it is merged); the build fails if the database is not connected. Migrations are forward-only: before a risky one, take a Neon branch or snapshot to restore from.
 - `src/lib/site-actions.ts`: the contact form and newsletter sign-up. Both save to the database (with a hidden honeypot field against bots); admins read messages and subscribers on `/admin`.
 - `src/app/globals.css`: the prototype’s stylesheet, ported with its class names intact. Form fields are at least 16px so iOS Safari does not zoom in on focus.
 - Icons come from [Lucide](https://lucide.dev) (`lucide-react`), not Unicode symbols, which iOS renders as emoji.
@@ -52,7 +53,9 @@ Code layout:
 
 Pages for the new locale are prerendered automatically, and redirects, `hreflang` links and the language picker pick it up from the routing config.
 
-Accounts, purchases, progress, notes, contact messages and newsletter sign-ups are stored in Postgres. Nothing is emailed yet: contact messages and subscribers are listed on the admin page until Resend is connected.
+Accounts, purchases, progress, notes, contact messages and newsletter sign-ups are stored in Postgres. Contact messages and subscribers are listed on the admin page; with Resend configured, each contact message is also emailed to the `ADMIN_EMAILS` addresses. Newsletter sign-ups record when consent was given, the consent text and the IP; sending the newsletter itself (with an unsubscribe link) is not built yet.
+
+Every setting is checked once at server start (`src/lib/env.ts`, via `src/instrumentation.ts`); a deployment with a missing or mismatched variable fails immediately with a message naming it.
 
 ### Accounts and environment variables
 
@@ -64,6 +67,7 @@ Accounts, purchases, progress, notes, contact messages and newsletter sign-ups a
 | `ADMIN_EMAILS` | Comma-separated emails of the accounts that can manage courses, e.g. `kate@example.com,me@example.com` |
 | `STRIPE_SECRET_KEY` | Stripe Dashboard, Developers, API keys: the secret key (`sk_test_…` to try it, `sk_live_…` for real payments) |
 | `STRIPE_WEBHOOK_SECRET` | The signing secret (`whsec_…`) of the webhook endpoint below |
+| `RESEND_API_KEY`, `EMAIL_FROM` | Optional, set together. Resend API key and a sender on a domain verified in Resend (`LatinKate <hello@example.com>`). Switches on email verification, password reset, purchase confirmation emails and contact notifications. Production refuses a `resend.dev` sender |
 
 For Google, create an OAuth client of type *Web application* and add the redirect URI `https://<site host>/api/auth/callback/google` for each host people sign in on (for now `https://katematus-website.vercel.app`). Signing in with Google links to an existing email-and-password account with the same address.
 
@@ -71,19 +75,21 @@ For Google, create an OAuth client of type *Web application* and add the redirec
 
 Students choose a package on a course page and pay on Stripe Checkout. Until both Stripe variables are set (and the site redeployed), the package dialog says online payment isn't open yet and the admin page names the missing variables.
 
-1. In Stripe, add a webhook endpoint `https://<site host>/api/stripe/webhook` (for now `https://katematus-website.vercel.app/api/stripe/webhook`) with the events `checkout.session.completed`, `checkout.session.async_payment_succeeded`, `checkout.session.async_payment_failed`, `checkout.session.expired` and `charge.refunded`. The last two events (and `async_payment_failed`) give a promo code use back when a checkout is abandoned.
+1. In Stripe, add a webhook endpoint `https://<site host>/api/stripe/webhook` (for now `https://katematus-website.vercel.app/api/stripe/webhook`) with the events `checkout.session.completed`, `checkout.session.async_payment_succeeded`, `checkout.session.async_payment_failed`, `checkout.session.expired`, `charge.refunded`, `charge.dispute.created` and `charge.dispute.closed`. The expiry and failure events give a promo code use back when a checkout is abandoned; the dispute events end access during a chargeback and restore it if the dispute is won.
 2. Put the secret key and that endpoint's signing secret in Vercel (production, and preview if you want to test there with test keys), then redeploy.
 3. In Stripe's settings, turn on email receipts for successful payments and refunds; the terms promise a receipt.
 
-How it works: checkout charges the tier price plus 13% HST, using a 13% "HST" tax rate the site creates in Stripe on first use, so receipts show the tax. When payment succeeds, the webhook (or the student's return to their dashboard, whichever comes first) gives 3 months of access and records the amount, tax and Stripe payment on the purchase. Promo codes (admin, Promo codes tab) take an amount or percentage off the price before HST: the checkout dialog checks the code, a use is reserved when checkout starts, counted when the payment completes and given back if the checkout expires. A code that makes the price zero skips payment but still grants access. A full refund in Stripe ends access; partial refunds don't. The student must be signed in, and someone who already owns the course is sent to their dashboard instead of paying twice.
+How it works: checkout charges the tier price plus 13% HST, using a 13% "HST" tax rate the site creates in Stripe on first use, so receipts show the tax. When payment succeeds, the webhook (or the student's return to their dashboard, whichever comes first) gives 3 months of access, records the amount, tax and Stripe payment on the purchase, and emails the student a confirmation (with Resend configured). Each Stripe event is handled once (`stripe_event` table); a redelivery is acknowledged and ignored. Promo codes (admin, Promo codes tab) take an amount or percentage off the price before HST: the checkout dialog checks the code, a use is reserved when checkout starts, counted when the payment completes and given back if the checkout expires. A code that makes the price zero skips payment but still grants access. A full refund or a chargeback in Stripe ends access (the purchase stays on record as refunded or disputed); partial refunds don't. Prices are CAD only. The student must be signed in, and someone who already owns the course is sent to their dashboard instead of paying twice.
 
-Password reset and email verification need an email provider (Resend) and are not set up yet ([#6](https://github.com/neo-noire/kate-website/issues/6)).
+Email verification and password reset both use 6-digit codes sent through Resend ([#6](https://github.com/neo-noire/kate-website/issues/6)). With `RESEND_API_KEY` set, a password account must verify its email before it can sign in (and so before it can buy or watch); without it, verification and reset are off and `/forgot-password` tells students to contact the coach.
+
+Public forms (contact, newsletter, promo code check, checkout start) are rate limited per IP or per user in the `rate_limit` table, which Better Auth's limiter also uses, so limits hold across serverless instances. Security headers (frame denial, referrer policy, a report-only Content Security Policy) are set in `next.config.ts`; tighten the CSP to enforcing once the browser console shows no violations.
 
 ### Courses and admin
 
 The catalog lives in the database. A **program** (e.g. Beginner 1.0) holds one **course** per dance, each with its **lessons**, and has **pricing tiers** (e.g. Solo, Personal, Mentorship). A student buys one course at one tier.
 
-Admins (the `ADMIN_EMAILS` accounts) manage it at `/en/admin`, linked from their dashboard as "Manage courses": edit text in each language, set prices, paste YouTube links for lessons, mark free previews, publish programs and give students access by email. Giving access there is free (for gifts, private-lesson students or fixing a problem); paying students get access automatically.
+Admins (the `ADMIN_EMAILS` accounts, once their email is verified: sign in with Google, or with a password after verifying the code; without Resend, set `role = 'admin'` on the user row instead) manage it at `/en/admin`, linked from their dashboard as "Manage courses": edit text in each language, set prices, paste YouTube links for lessons, mark free previews, publish programs and give students access by email. Giving access there is free (for gifts, private-lesson students or fixing a problem); paying students get access automatically.
 
 - Lesson videos are YouTube embeds (use unlisted videos). A paid lesson's video id is sent only when its owner presses play, but anyone holding an unlisted link can still watch it.
 - The first time a student plays a paid lesson of a course is saved on their purchase and shown on the admin page; refunds are only possible before then (free previews don't count).
@@ -95,7 +101,7 @@ Admins (the `ADMIN_EMAILS` accounts) manage it at `/en/admin`, linked from their
 
 ### Legal pages
 
-`/terms`, `/privacy` and `/refunds` (in every language) are linked from the footer, and sign-up links to the first two. The texts live in `src/content/legal/` (`en.ts`, `uk.ts`; a language without a translation shows English). The terms follow Ontario law; the legal business name and contact email in `src/content/legal/business.ts` are placeholders until Kate confirms them. Each page shows a draft notice until `reviewed` is set to `true` there, after the texts have been checked by someone qualified. Bump `lastUpdated` whenever a text changes.
+`/terms`, `/privacy` and `/refunds` (in every language) are linked from the footer, and sign-up links to the first two. The texts live in `src/content/legal/` (`en.ts`, `uk.ts`; a language without a translation shows English). The terms follow Ontario law; the legal business name and contact email in `src/content/legal/business.ts` are placeholders until Kate confirms them. **Fill them in before selling**: the Refund Policy tells students to email that address. Each page shows a draft notice until `reviewed` is set to `true` there, after the texts have been checked by someone qualified. Bump `lastUpdated` whenever a text changes.
 
 ## Where the words live
 

@@ -1,6 +1,6 @@
 import { PROGRAM_STATUSES } from "@/lib/catalog/status";
 import { relations } from "drizzle-orm";
-import { boolean, index, integer, jsonb, pgTable, primaryKey, text, timestamp, uniqueIndex } from "drizzle-orm/pg-core";
+import { bigint, boolean, index, integer, jsonb, pgTable, primaryKey, text, timestamp, uniqueIndex } from "drizzle-orm/pg-core";
 
 // Tables required by Better Auth (email + password, plus the extra `role` field on user). Property names are the field names
 // Better Auth expects; column names are snake_case.
@@ -171,6 +171,9 @@ export const lesson = pgTable(
   (table) => [index("lesson_course_id_idx").on(table.courseId)],
 );
 
+export const PURCHASE_STATUSES = ["active", "refunded", "disputed"] as const;
+export type PurchaseStatus = (typeof PURCHASE_STATUSES)[number];
+
 export const purchase = pgTable(
   "purchase",
   {
@@ -198,6 +201,10 @@ export const purchase = pgTable(
     expiresAt: timestamp("expires_at", { withTimezone: true }),
     /** The first time the student played a paid lesson of the course; decides refund eligibility. */
     firstWatchedAt: timestamp("first_watched_at", { withTimezone: true }),
+    /** Only "active" purchases give access. Refunds and chargebacks keep the row as the record of the sale. */
+    status: text("status", { enum: PURCHASE_STATUSES }).notNull().default("active"),
+    /** When the payment was refunded or disputed in Stripe. */
+    revokedAt: timestamp("revoked_at", { withTimezone: true }),
     createdAt: createdAt(),
     updatedAt: updatedAt(),
   },
@@ -282,7 +289,28 @@ export const contactMessage = pgTable(
 export const newsletterSubscriber = pgTable("newsletter_subscriber", {
   email: text("email").primaryKey(),
   locale: text("locale").notNull(),
+  /** Proof of consent (anti-spam law): when the box was ticked, what it said, and from where. */
+  consentAt: timestamp("consent_at", { withTimezone: true }).notNull().defaultNow(),
+  consentText: text("consent_text"),
+  ipAddress: text("ip_address"),
   createdAt: createdAt(),
+});
+
+/** Stripe webhook events already handled, so a redelivered event changes nothing. */
+export const stripeEvent = pgTable("stripe_event", {
+  id: text("id").primaryKey(),
+  type: text("type").notNull(),
+  receivedAt: timestamp("received_at", { withTimezone: true }).notNull().defaultNow(),
+});
+
+/**
+ * Request counters for rate limiting: Better Auth's limiter (model "rateLimit", storage
+ * "database") and the site's own public actions (src/lib/rate-limit.ts) share this table.
+ */
+export const rateLimit = pgTable("rate_limit", {
+  key: text("key").primaryKey(),
+  count: integer("count").notNull(),
+  lastRequest: bigint("last_request", { mode: "number" }).notNull(),
 });
 
 /**

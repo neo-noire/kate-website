@@ -198,7 +198,8 @@
         "expired": "That code has expired.",
         "usedUp": "That code has been used up.",
         "alreadyUsed": "You've already used that code.",
-        "notForCourse": "That code doesn't apply to this course."
+        "notForCourse": "That code doesn't apply to this course.",
+        "rateLimited": "Too many attempts. Please wait a minute and try again."
       }
     }
   },
@@ -295,7 +296,8 @@
       "oauth": "Google sign-in didn't work. Please try again or use your email.",
       "invalidCode": "That code isn't right. Check it and try again.",
       "codeExpired": "That code has expired. Send a new one.",
-      "tooManyAttempts": "Too many wrong codes. Send a new one."
+      "tooManyAttempts": "Too many wrong codes. Send a new one.",
+      "accountNotLinked": "An email-and-password account with this address exists but hasn't verified its email yet. Sign in with your password first, then Google will link to it."
     },
     "google": "Continue with Google",
     "or": "or",
@@ -310,6 +312,20 @@
       "resent": "A new code is on its way.",
       "changeEmail": "Use a different email",
       "noEmail": "Nothing arrived? Check your spam folder. If you already have an account, sign in instead."
+    },
+    "forgotPassword": "Forgot your password?",
+    "reset": {
+      "title": "Reset your password.",
+      "body": "Enter the email you signed up with and we'll send you a 6-digit code.",
+      "sendCode": "Send code",
+      "sending": "Sending…",
+      "codeSent": "If an account uses {email}, a code is on its way. It expires in 5 minutes.",
+      "newPassword": "New password",
+      "save": "Set new password",
+      "saving": "Saving…",
+      "backToSignIn": "Back to sign in",
+      "unavailable": "Password reset by email isn't available yet. Write to your coach and she will help you get back in.",
+      "done": "Your password has been changed. Sign in with the new one."
     }
   },
   "admin": {
@@ -375,7 +391,7 @@
       "coursesHint": "One course per dance, each with its own lessons.",
       "lessons": "Lessons",
       "access": "Access",
-      "accessHint": "Payments aren't connected yet. Give a registered student access to a course here. Access lasts 3 months; granting it again renews it."
+      "accessHint": "Give a registered student access to a course here (gifts, private-lesson students, fixing a problem). Paying students get access automatically. Access lasts 3 months; granting it again renews it."
     },
     "newTier": "New tier",
     "newCourse": "New course",
@@ -385,7 +401,9 @@
     "noAccess": "Nobody has access yet.",
     "source": {
       "admin": "Given by an admin",
-      "stripe": "Paid"
+      "stripe": "Paid",
+      "refunded": "Refunded",
+      "disputed": "Payment disputed"
     },
     "fields": {
       "title": "Title",
@@ -437,10 +455,11 @@
       "forbidden": "Only admins can do this.",
       "generic": "Something went wrong. Please try again.",
       "codeTaken": "That code already exists. Choose another.",
-      "promoCode": "Use 3 to 32 letters, numbers, dashes or underscores.",
+      "promoCode": "Use 6 to 32 letters, numbers, dashes or underscores.",
       "percent": "Enter a percentage from 1 to 100.",
       "noPrograms": "Pick at least one program, or choose All programs.",
-      "dateOrder": "The end date must be after the start date."
+      "dateOrder": "The end date must be after the start date.",
+      "tier": "That tier doesn't belong to this program."
     },
     "accessUntil": "Access until {date}",
     "expired": "Access ended {date}",
@@ -507,5 +526,12 @@
       "comingSoon": "Shown on the home page, but not open yet.",
       "published": "Visible to everyone and open for purchase."
     }
+  },
+  "errorPage": {
+    "eyebrow": "Error",
+    "title": "Something went wrong.",
+    "body": "We couldn't load this page. Please try again; if it keeps happening, write to your coach.",
+    "retry": "Try again",
+    "home": "Back to the home page"
   }
 }

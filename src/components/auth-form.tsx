@@ -13,7 +13,7 @@ import { safeNextPath } from "@/lib/auth/next-path";
 import { useLocalizedValidation } from "@/lib/validation";
 
 type Mode = "signIn" | "signUp";
-type ErrorKey = "invalidCredentials" | "emailTaken" | "passwordTooShort" | "tooManyRequests" | "oauth" | "generic";
+type ErrorKey = "invalidCredentials" | "emailTaken" | "passwordTooShort" | "tooManyRequests" | "oauth" | "accountNotLinked" | "generic";
 
 const MIN_PASSWORD_LENGTH = 8;
 
@@ -53,8 +53,11 @@ export function AuthForm({ mode, google, emailVerification }: { mode: Mode; goog
   const [pending, setPending] = useState(false);
   const [submitError, setError] = useState<ErrorKey | null>(null);
   const [emailToVerify, setEmailToVerify] = useState<string | null>(null);
-  // Google sends people back here with ?error=… when sign-in fails or is cancelled.
-  const error = submitError ?? (query.has("error") ? "oauth" : null);
+  // Google sends people back here with ?error=… when sign-in fails or is cancelled. "unable_to_link_account"
+  // means a password account with that address exists but hasn't verified its email yet.
+  const oauthError = query.get("error");
+  const error = submitError ?? (oauthError ? (oauthError === "unable_to_link_account" ? "accountNotLinked" : "oauth") : null);
+  const passwordReset = query.get("reset") === "done";
 
   async function continueWithGoogle() {
     setPending(true);
@@ -151,9 +154,19 @@ export function AuthForm({ mode, google, emailVerification }: { mode: Mode; goog
             </small>
           )}
         </div>
+        {mode === "signIn" && (
+          <p className="authSwitch -mt-2 text-right">
+            <Link href="/forgot-password">{t("forgotPassword")}</Link>
+          </p>
+        )}
         <p className="formError" role="alert">
           {error ? t(`errors.${error}`) : ""}
         </p>
+        {passwordReset && !error && mode === "signIn" && (
+          <p className="status" role="status">
+            {t("reset.done")}
+          </p>
+        )}
         {mode === "signUp" && (
           <p className="authAgreement">
             {t.rich("agreement", {

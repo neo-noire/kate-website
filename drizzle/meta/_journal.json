@@ -78,6 +78,13 @@
       "when": 1794437984775,
       "tag": "0010_promo_codes",
       "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "7",
+      "when": 1794439798144,
+      "tag": "0011_production_readiness",
+      "breakpoints": true
     }
   ]
 }

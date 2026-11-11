@@ -6,6 +6,7 @@ import { emailOTP } from "better-auth/plugins";
 import { db } from "@/db";
 import * as schema from "@/db/schema";
 import { sendEmail } from "@/lib/email";
+import { codeEmail, emailLocale } from "@/lib/emails";
 import { emailEnabled, googleEnabled } from "./providers";
 
 const CODE_LIFETIME_MINUTES = 5;
@@ -31,6 +32,8 @@ export const auth = betterAuth({
     ],
     fallback: process.env.BETTER_AUTH_URL ?? `https://${productionHost}`,
   },
+  // Serverless instances don't share memory, so the limiter counts in the database.
+  rateLimit: { storage: "database" },
   user: {
     // Read-only for users: sign-up and profile updates can't set it.
     additionalFields: { role: { type: "string", defaultValue: "student", input: false } },
@@ -55,8 +58,10 @@ export const auth = betterAuth({
       }
     : {},
   account: {
-    // Google verifies email addresses, so signing in with Google joins an existing
-    // email + password account with the same address instead of failing.
+    // Google verifies email addresses, so signing in with Google joins an existing, verified
+    // email + password account with the same address instead of failing. An unverified password
+    // account is never linked (Better Auth's requireLocalEmailVerified default), which stops
+    // someone who registered another person's address first from taking over their Google sign-in.
     accountLinking: { enabled: true, trustedProviders: ["google"] },
   },
   session: {
@@ -74,15 +79,11 @@ export const auth = betterAuth({
             overrideDefaultEmailVerification: true,
             // Codes only verify existing accounts; they can't create one without a name or consent to the terms.
             disableSignUp: true,
-            sendVerificationOTP: ({ email, otp }) =>
+            // Verification codes and password reset codes. The client sends the page language in x-locale.
+            sendVerificationOTP: ({ email, otp, type }, request) =>
               sendEmail({
                 to: email,
-                subject: `${otp} is your LatinKate code`,
-                text: [
-                  `Your LatinKate code is ${otp}. It expires in ${CODE_LIFETIME_MINUTES} minutes.`,
-                  `Ваш код LatinKate: ${otp}. Він дійсний ${CODE_LIFETIME_MINUTES} хвилин.`,
-                  "If you didn't ask for this, you can ignore this email. / Якщо це були не ви, просто проігноруйте цей лист.",
-                ].join("\n\n"),
+                ...codeEmail(type, emailLocale(request?.headers?.get("x-locale")), { otp, minutes: CODE_LIFETIME_MINUTES }),
               }),
           }),
         ]

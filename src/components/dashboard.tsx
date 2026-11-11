@@ -12,6 +12,7 @@ import { localize } from "@/lib/localized";
 import { useToast } from "./toast";
 import { LessonVideo } from "./lesson-video";
 import { Button } from "@/components/ui/button";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 type Tab = "about" | "notes";
 type Course = Library["courses"][number];
@@ -203,37 +204,27 @@ function Studio({ admin, library, initialCourseId }: Omit<DashboardProps, "userN
               </Button>
             </div>
 
-            <div className="contentTabs" role="tablist">
-              {(["about", "notes"] as const).map((id) => (
-                <button
-                  key={id}
-                  role="tab"
-                  id={`tab-${id}`}
-                  aria-selected={tab === id}
-                  aria-controls="lesson-panel"
-                  className={tab === id ? "active" : undefined}
-                  onClick={() => setTab(id)}
-                >
-                  {t(`dashboard.tabs.${id}`)}
-                </button>
-              ))}
-            </div>
-            <div id="lesson-panel" role="tabpanel" aria-labelledby={`tab-${tab}`} className="lessonText">
-              {tab === "about" && (
-                <>
-                  {localize(lesson.description, locale) && <Markdown>{localize(lesson.description, locale)!}</Markdown>}
-                  <p style={{ marginTop: 10 }}>{t("dashboard.aboutFine")}</p>
-                </>
-              )}
-              {tab === "notes" && (
+            <Tabs value={tab} onValueChange={(value) => setTab(value as Tab)}>
+              <TabsList variant="line" className="contentTabs h-auto w-full justify-start rounded-none p-0">
+                {(["about", "notes"] as const).map((id) => (
+                  <TabsTrigger key={id} value={id} className="flex-none px-0 py-3 text-xs">
+                    {t(`dashboard.tabs.${id}`)}
+                  </TabsTrigger>
+                ))}
+              </TabsList>
+              <TabsContent value="about" className="lessonText">
+                {localize(lesson.description, locale) && <Markdown>{localize(lesson.description, locale)!}</Markdown>}
+                <p style={{ marginTop: 10 }}>{t("dashboard.aboutFine")}</p>
+              </TabsContent>
+              <TabsContent value="notes" className="lessonText">
                 <LessonNotes
                   key={lesson.id}
                   lessonId={lesson.id}
                   saved={notes[lesson.id] ?? ""}
                   onSaved={(body) => setNotes((current) => ({ ...current, [lesson.id]: body }))}
                 />
-              )}
-            </div>
+              </TabsContent>
+            </Tabs>
           </>
         )}
 

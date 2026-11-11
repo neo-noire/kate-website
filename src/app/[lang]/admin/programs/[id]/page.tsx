@@ -383,7 +383,7 @@ async function AccessSection({ program }: { program: AdminProgram }) {
       {program.purchases.length ? (
         <ul className="m-0 grid list-none gap-3 p-0">
           {program.purchases.map((p) => (
-            <CardRow key={p.id}>
+            <CardRow key={p.id} className={p.status === "active" ? undefined : "opacity-70"}>
               <Mark>{(p.user.name || p.user.email).charAt(0).toUpperCase()}</Mark>
               <div className="grid min-w-0 flex-1 gap-0.5">
                 <span className="truncate">
@@ -394,7 +394,10 @@ async function AccessSection({ program }: { program: AdminProgram }) {
                     courseTitle.get(p.courseId),
                     p.tier && localize(p.tier.name, locale),
                     t(`source.${p.source === "stripe" ? "stripe" : "admin"}`),
-                    p.expiresAt && (p.expiresAt > now ? t("accessUntil", { date: date(p.expiresAt) }) : t("expired", { date: date(p.expiresAt) })),
+                    p.status !== "active" && p.revokedAt && `${t(`source.${p.status}`)} ${date(p.revokedAt)}`,
+                    p.status === "active" &&
+                      p.expiresAt &&
+                      (p.expiresAt > now ? t("accessUntil", { date: date(p.expiresAt) }) : t("expired", { date: date(p.expiresAt) })),
                     p.firstWatchedAt ? t("firstWatched", { date: date(p.firstWatchedAt) }) : t("notWatched"),
                   ]
                     .filter(Boolean)

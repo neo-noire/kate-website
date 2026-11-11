@@ -91,6 +91,25 @@ export async function getProgramPage(slug: string) {
 
 export type ProgramPage = NonNullable<Awaited<ReturnType<typeof getProgramPage>>>;
 
+/** Paths of every published program and course page, for the sitemap. */
+export async function getPublishedCoursePaths() {
+  "use cache";
+  cacheLife("max");
+  cacheTag(CATALOG_TAG);
+
+  const rows = await db
+    .select({ programSlug: program.slug, courseSlug: course.slug })
+    .from(program)
+    .leftJoin(course, eq(course.programId, program.id))
+    .where(eq(program.status, "published"));
+  const paths = new Set<string>();
+  for (const row of rows) {
+    paths.add(`/programs/${row.programSlug}`);
+    if (row.courseSlug) paths.add(`/programs/${row.programSlug}/${row.courseSlug}`);
+  }
+  return [...paths];
+}
+
 /** A free preview lesson with a video, for the home page's "Preview a lesson" button. */
 export async function getFeaturedPreview() {
   "use cache";
@@ -109,9 +128,9 @@ export async function getFeaturedPreview() {
 }
 
 /** The user's purchase of a course, with its tier, or undefined. Not cached: per user. */
-/** Purchases whose access hasn't ended. */
+/** Purchases that give access: not refunded or disputed, and not expired. */
 function activePurchase() {
-  return or(isNull(purchase.expiresAt), gt(purchase.expiresAt, new Date()));
+  return and(eq(purchase.status, "active"), or(isNull(purchase.expiresAt), gt(purchase.expiresAt, new Date())));
 }
 
 /** The user's current (not expired) purchase of a course. */

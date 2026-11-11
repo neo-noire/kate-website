@@ -1,10 +1,17 @@
 // Applies pending SQL migrations from ./drizzle before `next build`.
-// On Vercel a missing database fails the build; locally it is skipped so the site still builds.
+// On Vercel only the production build migrates (preview builds must not change the database a
+// branch happens to point at). Locally it runs when DATABASE_URL is set; `next build` itself
+// still needs a database to prerender the catalog pages.
 import { drizzle } from "drizzle-orm/node-postgres";
 import { migrate } from "drizzle-orm/node-postgres/migrator";
 import pg from "pg";
 
 const url = process.env.DATABASE_URL_UNPOOLED ?? process.env.DATABASE_URL;
+
+if (process.env.VERCEL && process.env.VERCEL_ENV !== "production") {
+  console.log(`Skipping database migrations on a ${process.env.VERCEL_ENV ?? "non-production"} build.`);
+  process.exit(0);
+}
 if (!url) {
   if (process.env.VERCEL) {
     console.error("DATABASE_URL is not set. Connect the Neon database to this Vercel project.");

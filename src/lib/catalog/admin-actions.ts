@@ -1,7 +1,7 @@
 "use server";
 
 import { PROGRAM_STATUSES } from "@/lib/catalog/status";
-import { count, eq } from "drizzle-orm";
+import { and, count, eq } from "drizzle-orm";
 import { updateTag } from "next/cache";
 import { db } from "@/db";
 import {
@@ -248,13 +248,19 @@ export async function grantAccess(_: FormState, form: FormData): Promise<FormSta
     const tierId = readText(form, "tierId") || null;
     const student = await db.query.user.findFirst({ where: eq(user.email, email), columns: { id: true } });
     if (!student) throw new FieldError("userNotFound", "email");
+    const target = await db.query.course.findFirst({ where: eq(course.id, courseId), columns: { programId: true } });
+    if (!target) throw new FieldError("notFound");
+    if (tierId) {
+      const chosen = await db.query.tier.findFirst({ where: and(eq(tier.id, tierId), eq(tier.programId, target.programId)), columns: { id: true } });
+      if (!chosen) throw new FieldError("tier", "tierId");
+    }
     await db
       .insert(purchase)
       .values({ id: newId(), userId: student.id, courseId, tierId, source: "admin", expiresAt: accessExpiry() })
-      // Granting again renews access for another full period.
+      // Granting again renews access for another full period (and reinstates a refunded purchase).
       .onConflictDoUpdate({
         target: [purchase.userId, purchase.courseId],
-        set: { tierId, expiresAt: accessExpiry(), updatedAt: new Date() },
+        set: { tierId, source: "admin", status: "active", revokedAt: null, expiresAt: accessExpiry(), updatedAt: new Date() },
       });
   });
 }
@@ -275,7 +281,8 @@ export async function removeSubscriber(_: FormState, form: FormData): Promise<Fo
 
 // Promo codes
 
-const PROMO_CODE = /^[A-Z0-9_-]{3,32}$/;
+// At least 6 characters so codes can't be guessed by trying every short string.
+const PROMO_CODE = /^[A-Z0-9_-]{6,32}$/;
 
 /** A date input ("2026-12-31") as the start or the very end of that day. */
 function readDate(form: FormData, name: string, endOfDay: boolean) {

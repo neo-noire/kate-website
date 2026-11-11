@@ -24,6 +24,7 @@ export function NewsletterForm() {
         email: String(data.get("email")),
         website: String(data.get("website") ?? ""),
         locale,
+        consentText: t("newsletter.consent"),
       });
       setStatus(ok ? "done" : "error");
       if (ok) formElement.reset();
