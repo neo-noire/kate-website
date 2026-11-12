@@ -39,14 +39,11 @@ export const envSchema = z
     if (Boolean(env.STRIPE_SECRET_KEY) !== Boolean(env.STRIPE_WEBHOOK_SECRET)) {
       problem("STRIPE_WEBHOOK_SECRET", "STRIPE_SECRET_KEY and STRIPE_WEBHOOK_SECRET must be set together");
     }
-    if (env.STRIPE_SECRET_KEY && !env.STRIPE_SECRET_KEY.startsWith("sk_")) {
-      problem("STRIPE_SECRET_KEY", "must be a Stripe secret key (sk_test_… or sk_live_…)");
+    if (env.STRIPE_SECRET_KEY && !/^[sr]k_(test|live)_/.test(env.STRIPE_SECRET_KEY)) {
+      problem("STRIPE_SECRET_KEY", "must be a Stripe secret or restricted key (sk_… or rk_…), not the publishable pk_… key");
     }
     if (env.STRIPE_WEBHOOK_SECRET && !env.STRIPE_WEBHOOK_SECRET.startsWith("whsec_")) {
       problem("STRIPE_WEBHOOK_SECRET", "must be a webhook signing secret (whsec_…)");
-    }
-    if (production && env.STRIPE_SECRET_KEY && !env.STRIPE_SECRET_KEY.startsWith("sk_live_")) {
-      problem("STRIPE_SECRET_KEY", "production must use a live key (sk_live_…); a test key takes no real payments");
     }
 
     // With Resend on, sign-in requires a verified email, so the sender must actually deliver.
@@ -61,10 +58,22 @@ export const envSchema = z
 
 export type Env = z.infer<typeof envSchema>;
 
+/** Settings that are legal but not what a live shop wants. Logged, never fatal: a test key must not take the site down. */
+export function envWarnings(env: Env): string[] {
+  const warnings: string[] = [];
+  if (env.VERCEL_ENV === "production" && env.STRIPE_SECRET_KEY && !/^[sr]k_live_/.test(env.STRIPE_SECRET_KEY)) {
+    warnings.push("STRIPE_SECRET_KEY is a test key: checkout runs in Stripe test mode and takes no real payments");
+  }
+  return warnings;
+}
+
 /** Validates `source` (the process environment by default). Throws one error listing every problem. */
 export function validateEnv(source: Record<string, string | undefined> = process.env): Env {
   const result = envSchema.safeParse(source);
-  if (result.success) return result.data;
+  if (result.success) {
+    for (const warning of envWarnings(result.data)) console.warn(`[env] ${warning}`);
+    return result.data;
+  }
   const lines = result.error.issues.map((issue) => `  ${issue.path.join(".") || "env"}: ${issue.message}`);
   throw new Error(`Environment is not configured correctly:\n${lines.join("\n")}\nSee .env.example.`);
 }

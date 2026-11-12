@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { safeNextPath } from "@/lib/auth/next-path";
-import { validateEnv } from "@/lib/env";
+import { envWarnings, validateEnv } from "@/lib/env";
 import { formatPrice, parsePriceToCents, withHst } from "@/lib/money";
 import { normalizePromoCode, promoDiscount } from "@/lib/promo";
 import { parseYouTubeId } from "@/lib/youtube";
@@ -77,11 +77,17 @@ describe("environment validation", () => {
     expect(() => validateEnv({ ...base, RESEND_API_KEY: "re_x" })).toThrow(/EMAIL_FROM/);
     expect(() => validateEnv({ ...base, RESEND_API_KEY: "re_x", EMAIL_FROM: "LatinKate <hi@example.com>" })).not.toThrow();
   });
-  it("refuses a test sender and a test Stripe key in production", () => {
+  it("refuses a test sender in production, only warns about a test Stripe key", () => {
     const prod = { ...base, VERCEL_ENV: "production" };
     expect(() => validateEnv({ ...prod, RESEND_API_KEY: "re_x", EMAIL_FROM: "onboarding@resend.dev" })).toThrow(/resend\.dev/);
-    expect(() => validateEnv({ ...prod, STRIPE_SECRET_KEY: "sk_test_1", STRIPE_WEBHOOK_SECRET: "whsec_1" })).toThrow(/live key/);
-    expect(() => validateEnv({ ...prod, STRIPE_SECRET_KEY: "sk_live_1", STRIPE_WEBHOOK_SECRET: "whsec_1" })).not.toThrow();
+    const testKey = { ...prod, STRIPE_SECRET_KEY: "sk_test_1", STRIPE_WEBHOOK_SECRET: "whsec_1" };
+    expect(envWarnings(validateEnv(testKey))).toEqual([expect.stringMatching(/test key/)]);
+    expect(envWarnings(validateEnv({ ...testKey, STRIPE_SECRET_KEY: "rk_live_1" }))).toEqual([]);
+  });
+  it("accepts secret and restricted keys, not publishable ones", () => {
+    const stripe = (key: string) => ({ ...base, STRIPE_SECRET_KEY: key, STRIPE_WEBHOOK_SECRET: "whsec_1" });
+    expect(() => validateEnv(stripe("rk_test_1"))).not.toThrow();
+    expect(() => validateEnv(stripe("pk_test_1"))).toThrow(/publishable/);
   });
   it("requires Stripe and Google settings in pairs", () => {
     expect(() => validateEnv({ ...base, STRIPE_SECRET_KEY: "sk_test_1" })).toThrow(/set together/);
