@@ -3,7 +3,7 @@ import { headers } from "next/headers";
 import { auth } from "./server";
 
 /** Emails from the ADMIN_EMAILS setting (comma separated), lowercased. */
-function adminEmails() {
+export function adminEmails() {
   return new Set(
     (process.env.ADMIN_EMAILS ?? "")
       .split(",")

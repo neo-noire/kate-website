@@ -20,6 +20,7 @@ import {
   reservePromo,
   type PromoProblem,
 } from "@/lib/promo";
+import { allowPublicAction, consumeRateLimit } from "@/lib/rate-limit";
 import { type CheckoutMetadata, getHstTaxRateId, getStripe, isStripeConfigured } from "@/lib/stripe/server";
 
 /** Set when Stripe couldn't start the payment, or the promo code couldn't be used, so the dialog can say so. */
@@ -83,6 +84,8 @@ export async function previewPromo(_: PromoPreview, form: FormData): Promise<Pro
   const code = normalizePromoCode(String(form.get("promo") ?? ""));
   if (!code) return { at };
   if (!row) return { problem: "invalid", at };
+  // Codes are guessable text, so checking them is limited per address.
+  if (!(await allowPublicAction("promo", { max: 10, windowSeconds: 60 }))) return { problem: "rateLimited", at };
 
   const session = await getSession();
   const result = await checkPromo(code, {
@@ -126,6 +129,9 @@ export async function startCheckout(_: CheckoutState, form: FormData): Promise<C
   if (await getPurchase(session.user.id, courseId)) {
     return redirect({ href: { pathname: "/dashboard", query: { course: courseId } }, locale });
   }
+  if (!(await consumeRateLimit(`checkout:${session.user.id}`, { max: 10, windowSeconds: 60 })).allowed) {
+    return { failed: false, promoProblem: "rateLimited" };
+  }
 
   // Reserve the code first, so a paid checkout can't end up over the code's limit.
   let promo: { code: string; discountCents: number; redemptionId: string } | null = null;
@@ -142,7 +148,7 @@ export async function startCheckout(_: CheckoutState, form: FormData): Promise<C
   }
 
   const site = await origin();
-  const metadata: CheckoutMetadata = { userId: session.user.id, courseId, tierId: row.tierId };
+  const metadata: CheckoutMetadata = { userId: session.user.id, courseId, tierId: row.tierId, locale, siteUrl: site };
   let url: string | null;
   try {
     const stripe = getStripe();

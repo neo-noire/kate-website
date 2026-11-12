@@ -4,7 +4,11 @@ import { hasLocale } from "next-intl";
 import { db } from "@/db";
 import { contactMessage, newsletterSubscriber } from "@/db/schema";
 import { routing } from "@/i18n/routing";
-import { getSession } from "@/lib/auth/session";
+import { adminEmails, getSession } from "@/lib/auth/session";
+import { sendEmailQuietly } from "@/lib/email";
+import { contactNotificationEmail } from "@/lib/emails";
+import { allowPublicAction, clientIp } from "@/lib/rate-limit";
+import { headers } from "next/headers";
 
 const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -32,6 +36,7 @@ export async function sendContactMessage(form: {
   const email = text(form.email, 254).toLowerCase();
   const message = text(form.message, 5000);
   if (!name || !message || !EMAIL.test(email)) return false;
+  if (!(await allowPublicAction("contact", { max: 5, windowSeconds: 60 * 60 }))) return false;
   const session = await getSession();
   await db.insert(contactMessage).values({
     id: crypto.randomUUID(),
@@ -41,14 +46,29 @@ export async function sendContactMessage(form: {
     locale: locale(form.locale),
     userId: session?.user.id ?? null,
   });
+  const h = await headers();
+  const adminUrl = `https://${h.get("x-forwarded-host") ?? h.get("host")}/${routing.defaultLocale}/admin`;
+  for (const admin of adminEmails()) {
+    void sendEmailQuietly({ to: admin, ...contactNotificationEmail({ name, email, message, adminUrl }) });
+  }
   return true;
 }
 
 /** Adds an email to the newsletter list. Signing up twice is harmless. */
-export async function subscribeToNewsletter(form: { email: string; locale: string; website?: string }): Promise<boolean> {
+export async function subscribeToNewsletter(form: {
+  email: string;
+  locale: string;
+  website?: string;
+  /** The consent sentence the person ticked, kept as proof. */
+  consentText?: string;
+}): Promise<boolean> {
   if (form.website) return true;
   const email = text(form.email, 254).toLowerCase();
   if (!EMAIL.test(email)) return false;
-  await db.insert(newsletterSubscriber).values({ email, locale: locale(form.locale) }).onConflictDoNothing();
+  if (!(await allowPublicAction("newsletter", { max: 5, windowSeconds: 60 * 60 }))) return false;
+  await db
+    .insert(newsletterSubscriber)
+    .values({ email, locale: locale(form.locale), consentText: text(form.consentText, 300) || null, ipAddress: await clientIp() })
+    .onConflictDoNothing();
   return true;
 }

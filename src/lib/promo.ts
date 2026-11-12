@@ -4,7 +4,7 @@ import { db } from "@/db";
 import { promoCode, promoCodeProgram, promoRedemption } from "@/db/schema";
 
 /** Why a code can't be used. The checkout dialog shows a message for each. */
-export type PromoProblem = "invalid" | "notStarted" | "expired" | "usedUp" | "alreadyUsed" | "notForCourse";
+export type PromoProblem = "invalid" | "notStarted" | "expired" | "usedUp" | "alreadyUsed" | "notForCourse" | "rateLimited";
 
 export type Promo = typeof promoCode.$inferSelect;
 
