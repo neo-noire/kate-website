@@ -1,5 +1,5 @@
 import { PROGRAM_STATUSES } from "@/lib/catalog/status";
-import { relations } from "drizzle-orm";
+import { relations, sql } from "drizzle-orm";
 import { bigint, boolean, index, integer, jsonb, pgTable, primaryKey, text, timestamp, uniqueIndex } from "drizzle-orm/pg-core";
 
 // Tables required by Better Auth (email + password, plus the extra `role` field on user). Property names are the field names
@@ -308,7 +308,9 @@ export const stripeEvent = pgTable("stripe_event", {
  * "database") and the site's own public actions (src/lib/rate-limit.ts) share this table.
  */
 export const rateLimit = pgTable("rate_limit", {
-  key: text("key").primaryKey(),
+  // Better Auth requires an id column; the site's own limiter inserts without one, so the database fills it.
+  id: text("id").primaryKey().default(sql`gen_random_uuid()::text`),
+  key: text("key").notNull().unique(),
   count: integer("count").notNull(),
   lastRequest: bigint("last_request", { mode: "number" }).notNull(),
 });
