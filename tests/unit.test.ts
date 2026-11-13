@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { safeNextPath } from "@/lib/auth/next-path";
-import { contactNotificationEmail, codeEmail } from "@/lib/emails";
+import { contactNotificationEmail, codeEmail, purchaseNoticeEmail } from "@/lib/emails";
 import { envWarnings, validateEnv } from "@/lib/env";
 import { formatPrice, parsePriceToCents, withHst } from "@/lib/money";
 import { normalizePromoCode, promoDiscount } from "@/lib/promo";
@@ -109,5 +109,12 @@ describe("emails", () => {
     expect(email.subject).toContain("482913");
     expect(email.html).toContain("482913");
     expect(email.text).toContain("482913");
+  });
+  it("tells the owner who bought what, and replies go to the buyer", () => {
+    const summary = { courseTitle: "Intro", programTitle: "Big Passion", tierName: "Guided", amountCents: 11300, taxCents: 1300, currency: "CAD", expiresAt: new Date(), dashboardUrl: "https://x.test" };
+    const email = purchaseNoticeEmail(summary, { name: "Anna", email: "anna@example.com" });
+    expect(email.text).toContain("anna@example.com");
+    expect(email.text).toContain("Intro");
+    expect(email.replyTo).toBe("anna@example.com");
   });
 });

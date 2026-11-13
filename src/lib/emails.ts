@@ -105,6 +105,27 @@ export function purchaseEmail(locale: Locale, p: PurchaseSummary) {
   };
 }
 
+/** Tells the course owner who bought what, in English and Ukrainian. */
+export function purchaseNoticeEmail(p: PurchaseSummary, buyer: { name: string; email: string }) {
+  const money = formatPrice(p.amountCents, p.currency, "en");
+  return {
+    replyTo: buyer.email,
+    subject: `New purchase: ${p.courseTitle} / Нова покупка: ${p.courseTitle}`,
+    ...renderEmail({
+      lang: "en",
+      heading: "New purchase / Нова покупка",
+      details: [
+        ["Buyer / Покупець", buyer.name],
+        ["Email", buyer.email],
+        ["Course / Курс", p.courseTitle],
+        ["Package / Пакет", p.tierName],
+        ["Paid / Сплачено", `${money} (HST ${formatPrice(p.taxCents, p.currency, "en")})`],
+      ],
+      footer: `Reply to this email to write to ${buyer.email} directly.`,
+    }),
+  };
+}
+
 /** Tells the admins a contact message arrived; the full text is on the admin page too. */
 export function contactNotificationEmail(m: { name: string; email: string; message: string; adminUrl: string }) {
   return {
