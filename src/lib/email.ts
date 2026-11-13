@@ -1,16 +1,16 @@
 import "server-only";
-import { EMAIL_FROM } from "@/lib/constants";
+import { EMAIL_FROM, EMAIL_REPLY_TO } from "@/lib/constants";
 
-export type Email = { to: string; subject: string; text: string };
+export type Email = { to: string; subject: string; text: string; replyTo?: string };
 
 /** Sends a plain-text email through Resend. Throws when Resend rejects it, so failures aren't silent. */
-export async function sendEmail({ to, subject, text }: Email) {
+export async function sendEmail({ to, subject, text, replyTo = EMAIL_REPLY_TO }: Email) {
   const apiKey = process.env.RESEND_API_KEY;
   if (!apiKey) throw new Error("RESEND_API_KEY is not set");
   const response = await fetch("https://api.resend.com/emails", {
     method: "POST",
     headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
-    body: JSON.stringify({ from: EMAIL_FROM, to, subject, text }),
+    body: JSON.stringify({ from: EMAIL_FROM, to, subject, text, reply_to: replyTo }),
   });
   if (!response.ok) throw new Error(`Resend rejected the email (${response.status}): ${await response.text()}`);
 }
