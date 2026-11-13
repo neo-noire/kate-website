@@ -111,7 +111,7 @@ export async function previewPromo(_: PromoPreview, form: FormData): Promise<Pro
 /**
  * Sends the student to Stripe Checkout for one course at one tier. The price is the tier's price
  * before tax, less any promo code; Stripe adds 13% HST on what is left. Visitors who aren't signed in
- * go to sign-in first, and students who already own the course go to their dashboard.
+ * go to sign-in first and come back to this tier's dialog, and students who already own the course go to their dashboard.
  */
 export async function startCheckout(_: CheckoutState, form: FormData): Promise<CheckoutState> {
   const locale = readLocale(form);
@@ -125,7 +125,11 @@ export async function startCheckout(_: CheckoutState, form: FormData): Promise<C
   if (!isStripeConfigured()) return redirect({ href: pagePath, locale });
 
   const session = await getSession();
-  if (!session) return redirect({ href: { pathname: "/sign-in", query: { next: pagePath } }, locale });
+  if (!session) {
+    // Sign-in returns to the course page, where ?enroll reopens this tier's dialog (and ?promo refills the code).
+    const resume = new URLSearchParams({ enroll: row.tierId, ...(promoInput && { promo: promoInput }) });
+    return redirect({ href: { pathname: "/sign-in", query: { next: `${pagePath}?${resume}` } }, locale });
+  }
   if (await getPurchase(session.user.id, courseId)) {
     return redirect({ href: { pathname: "/dashboard", query: { course: courseId } }, locale });
   }
