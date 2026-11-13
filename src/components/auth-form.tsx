@@ -13,7 +13,7 @@ import { safeNextPath } from "@/lib/auth/next-path";
 import { useLocalizedValidation } from "@/lib/validation";
 
 type Mode = "signIn" | "signUp";
-type ErrorKey = "invalidCredentials" | "emailTaken" | "passwordTooShort" | "tooManyRequests" | "oauth" | "accountNotLinked" | "generic";
+type ErrorKey = "invalidCredentials" | "emailTaken" | "passwordTooShort" | "tooManyRequests" | "oauth" | "accountNotLinked" | "accountDeactivated" | "generic";
 
 const MIN_PASSWORD_LENGTH = 8;
 
@@ -38,6 +38,8 @@ function errorKey(error: { code?: string; status?: number }): ErrorKey {
       return "emailTaken";
     case "PASSWORD_TOO_SHORT":
       return "passwordTooShort";
+    case "ACCOUNT_DEACTIVATED":
+      return "accountDeactivated";
     default:
       return "generic";
   }
@@ -56,7 +58,8 @@ export function AuthForm({ mode, google, emailVerification }: { mode: Mode; goog
   // Google sends people back here with ?error=… when sign-in fails or is cancelled. "unable_to_link_account"
   // means a password account with that address exists but hasn't verified its email yet.
   const oauthError = query.get("error");
-  const error = submitError ?? (oauthError ? (oauthError === "unable_to_link_account" ? "accountNotLinked" : "oauth") : null);
+  const oauthKey = oauthError === "unable_to_link_account" ? "accountNotLinked" : /deactivated/i.test(oauthError ?? "") ? "accountDeactivated" : "oauth";
+  const error = submitError ?? (oauthError ? oauthKey : null);
   const passwordReset = query.get("reset") === "done";
 
   async function continueWithGoogle() {

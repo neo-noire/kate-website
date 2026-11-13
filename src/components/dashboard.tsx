@@ -214,7 +214,6 @@ function Studio({ admin, library, initialCourseId }: Omit<DashboardProps, "userN
               </TabsList>
               <TabsContent value="about" className="lessonText">
                 {localize(lesson.description, locale) && <Markdown>{localize(lesson.description, locale)!}</Markdown>}
-                <p style={{ marginTop: 10 }}>{t("dashboard.aboutFine")}</p>
               </TabsContent>
               <TabsContent value="notes" className="lessonText">
                 <LessonNotes

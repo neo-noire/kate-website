@@ -13,6 +13,13 @@ export const user = pgTable("user", {
   image: text("image"),
   /** "admin" can edit the catalog and grant access; everyone else is "student". */
   role: text("role").notNull().default("student"),
+  /** The last time the account signed in (set when a session is created). */
+  lastLoginAt: timestamp("last_login_at", { withTimezone: true }),
+  /** Set when an admin deactivates the account: it can't sign in and its sessions are gone. Cleared on reactivation. */
+  deactivatedAt: timestamp("deactivated_at", { withTimezone: true }),
+  deactivationReason: text("deactivation_reason"),
+  /** Set when an admin deletes the account: personal details are scrubbed, purchases stay as the sales record. */
+  deletedAt: timestamp("deleted_at", { withTimezone: true }),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
 });
