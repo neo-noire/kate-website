@@ -16,6 +16,7 @@ export type FormError =
   | "youtube"
   | "email"
   | "userNotFound"
+  | "selfDemote"
   | "tier"
   | "codeTaken"
   | "promoCode"

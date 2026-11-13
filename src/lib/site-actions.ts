@@ -1,14 +1,16 @@
 "use server";
 
 import { hasLocale } from "next-intl";
+import { eq } from "drizzle-orm";
 import { db } from "@/db";
-import { contactMessage, newsletterSubscriber } from "@/db/schema";
+import { contactMessage, newsletterSubscriber, user } from "@/db/schema";
 import { routing } from "@/i18n/routing";
 import { adminEmails, getSession } from "@/lib/auth/session";
 import { sendEmailQuietly } from "@/lib/email";
 import { contactNotificationEmail } from "@/lib/emails";
 import { allowPublicAction, clientIp } from "@/lib/rate-limit";
 import { headers } from "next/headers";
+import { after } from "next/server";
 
 const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -48,9 +50,13 @@ export async function sendContactMessage(form: {
   });
   const h = await headers();
   const adminUrl = `https://${h.get("x-forwarded-host") ?? h.get("host")}/${routing.defaultLocale}/admin`;
-  for (const admin of adminEmails()) {
-    void sendEmailQuietly({ to: admin, ...contactNotificationEmail({ name, email, message, adminUrl }) });
-  }
+  const adminAccounts = await db.query.user.findMany({ where: eq(user.role, "admin"), columns: { email: true } });
+  const admins = [...new Set([...adminEmails(), ...adminAccounts.map((account) => account.email.toLowerCase())])];
+  if (!admins.length) console.warn("Contact message saved but not emailed: no admin has an email address (ADMIN_EMAILS or an admin account)");
+  // after() keeps the function alive until the emails are out; a bare promise is dropped once the response is sent.
+  after(() =>
+    Promise.all(admins.map((admin) => sendEmailQuietly({ to: admin, ...contactNotificationEmail({ name, email, message, adminUrl }) }))),
+  );
   return true;
 }
 

@@ -12,6 +12,7 @@ import {
   promoRedemption,
   purchase,
   tier,
+  user,
 } from "@/db/schema";
 
 // Admin reads are not cached: they include drafts and must show edits immediately.
@@ -55,6 +56,11 @@ export type AdminProgram = NonNullable<Awaited<ReturnType<typeof getAdminProgram
 /** The newest messages from the contact form. */
 export async function getContactMessages(limit = 100) {
   return db.query.contactMessage.findMany({ orderBy: [desc(contactMessage.createdAt)], limit });
+}
+
+/** Accounts promoted to admin from the admin page. Admins named in ADMIN_EMAILS are not in the database. */
+export async function getAdminUsers() {
+  return db.query.user.findMany({ where: eq(user.role, "admin"), columns: { id: true, name: true, email: true }, orderBy: [asc(user.createdAt)] });
 }
 
 export async function getNewsletterSubscribers() {

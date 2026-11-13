@@ -2,7 +2,7 @@
 
 import { ArrowUpRight, Lock } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
-import { useActionState, useEffect, useState } from "react";
+import { useActionState, useEffect, useRef, useState } from "react";
 import { useFormStatus } from "react-dom";
 import { type PromoPreview, previewPromo, startCheckout } from "@/lib/checkout-actions";
 import { formatPrice } from "@/lib/money";
@@ -136,7 +136,7 @@ function PayButton({ label }: { label: string }) {
   );
 }
 
-/** The "Promo code" field above the price. A code in the page address (?promo=KATE10) fills it in. */
+/** The "Promo code" field above the price. A code in the page address (?promo=KATE10) fills it in and is applied. */
 function PromoForm({
   tierId,
   courseId,
@@ -152,8 +152,13 @@ function PromoForm({
 }) {
   const t = useTranslations("enroll.promo");
   const [initial] = useState(() => new URLSearchParams(window.location.search).get("promo") ?? "");
+  const form = useRef<HTMLFormElement>(null);
+  // A code that arrives prefilled (e.g. after sign-in) is applied right away, not left for the student to press Apply.
+  useEffect(() => {
+    if (initial) form.current?.requestSubmit();
+  }, [initial]);
   return (
-    <form action={action} className="mb-5 grid gap-1.5">
+    <form ref={form} action={action} className="mb-5 grid gap-1.5">
       <input type="hidden" name="tierId" value={tierId} />
       <input type="hidden" name="courseId" value={courseId} />
       <input type="hidden" name="locale" value={locale} />

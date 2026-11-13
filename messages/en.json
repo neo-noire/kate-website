@@ -452,6 +452,7 @@
       "email": "Enter a valid email address.",
       "userNotFound": "No account uses this email. Ask the student to sign up first.",
       "notFound": "This item no longer exists. Reload the page.",
+      "selfDemote": "You can't remove yourself as an admin.",
       "forbidden": "Only admins can do this.",
       "generic": "Something went wrong. Please try again.",
       "codeTaken": "That code already exists. Choose another.",
@@ -473,6 +474,17 @@
       "subscriberCount": "{count, plural, one {# subscriber} other {# subscribers}}",
       "delete": "Delete",
       "remove": "Remove"
+    },
+    "admins": {
+      "tab": "Admins",
+      "title": "Admins",
+      "hint": "Admins edit the catalog, grant access and get an email for every contact-form message.",
+      "add": "Add admin",
+      "email": "Account email",
+      "emailHint": "They must have signed up already.",
+      "remove": "Remove admin",
+      "you": "You",
+      "fromSettings": "Set in ADMIN_EMAILS (change it in Vercel)"
     },
     "paymentsOff": "Online payment is off: students can't buy courses yet. Add {names} in Vercel (Settings, Environment Variables), then redeploy.",
     "promo": {

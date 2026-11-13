@@ -73,13 +73,8 @@ describe("environment validation", () => {
   it("accepts a minimal setup", () => {
     expect(() => validateEnv(base)).not.toThrow();
   });
-  it("requires EMAIL_FROM with RESEND_API_KEY", () => {
-    expect(() => validateEnv({ ...base, RESEND_API_KEY: "re_x" })).toThrow(/EMAIL_FROM/);
-    expect(() => validateEnv({ ...base, RESEND_API_KEY: "re_x", EMAIL_FROM: "LatinKate <hi@example.com>" })).not.toThrow();
-  });
-  it("refuses a test sender in production, only warns about a test Stripe key", () => {
+  it("only warns about a test Stripe key in production", () => {
     const prod = { ...base, VERCEL_ENV: "production" };
-    expect(() => validateEnv({ ...prod, RESEND_API_KEY: "re_x", EMAIL_FROM: "onboarding@resend.dev" })).toThrow(/resend\.dev/);
     const testKey = { ...prod, STRIPE_SECRET_KEY: "sk_test_1", STRIPE_WEBHOOK_SECRET: "whsec_1" };
     expect(envWarnings(validateEnv(testKey))).toEqual([expect.stringMatching(/test key/)]);
     expect(envWarnings(validateEnv({ ...testKey, STRIPE_SECRET_KEY: "rk_live_1" }))).toEqual([]);

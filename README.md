@@ -67,7 +67,7 @@ Every setting is checked once at server start (`src/lib/env.ts`, via `src/instru
 | `ADMIN_EMAILS` | Comma-separated emails of the accounts that can manage courses, e.g. `kate@example.com,me@example.com` |
 | `STRIPE_SECRET_KEY` | Stripe Dashboard, Developers, API keys: the secret key (`sk_test_…` to try it, `sk_live_…` for real payments; a restricted `rk_…` key works too). Production logs a warning while a test key is set |
 | `STRIPE_WEBHOOK_SECRET` | The signing secret (`whsec_…`) of the webhook endpoint below |
-| `RESEND_API_KEY`, `EMAIL_FROM` | Optional, set together. Resend API key and a sender on a domain verified in Resend (`LatinKate <hello@example.com>`). Switches on email verification, password reset, purchase confirmation emails and contact notifications. Production refuses a `resend.dev` sender |
+| `RESEND_API_KEY` | Optional. Resend API key; emails are sent from `EMAIL_FROM` in `src/lib/constants.ts`, a domain verified in Resend. Switches on email verification, password reset, purchase confirmation emails and contact notifications. |
 
 For Google, create an OAuth client of type *Web application* and add the redirect URI `https://<site host>/api/auth/callback/google` for each host people sign in on (for now `https://katematus-website.vercel.app`). Signing in with Google links to an existing email-and-password account with the same address.
 
