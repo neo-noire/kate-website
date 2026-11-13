@@ -269,6 +269,27 @@ export async function revokeAccess(_: FormState, form: FormData): Promise<FormSt
   return run(() => db.delete(purchase).where(eq(purchase.id, readId(form))));
 }
 
+// Admins
+
+/** Makes an existing account an admin. ADMIN_EMAILS stays as the list that can't be removed from here. */
+export async function addAdmin(_: FormState, form: FormData): Promise<FormState> {
+  return run(async () => {
+    const email = readText(form, "email", { required: true, max: 254 }).toLowerCase();
+    if (!email.includes("@")) throw new FieldError("email", "email");
+    const promoted = await db.update(user).set({ role: "admin", updatedAt: new Date() }).where(eq(user.email, email)).returning({ id: user.id });
+    if (!promoted.length) throw new FieldError("userNotFound", "email");
+  });
+}
+
+/** Takes the admin role away. Admins can't remove themselves, so one admin always remains. */
+export async function removeAdmin(_: FormState, form: FormData): Promise<FormState> {
+  return run(async () => {
+    const id = readId(form);
+    if ((await requireAdmin()).user.id === id) throw new FieldError("selfDemote");
+    await db.update(user).set({ role: "student", updatedAt: new Date() }).where(and(eq(user.id, id), eq(user.role, "admin")));
+  });
+}
+
 // Contact form and newsletter
 
 export async function deleteContactMessage(_: FormState, form: FormData): Promise<FormState> {

@@ -21,11 +21,9 @@ export const envSchema = z
     STRIPE_SECRET_KEY: optional,
     STRIPE_WEBHOOK_SECRET: optional,
     RESEND_API_KEY: optional,
-    EMAIL_FROM: optional,
     VERCEL_ENV: optional,
   })
   .superRefine((env, ctx) => {
-    const production = env.VERCEL_ENV === "production";
     const problem = (path: string, message: string) => ctx.addIssue({ code: "custom", path: [path], message });
 
     for (const address of env.ADMIN_EMAILS?.split(",").map((s) => s.trim()).filter(Boolean) ?? []) {
@@ -44,15 +42,6 @@ export const envSchema = z
     }
     if (env.STRIPE_WEBHOOK_SECRET && !env.STRIPE_WEBHOOK_SECRET.startsWith("whsec_")) {
       problem("STRIPE_WEBHOOK_SECRET", "must be a webhook signing secret (whsec_…)");
-    }
-
-    // With Resend on, sign-in requires a verified email, so the sender must actually deliver.
-    if (env.RESEND_API_KEY) {
-      if (!env.EMAIL_FROM) {
-        problem("EMAIL_FROM", "required when RESEND_API_KEY is set: Resend's test sender only delivers to your own address, so nobody could verify their email");
-      } else if (production && /resend\.dev/i.test(env.EMAIL_FROM)) {
-        problem("EMAIL_FROM", "production must send from a domain verified in Resend, not resend.dev");
-      }
     }
   });
 

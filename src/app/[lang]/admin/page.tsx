@@ -12,14 +12,17 @@ import { Link } from "@/i18n/navigation";
 import { requireAdminPage } from "@/lib/auth/admin-page";
 import {
   createProgram,
+  addAdmin,
   createPromoCode,
   deleteContactMessage,
   deletePromoCode,
+  removeAdmin,
   removeSubscriber,
   updatePromoCode,
 } from "@/lib/catalog/admin-actions";
 import { PromoFields } from "@/components/admin/promo-fields";
-import { type AdminPromoCode, getAdminPrograms, getAdminPromoCodes, getContactMessages, getNewsletterSubscribers } from "@/lib/catalog/admin-queries";
+import { type AdminPromoCode, getAdminPrograms, getAdminUsers, getAdminPromoCodes, getContactMessages, getNewsletterSubscribers } from "@/lib/catalog/admin-queries";
+import { adminEmails } from "@/lib/auth/session";
 import { localize } from "@/lib/localized";
 import { formatPrice } from "@/lib/money";
 import { STATUS_LABEL } from "@/lib/catalog/status";
@@ -39,8 +42,8 @@ export default function AdminPage() {
 }
 
 async function AdminHome() {
-  await requireAdminPage("/admin");
-  const [t, locale, format, programs, promoCodes, messages, subscribers] = await Promise.all([
+  const { user: me } = await requireAdminPage("/admin");
+  const [t, locale, format, programs, promoCodes, messages, subscribers, admins] = await Promise.all([
     getTranslations("admin"),
     getLocale(),
     getFormatter(),
@@ -48,6 +51,7 @@ async function AdminHome() {
     getAdminPromoCodes(),
     getContactMessages(),
     getNewsletterSubscribers(),
+    getAdminUsers(),
   ]);
   const date = (value: Date) => format.dateTime(value, { dateStyle: "medium", timeStyle: "short" });
 
@@ -72,6 +76,7 @@ async function AdminHome() {
           <TabsTrigger value="subscribers">
             {t("inbox.subscribers")} <Badge variant="secondary">{subscribers.length}</Badge>
           </TabsTrigger>
+          <TabsTrigger value="admins">{t("admins.tab")}</TabsTrigger>
         </TabsList>
 
         <TabsContent value="programs" className="mt-6">
@@ -163,6 +168,38 @@ async function AdminHome() {
           ) : (
             <p className="text-sm text-muted-foreground">{t("inbox.noSubscribers")}</p>
           )}
+        </TabsContent>
+        <TabsContent value="admins" className="mt-6">
+          <SectionHeader title={t("admins.title")} hint={t("admins.hint")}>
+            <FormDialog mode="add" variant="default" title={t("admins.add")}>
+              <ActionForm action={addAdmin} submitLabel={t("admins.add")} resetOnSuccess>
+                <TextField name="email" type="email" label={t("admins.email")} hint={t("admins.emailHint")} required />
+              </ActionForm>
+            </FormDialog>
+          </SectionHeader>
+          <ul className="m-0 grid list-none gap-3 p-0">
+            {[...adminEmails()].map((email) => (
+              <CardRow key={email}>
+                <Mark>{email.charAt(0).toUpperCase()}</Mark>
+                <span className="grid min-w-0 flex-1 gap-0.5">
+                  <span className="truncate">{email}</span>
+                  <small className="text-xs text-muted-foreground">{t("admins.fromSettings")}</small>
+                </span>
+              </CardRow>
+            ))}
+            {admins.map((admin) => (
+              <CardRow key={admin.id}>
+                <Mark>{admin.name.charAt(0).toUpperCase()}</Mark>
+                <span className="grid min-w-0 flex-1 gap-0.5">
+                  <span className="truncate font-bold">
+                    {admin.name} {admin.id === me.id && <Badge variant="secondary">{t("admins.you")}</Badge>}
+                  </span>
+                  <small className="text-xs text-muted-foreground">{admin.email}</small>
+                </span>
+                {admin.id !== me.id && <ItemActions id={admin.id} title={admin.email} deleteLabel={t("admins.remove")} deleteAction={removeAdmin} />}
+              </CardRow>
+            ))}
+          </ul>
         </TabsContent>
       </Tabs>
     </main>
