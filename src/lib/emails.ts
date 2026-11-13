@@ -1,10 +1,11 @@
 import { hasLocale } from "next-intl";
 import { routing, type Locale } from "@/i18n/routing";
+import { renderEmail } from "@/lib/email-layout";
 import { formatPrice } from "@/lib/money";
 
 /**
- * The texts of every email the site sends, per language. Plain text on purpose: it renders
- * everywhere and nothing here needs layout. The locale comes from the page the person was on.
+ * The content of every email the site sends, per language. The locale comes from the page the person
+ * was on. The look lives in email-layout.ts; each email there is sent as HTML with a plain-text copy.
  */
 
 const BRAND = "LatinKate";
@@ -15,31 +16,40 @@ export function emailLocale(value: string | null | undefined): Locale {
 
 type Code = { otp: string; minutes: number };
 
-const verificationCode: Record<Locale, (c: Code) => { subject: string; text: string }> = {
+const verificationCode: Record<Locale, (c: Code) => { subject: string; heading: string; paragraphs: string[]; footer: string }> = {
   en: ({ otp, minutes }) => ({
     subject: `${otp} is your ${BRAND} code`,
-    text: `Your ${BRAND} verification code is ${otp}. It expires in ${minutes} minutes.\n\nIf you didn't ask for this, you can ignore this email.`,
+    heading: "Your verification code",
+    paragraphs: [`Enter this code to confirm your email. It expires in ${minutes} minutes.`],
+    footer: "If you didn't ask for this, you can ignore this email.",
   }),
   uk: ({ otp, minutes }) => ({
     subject: `${otp} — твій код ${BRAND}`,
-    text: `Твій код підтвердження ${BRAND}: ${otp}. Він дійсний ${minutes} хвилин.\n\nЯкщо це були не ти, просто проігноруй цей лист.`,
+    heading: "Твій код підтвердження",
+    paragraphs: [`Введи цей код, щоб підтвердити email. Він дійсний ${minutes} хвилин.`],
+    footer: "Якщо це були не ти, просто проігноруй цей лист.",
   }),
 };
 
-const passwordResetCode: Record<Locale, (c: Code) => { subject: string; text: string }> = {
+const passwordResetCode: Record<Locale, (c: Code) => { subject: string; heading: string; paragraphs: string[]; footer: string }> = {
   en: ({ otp, minutes }) => ({
     subject: `${otp} is your ${BRAND} password reset code`,
-    text: `Use the code ${otp} to set a new ${BRAND} password. It expires in ${minutes} minutes.\n\nIf you didn't ask to reset your password, you can ignore this email; your password stays the same.`,
+    heading: "Reset your password",
+    paragraphs: [`Enter this code to set a new ${BRAND} password. It expires in ${minutes} minutes.`],
+    footer: "If you didn't ask to reset your password, you can ignore this email; your password stays the same.",
   }),
   uk: ({ otp, minutes }) => ({
     subject: `${otp} — код для зміни пароля ${BRAND}`,
-    text: `Введи код ${otp}, щоб встановити новий пароль ${BRAND}. Він дійсний ${minutes} хвилин.\n\nЯкщо ти не просив(ла) змінити пароль, проігноруй цей лист — пароль залишиться тим самим.`,
+    heading: "Зміна пароля",
+    paragraphs: [`Введи цей код, щоб встановити новий пароль ${BRAND}. Він дійсний ${minutes} хвилин.`],
+    footer: "Якщо ти не просив(ла) змінити пароль, проігноруй цей лист — пароль залишиться тим самим.",
   }),
 };
 
 /** A one-time code for signing in or resetting a password. */
 export function codeEmail(type: "forget-password" | "email-verification" | "sign-in" | "change-email", locale: Locale, code: Code) {
-  return (type === "forget-password" ? passwordResetCode : verificationCode)[locale](code);
+  const { subject, ...content } = (type === "forget-password" ? passwordResetCode : verificationCode)[locale](code);
+  return { subject, ...renderEmail({ lang: locale, code: code.otp, ...content }) };
 }
 
 export type PurchaseSummary = {
@@ -60,24 +70,38 @@ export function purchaseEmail(locale: Locale, p: PurchaseSummary) {
   if (locale === "uk") {
     return {
       subject: `Твій курс ${p.courseTitle} відкрито`,
-      text: [
-        `Дякуємо за покупку! Курс «${p.courseTitle}» (${p.programTitle}, пакет ${p.tierName}) уже чекає на тебе.`,
-        `Сплачено: ${money(p.amountCents)} (з них HST ${money(p.taxCents)}).`,
-        `Доступ до відеоуроків діє до ${date}.`,
-        `Дивитися: ${p.dashboardUrl}`,
-        `Квитанцію за оплату надсилає Stripe окремим листом.`,
-      ].join("\n\n"),
+      ...renderEmail({
+        lang: locale,
+        heading: "Дякуємо за покупку!",
+        paragraphs: [`Курс «${p.courseTitle}» уже чекає на тебе. Гарного навчання!`],
+        details: [
+          ["Курс", p.courseTitle],
+          ["Програма", p.programTitle],
+          ["Пакет", p.tierName],
+          ["Сплачено", `${money(p.amountCents)} (з них HST ${money(p.taxCents)})`],
+          ["Доступ до", date],
+        ],
+        button: { label: "Дивитися уроки", url: p.dashboardUrl },
+        footer: "Квитанцію за оплату надсилає Stripe окремим листом.",
+      }),
     };
   }
   return {
     subject: `Your ${p.courseTitle} course is ready`,
-    text: [
-      `Thank you for your purchase! ${p.courseTitle} (${p.programTitle}, ${p.tierName} package) is waiting for you.`,
-      `Paid: ${money(p.amountCents)} (includes ${money(p.taxCents)} HST).`,
-      `Your access to the video lessons lasts until ${date}.`,
-      `Start watching: ${p.dashboardUrl}`,
-      `Stripe sends the card receipt in a separate email.`,
-    ].join("\n\n"),
+    ...renderEmail({
+      lang: locale,
+      heading: "Thank you for your purchase!",
+      paragraphs: [`${p.courseTitle} is waiting for you. Enjoy the lessons!`],
+      details: [
+        ["Course", p.courseTitle],
+        ["Program", p.programTitle],
+        ["Package", p.tierName],
+        ["Paid", `${money(p.amountCents)} (includes ${money(p.taxCents)} HST)`],
+        ["Access until", date],
+      ],
+      button: { label: "Start watching", url: p.dashboardUrl },
+      footer: "Stripe sends the card receipt in a separate email.",
+    }),
   };
 }
 
@@ -87,6 +111,16 @@ export function contactNotificationEmail(m: { name: string; email: string; messa
     // Reply goes straight to the visitor.
     replyTo: m.email,
     subject: `New message from ${m.name} / Нове повідомлення від ${m.name}`,
-    text: [`${m.name} <${m.email}> wrote:`, m.message, `Reply to ${m.email}. All messages: ${m.adminUrl}`].join("\n\n"),
+    ...renderEmail({
+      lang: "en",
+      heading: "New message / Нове повідомлення",
+      details: [
+        ["From / Від", m.name],
+        ["Email", m.email],
+      ],
+      quote: m.message,
+      button: { label: "Open admin / Відкрити адмінку", url: m.adminUrl },
+      footer: `Reply to this email to answer ${m.email} directly.`,
+    }),
   };
 }
