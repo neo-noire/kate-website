@@ -4,8 +4,9 @@ import Stripe from "stripe";
 import { db } from "@/db";
 import { course, program, purchase, tier, user } from "@/db/schema";
 import { accessExpiry } from "@/lib/catalog/access";
+import { PURCHASE_NOTICE_TO } from "@/lib/constants";
 import { sendEmailQuietly } from "@/lib/email";
-import { emailLocale, purchaseEmail } from "@/lib/emails";
+import { emailLocale, purchaseEmail, purchaseNoticeEmail } from "@/lib/emails";
 import { localize } from "@/lib/localized";
 import { HST_RATE } from "@/lib/money";
 import { markRedeemed } from "@/lib/promo";
@@ -121,26 +122,28 @@ async function sendPurchaseConfirmation({
 }: Partial<CheckoutMetadata> & { userId: string; courseId: string; expiresAt: Date; session: Stripe.Checkout.Session }) {
   const lang = emailLocale(locale);
   const [row] = await db
-    .select({ email: user.email, courseTitle: course.title, programTitle: program.title })
+    .select({ name: user.name, email: user.email, courseTitle: course.title, programTitle: program.title })
     .from(course)
     .innerJoin(program, eq(program.id, course.programId))
     .innerJoin(user, eq(user.id, userId))
     .where(eq(course.id, courseId));
   if (!row) return;
   const tierRow = tierId ? await db.query.tier.findFirst({ where: eq(tier.id, tierId), columns: { name: true } }) : undefined;
-  await sendEmailQuietly({
-    to: row.email,
-    ...purchaseEmail(lang, {
-      courseTitle: localize(row.courseTitle, lang),
-      programTitle: localize(row.programTitle, lang),
-      tierName: tierRow ? localize(tierRow.name, lang) : "",
-      amountCents: session.amount_total ?? 0,
-      taxCents: session.total_details?.amount_tax ?? 0,
-      currency: session.currency?.toUpperCase() ?? "CAD",
-      expiresAt,
-      dashboardUrl: `${siteUrl ?? ""}/${lang}/dashboard?course=${courseId}`,
-    }),
-  });
+  const summary = {
+    courseTitle: localize(row.courseTitle, "en"),
+    programTitle: localize(row.programTitle, "en"),
+    tierName: tierRow ? localize(tierRow.name, "en") : "",
+    amountCents: session.amount_total ?? 0,
+    taxCents: session.total_details?.amount_tax ?? 0,
+    currency: session.currency?.toUpperCase() ?? "CAD",
+    expiresAt,
+    dashboardUrl: `${siteUrl ?? ""}/${lang}/dashboard?course=${courseId}`,
+  };
+  // The buyer's confirmation and the owner's notice go out independently; neither can fail the other.
+  await Promise.all([
+    sendEmailQuietly({ to: row.email, ...purchaseEmail(summary) }),
+    sendEmailQuietly({ to: PURCHASE_NOTICE_TO, ...purchaseNoticeEmail(summary, row) }),
+  ]);
 }
 
 /**

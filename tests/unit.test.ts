@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { safeNextPath } from "@/lib/auth/next-path";
+import { contactNotificationEmail, codeEmail, purchaseNoticeEmail } from "@/lib/emails";
 import { envWarnings, validateEnv } from "@/lib/env";
 import { formatPrice, parsePriceToCents, withHst } from "@/lib/money";
 import { normalizePromoCode, promoDiscount } from "@/lib/promo";
@@ -92,5 +93,28 @@ describe("environment validation", () => {
     expect(() => validateEnv({ DATABASE_URL: "mysql://x", BETTER_AUTH_SECRET: "short", ADMIN_EMAILS: "not-an-email" })).toThrow(
       /DATABASE_URL[\s\S]*BETTER_AUTH_SECRET[\s\S]*ADMIN_EMAILS/,
     );
+  });
+});
+
+describe("emails", () => {
+  it("escapes what visitors write, and keeps it readable in the plain-text copy", () => {
+    const email = contactNotificationEmail({ name: "Anna", email: "a@example.com", message: "<script>alert(1)</script>", adminUrl: "https://x.test/admin" });
+    expect(email.html).not.toContain("<script>");
+    expect(email.html).toContain("&lt;script&gt;");
+    expect(email.text).toContain("<script>alert(1)</script>");
+    expect(email.replyTo).toBe("a@example.com");
+  });
+  it("shows the code in both versions", () => {
+    const email = codeEmail("email-verification", { otp: "482913", minutes: 10 });
+    expect(email.subject).toContain("482913");
+    expect(email.html).toContain("482913");
+    expect(email.text).toContain("482913");
+  });
+  it("tells the owner who bought what, and replies go to the buyer", () => {
+    const summary = { courseTitle: "Intro", programTitle: "Big Passion", tierName: "Guided", amountCents: 11300, taxCents: 1300, currency: "CAD", expiresAt: new Date(), dashboardUrl: "https://x.test" };
+    const email = purchaseNoticeEmail(summary, { name: "Anna", email: "anna@example.com" });
+    expect(email.text).toContain("anna@example.com");
+    expect(email.text).toContain("Intro");
+    expect(email.replyTo).toBe("anna@example.com");
   });
 });

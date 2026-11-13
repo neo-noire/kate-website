@@ -6,7 +6,7 @@ import { emailOTP } from "better-auth/plugins";
 import { db } from "@/db";
 import * as schema from "@/db/schema";
 import { sendEmail } from "@/lib/email";
-import { codeEmail, emailLocale } from "@/lib/emails";
+import { codeEmail } from "@/lib/emails";
 import { emailEnabled, googleEnabled } from "./providers";
 
 const CODE_LIFETIME_MINUTES = 5;
@@ -79,11 +79,11 @@ export const auth = betterAuth({
             overrideDefaultEmailVerification: true,
             // Codes only verify existing accounts; they can't create one without a name or consent to the terms.
             disableSignUp: true,
-            // Verification codes and password reset codes. The client sends the page language in x-locale.
-            sendVerificationOTP: ({ email, otp, type }, request) =>
+            // Verification codes and password reset codes.
+            sendVerificationOTP: ({ email, otp, type }) =>
               sendEmail({
                 to: email,
-                ...codeEmail(type, emailLocale(request?.headers?.get("x-locale")), { otp, minutes: CODE_LIFETIME_MINUTES }),
+                ...codeEmail(type, { otp, minutes: CODE_LIFETIME_MINUTES }),
               }),
           }),
         ]

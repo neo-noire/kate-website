@@ -1,45 +1,41 @@
 import { hasLocale } from "next-intl";
 import { routing, type Locale } from "@/i18n/routing";
+import { renderEmail } from "@/lib/email-layout";
 import { formatPrice } from "@/lib/money";
 
 /**
- * The texts of every email the site sends, per language. Plain text on purpose: it renders
- * everywhere and nothing here needs layout. The locale comes from the page the person was on.
+ * The content of every email the site sends. Emails are in English only, whatever language the
+ * page was in. The look lives in email-layout.ts; each email is sent as HTML with a plain-text copy.
  */
 
 const BRAND = "LatinKate";
 
+/** The language of the page a link in an email should open: the one the person bought or signed up in. */
 export function emailLocale(value: string | null | undefined): Locale {
   return value && hasLocale(routing.locales, value) ? value : routing.defaultLocale;
 }
 
 type Code = { otp: string; minutes: number };
 
-const verificationCode: Record<Locale, (c: Code) => { subject: string; text: string }> = {
-  en: ({ otp, minutes }) => ({
-    subject: `${otp} is your ${BRAND} code`,
-    text: `Your ${BRAND} verification code is ${otp}. It expires in ${minutes} minutes.\n\nIf you didn't ask for this, you can ignore this email.`,
-  }),
-  uk: ({ otp, minutes }) => ({
-    subject: `${otp} — твій код ${BRAND}`,
-    text: `Твій код підтвердження ${BRAND}: ${otp}. Він дійсний ${minutes} хвилин.\n\nЯкщо це були не ти, просто проігноруй цей лист.`,
-  }),
-};
-
-const passwordResetCode: Record<Locale, (c: Code) => { subject: string; text: string }> = {
-  en: ({ otp, minutes }) => ({
-    subject: `${otp} is your ${BRAND} password reset code`,
-    text: `Use the code ${otp} to set a new ${BRAND} password. It expires in ${minutes} minutes.\n\nIf you didn't ask to reset your password, you can ignore this email; your password stays the same.`,
-  }),
-  uk: ({ otp, minutes }) => ({
-    subject: `${otp} — код для зміни пароля ${BRAND}`,
-    text: `Введи код ${otp}, щоб встановити новий пароль ${BRAND}. Він дійсний ${minutes} хвилин.\n\nЯкщо ти не просив(ла) змінити пароль, проігноруй цей лист — пароль залишиться тим самим.`,
-  }),
-};
-
-/** A one-time code for signing in or resetting a password. */
-export function codeEmail(type: "forget-password" | "email-verification" | "sign-in" | "change-email", locale: Locale, code: Code) {
-  return (type === "forget-password" ? passwordResetCode : verificationCode)[locale](code);
+/** A one-time code for verifying an email, signing in or resetting a password. */
+export function codeEmail(type: "forget-password" | "email-verification" | "sign-in" | "change-email", { otp, minutes }: Code) {
+  const reset = type === "forget-password";
+  return {
+    subject: `${otp} is your ${BRAND} ${reset ? "password reset code" : "code"}`,
+    ...renderEmail({
+      lang: "en",
+      heading: reset ? "Reset your password" : "Your verification code",
+      paragraphs: [
+        reset
+          ? `Enter this code to set a new ${BRAND} password. It expires in ${minutes} minutes.`
+          : `Enter this code to confirm your email. It expires in ${minutes} minutes.`,
+      ],
+      code: otp,
+      footer: reset
+        ? "If you didn't ask to reset your password, you can ignore this email; your password stays the same."
+        : "If you didn't ask for this, you can ignore this email.",
+    }),
+  };
 }
 
 export type PurchaseSummary = {
@@ -54,30 +50,44 @@ export type PurchaseSummary = {
 };
 
 /** Confirms a paid course. Stripe sends the card receipt; this one says what was bought and until when. */
-export function purchaseEmail(locale: Locale, p: PurchaseSummary) {
-  const money = (cents: number) => formatPrice(cents, p.currency, locale);
-  const date = new Intl.DateTimeFormat(locale, { dateStyle: "long" }).format(p.expiresAt);
-  if (locale === "uk") {
-    return {
-      subject: `Твій курс ${p.courseTitle} відкрито`,
-      text: [
-        `Дякуємо за покупку! Курс «${p.courseTitle}» (${p.programTitle}, пакет ${p.tierName}) уже чекає на тебе.`,
-        `Сплачено: ${money(p.amountCents)} (з них HST ${money(p.taxCents)}).`,
-        `Доступ до відеоуроків діє до ${date}.`,
-        `Дивитися: ${p.dashboardUrl}`,
-        `Квитанцію за оплату надсилає Stripe окремим листом.`,
-      ].join("\n\n"),
-    };
-  }
+export function purchaseEmail(p: PurchaseSummary) {
+  const date = new Intl.DateTimeFormat("en", { dateStyle: "long" }).format(p.expiresAt);
   return {
     subject: `Your ${p.courseTitle} course is ready`,
-    text: [
-      `Thank you for your purchase! ${p.courseTitle} (${p.programTitle}, ${p.tierName} package) is waiting for you.`,
-      `Paid: ${money(p.amountCents)} (includes ${money(p.taxCents)} HST).`,
-      `Your access to the video lessons lasts until ${date}.`,
-      `Start watching: ${p.dashboardUrl}`,
-      `Stripe sends the card receipt in a separate email.`,
-    ].join("\n\n"),
+    ...renderEmail({
+      lang: "en",
+      heading: "Thank you for your purchase!",
+      paragraphs: [`${p.courseTitle} is waiting for you. Enjoy the lessons!`],
+      details: [
+        ["Course", p.courseTitle],
+        ["Program", p.programTitle],
+        ["Package", p.tierName],
+        ["Paid", `${formatPrice(p.amountCents, p.currency, "en")} (includes ${formatPrice(p.taxCents, p.currency, "en")} HST)`],
+        ["Access until", date],
+      ],
+      button: { label: "Start watching", url: p.dashboardUrl },
+      footer: "Stripe sends the card receipt in a separate email.",
+    }),
+  };
+}
+
+/** Tells the course owner who bought what. */
+export function purchaseNoticeEmail(p: PurchaseSummary, buyer: { name: string; email: string }) {
+  return {
+    replyTo: buyer.email,
+    subject: `New purchase: ${p.courseTitle}`,
+    ...renderEmail({
+      lang: "en",
+      heading: "New purchase",
+      details: [
+        ["Buyer", buyer.name],
+        ["Email", buyer.email],
+        ["Course", p.courseTitle],
+        ["Package", p.tierName],
+        ["Paid", `${formatPrice(p.amountCents, p.currency, "en")} (HST ${formatPrice(p.taxCents, p.currency, "en")})`],
+      ],
+      footer: `Reply to this email to write to ${buyer.email} directly.`,
+    }),
   };
 }
 
@@ -86,7 +96,17 @@ export function contactNotificationEmail(m: { name: string; email: string; messa
   return {
     // Reply goes straight to the visitor.
     replyTo: m.email,
-    subject: `New message from ${m.name} / Нове повідомлення від ${m.name}`,
-    text: [`${m.name} <${m.email}> wrote:`, m.message, `Reply to ${m.email}. All messages: ${m.adminUrl}`].join("\n\n"),
+    subject: `New message from ${m.name}`,
+    ...renderEmail({
+      lang: "en",
+      heading: "New message",
+      details: [
+        ["From", m.name],
+        ["Email", m.email],
+      ],
+      quote: m.message,
+      button: { label: "Open admin", url: m.adminUrl },
+      footer: `Reply to this email to answer ${m.email} directly.`,
+    }),
   };
 }
