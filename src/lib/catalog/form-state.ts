@@ -17,6 +17,7 @@ export type FormError =
   | "email"
   | "userNotFound"
   | "selfDemote"
+  | "protectedUser"
   | "tier"
   | "codeTaken"
   | "promoCode"

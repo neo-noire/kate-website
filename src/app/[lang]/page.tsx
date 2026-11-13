@@ -144,8 +144,6 @@ export default async function HomePage() {
         <div className="newsletter">
           <div>
             <h2>
-              {t("newsletter.titleLine1")}
-              <br />
               {t("newsletter.titleLine2")}
             </h2>
             <p>

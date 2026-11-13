@@ -19,8 +19,9 @@ import {
 } from "@/db/schema";
 import { redirect } from "@/i18n/navigation";
 import { routing, type Locale } from "@/i18n/routing";
-import { NotAuthorizedError, requireAdmin } from "@/lib/auth/session";
+import { adminEmails, NotAuthorizedError, requireAdmin } from "@/lib/auth/session";
 import { CURRENCIES, parsePriceToCents } from "@/lib/money";
+import { anonymizeUser, deactivateUser, reactivateUser } from "@/lib/users";
 import { parseYouTubeId } from "@/lib/youtube";
 import { accessExpiry } from "./access";
 import type { FormError, FormState } from "./form-state";
@@ -288,6 +289,33 @@ export async function removeAdmin(_: FormState, form: FormData): Promise<FormSta
     if ((await requireAdmin()).user.id === id) throw new FieldError("selfDemote");
     await db.update(user).set({ role: "student", updatedAt: new Date() }).where(and(eq(user.id, id), eq(user.role, "admin")));
   });
+}
+
+// Accounts
+
+/**
+ * The account to deactivate or delete. Admins (by role or by ADMIN_EMAILS, which includes the
+ * person acting) must be demoted first, so nobody can lock the admins out.
+ */
+async function manageableAccount(form: FormData) {
+  const id = readId(form);
+  const target = await db.query.user.findFirst({ where: eq(user.id, id), columns: { id: true, email: true, role: true, deletedAt: true } });
+  if (!target || target.deletedAt) throw new FieldError("notFound");
+  if (target.role === "admin" || adminEmails().has(target.email.toLowerCase())) throw new FieldError("protectedUser");
+  return target.id;
+}
+
+export async function deactivateAccount(_: FormState, form: FormData): Promise<FormState> {
+  return run(async () => deactivateUser(await manageableAccount(form), readText(form, "reason", { max: 300 }) || null));
+}
+
+export async function reactivateAccount(_: FormState, form: FormData): Promise<FormState> {
+  return run(async () => reactivateUser(await manageableAccount(form)));
+}
+
+/** Deletes a person's data and keeps their purchases as the sales record (see anonymizeUser). */
+export async function deleteAccount(_: FormState, form: FormData): Promise<FormState> {
+  return run(async () => anonymizeUser(await manageableAccount(form)));
 }
 
 // Contact form and newsletter

@@ -1,6 +1,6 @@
 "use client";
 
-import { Check, LogOut, Plus, Settings } from "lucide-react";
+import { Check, LogOut, Settings } from "lucide-react";
 import { useFormatter, useLocale, useTranslations } from "next-intl";
 import { useState, useTransition } from "react";
 import { Markdown } from "@/components/markdown";
@@ -51,11 +51,6 @@ export function Dashboard({ userName, admin, library, initialCourseId, checkout 
                 </Link>
               </Button>
             )}
-            <Button asChild variant="outline">
-              <Link href="/#courses">
-                <Plus aria-hidden /> {t("dashboard.addCourse")}
-              </Link>
-            </Button>
             <Button
               variant="ghost"
               onClick={async () => {
@@ -214,7 +209,6 @@ function Studio({ admin, library, initialCourseId }: Omit<DashboardProps, "userN
               </TabsList>
               <TabsContent value="about" className="lessonText">
                 {localize(lesson.description, locale) && <Markdown>{localize(lesson.description, locale)!}</Markdown>}
-                <p style={{ marginTop: 10 }}>{t("dashboard.aboutFine")}</p>
               </TabsContent>
               <TabsContent value="notes" className="lessonText">
                 <LessonNotes

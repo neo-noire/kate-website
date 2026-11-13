@@ -7,6 +7,7 @@ import { FormDialog } from "@/components/admin/dialogs";
 import { ActionForm, LocalizedField, TextField } from "@/components/admin/forms";
 import { ItemActions } from "@/components/admin/item-actions";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Link } from "@/i18n/navigation";
 import { requireAdminPage } from "@/lib/auth/admin-page";
@@ -61,6 +62,9 @@ async function AdminHome() {
       <h1>{t("title")}</h1>
       <p className="sub">{t("intro")}</p>
       <PaymentsWarning />
+      <Button asChild variant="outline" className="mt-5">
+        <Link href="/admin/users">{t("users.open")}</Link>
+      </Button>
 
       <Tabs defaultValue="programs" className="mt-6">
         <TabsList>

@@ -1,5 +1,7 @@
 import "server-only";
+import { eq } from "drizzle-orm";
 import { betterAuth } from "better-auth";
+import { APIError } from "better-auth/api";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { nextCookies } from "better-auth/next-js";
 import { emailOTP } from "better-auth/plugins";
@@ -64,9 +66,22 @@ export const auth = betterAuth({
     // someone who registered another person's address first from taking over their Google sign-in.
     accountLinking: { enabled: true, trustedProviders: ["google"] },
   },
-  session: {
-    // Keep a short-lived signed copy of the session in a cookie to skip a database read per request.
-    cookieCache: { enabled: true, maxAge: 5 * 60 },
+  // No session cookie cache: every request reads the session from the database, so deactivating an
+  // account (which deletes its sessions) or changing a role takes effect on the very next request.
+  databaseHooks: {
+    session: {
+      create: {
+        // Every way of signing in (password, email code, Google) creates a session, so this one check
+        // keeps deactivated and deleted accounts out.
+        before: async (newSession) => {
+          const account = await db.query.user.findFirst({ where: eq(schema.user.id, newSession.userId), columns: { deactivatedAt: true } });
+          if (account?.deactivatedAt) throw new APIError("FORBIDDEN", { message: "This account is deactivated.", code: "ACCOUNT_DEACTIVATED" });
+        },
+        after: async (newSession) => {
+          await db.update(schema.user).set({ lastLoginAt: new Date() }).where(eq(schema.user.id, newSession.userId));
+        },
+      },
+    },
   },
   plugins: [
     ...(emailEnabled
