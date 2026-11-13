@@ -105,7 +105,7 @@ describe("emails", () => {
     expect(email.replyTo).toBe("a@example.com");
   });
   it("shows the code in both versions", () => {
-    const email = codeEmail("email-verification", "en", { otp: "482913", minutes: 10 });
+    const email = codeEmail("email-verification", { otp: "482913", minutes: 10 });
     expect(email.subject).toContain("482913");
     expect(email.html).toContain("482913");
     expect(email.text).toContain("482913");

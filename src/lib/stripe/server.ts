@@ -130,9 +130,9 @@ async function sendPurchaseConfirmation({
   if (!row) return;
   const tierRow = tierId ? await db.query.tier.findFirst({ where: eq(tier.id, tierId), columns: { name: true } }) : undefined;
   const summary = {
-    courseTitle: localize(row.courseTitle, lang),
-    programTitle: localize(row.programTitle, lang),
-    tierName: tierRow ? localize(tierRow.name, lang) : "",
+    courseTitle: localize(row.courseTitle, "en"),
+    programTitle: localize(row.programTitle, "en"),
+    tierName: tierRow ? localize(tierRow.name, "en") : "",
     amountCents: session.amount_total ?? 0,
     taxCents: session.total_details?.amount_tax ?? 0,
     currency: session.currency?.toUpperCase() ?? "CAD",
@@ -141,7 +141,7 @@ async function sendPurchaseConfirmation({
   };
   // The buyer's confirmation and the owner's notice go out independently; neither can fail the other.
   await Promise.all([
-    sendEmailQuietly({ to: row.email, ...purchaseEmail(lang, summary) }),
+    sendEmailQuietly({ to: row.email, ...purchaseEmail(summary) }),
     sendEmailQuietly({ to: PURCHASE_NOTICE_TO, ...purchaseNoticeEmail(summary, row) }),
   ]);
 }
