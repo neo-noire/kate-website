@@ -2,7 +2,7 @@
 
 import { ArrowUpRight, Lock } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
-import { useActionState, useState } from "react";
+import { useActionState, useEffect, useState } from "react";
 import { useFormStatus } from "react-dom";
 import { type PromoPreview, previewPromo, startCheckout } from "@/lib/checkout-actions";
 import { formatPrice } from "@/lib/money";
@@ -54,12 +54,26 @@ export function EnrollButton({
   const applied = preview.code ? preview : null;
   const money = (cents: number) => formatPrice(cents, currency, locale);
 
+  // Signing in sends visitors back here with ?enroll=<tierId>; reopen the dialog they were in.
+  const { show } = dialog;
+  useEffect(() => {
+    if (new URLSearchParams(window.location.search).get("enroll") === tierId) show();
+  }, [tierId]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  function closeDialog() {
+    dialog.close();
+    const url = new URL(window.location.href);
+    if (!url.searchParams.has("enroll")) return;
+    url.searchParams.delete("enroll");
+    window.history.replaceState(null, "", url);
+  }
+
   return (
     <>
       <Button variant={featured ? "default" : "outline"} size="lg" className={className} onClick={dialog.show}>
         {t("packages.choose", { name: tierName })} <ArrowUpRight aria-hidden />
       </Button>
-      <Modal open={dialog.open} onClose={dialog.close} label={t("enroll.dialogLabel")} size="sm">
+      <Modal open={dialog.open} onClose={closeDialog} label={t("enroll.dialogLabel")} size="sm">
         <div className="eyebrow">{t("enroll.eyebrow")}</div>
         <h2>
           {courseTitle} · {tierName}

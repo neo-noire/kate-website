@@ -1,5 +1,5 @@
-/** Currencies an admin can price tiers in. CAD only: the Terms promise CAD prices and 13% Ontario HST is added to every sale. */
-export const CURRENCIES = ["CAD"] as const;
+/** Currencies an admin can price tiers in. CAD is the default (first); 13% Ontario HST is added to every sale whatever the currency. */
+export const CURRENCIES = ["CAD", "USD"] as const;
 export type Currency = (typeof CURRENCIES)[number];
 
 /** Formats a price in minor units (cents), dropping ".00" for whole amounts. */

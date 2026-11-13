@@ -5,8 +5,9 @@
 import { drizzle } from "drizzle-orm/node-postgres";
 import { migrate } from "drizzle-orm/node-postgres/migrator";
 import pg from "pg";
+import { connectionString } from "../src/db/connection-string.mjs";
 
-const url = process.env.DATABASE_URL_UNPOOLED ?? process.env.DATABASE_URL;
+const url = connectionString(process.env.DATABASE_URL_UNPOOLED ?? process.env.DATABASE_URL);
 
 if (process.env.VERCEL && process.env.VERCEL_ENV !== "production") {
   console.log(`Skipping database migrations on a ${process.env.VERCEL_ENV ?? "non-production"} build.`);
