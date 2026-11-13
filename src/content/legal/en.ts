@@ -141,6 +141,7 @@ export function englishLegal(b: Business): Record<LegalDoc, LegalDocument> {
               "A language cookie remembers the language you chose.",
               "Your browser's local storage keeps a few preferences on your device.",
             ],
+            "We count visits with Vercel Web Analytics. It sets no cookies and doesn't follow you across sites; it records which pages are opened, the referring site, and your country and device type.",
             "Lesson videos are embedded from YouTube in privacy-enhanced mode, so YouTube doesn't set cookies when the page loads. When you press play, YouTube (Google) may store data on your device and receive information about your viewing, under Google's privacy policy.",
           ],
         },
@@ -149,7 +150,7 @@ export function englishLegal(b: Business): Record<LegalDoc, LegalDocument> {
           body: [
             "We share information only with service providers that help us run the site, and only what each one needs:",
             [
-              "Vercel: website hosting;",
+              "Vercel: website hosting and visit statistics;",
               "Neon: our database;",
               "Stripe: payment processing;",
               "Google: optional sign-in, and YouTube for lesson videos;",
