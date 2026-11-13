@@ -170,7 +170,8 @@ export async function startCheckout(_: CheckoutState, form: FormData): Promise<C
       customer_email: session.user.email,
       client_reference_id: session.user.id,
       metadata: promo ? { ...metadata, promo: promo.code } : metadata,
-      payment_intent_data: { metadata },
+      // receipt_email makes Stripe send the card receipt whatever the dashboard's "Successful payments" toggle says.
+      payment_intent_data: { metadata, receipt_email: session.user.email },
       ...(coupon ? { discounts: [{ coupon: coupon.id }] } : {}),
       // A reserved promo use is held until the session ends, so a promo checkout expires after the minimum 30 minutes.
       ...(promo ? { expires_at: Math.floor(Date.now() / 1000) + 30 * 60 } : {}),
